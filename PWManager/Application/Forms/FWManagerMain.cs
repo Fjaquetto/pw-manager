@@ -28,9 +28,16 @@ namespace PWManager
         private void HideColumnsInDataGrid()
         {
             if (dgUser.Columns.Contains("Id"))
-            {
                 dgUser.Columns["Id"].Visible = false;
-            }
+        }
+
+        private void FilterUserData()
+        {
+            dgUser.DataSource = _decryptedUsers
+                .Where(x =>
+                    x.Site.Contains(txtSiteSearch.Text) &&
+                    x.Login.Contains(txtLoginSearch.Text))
+                .ToList();
         }
 
         #region Events
@@ -51,12 +58,15 @@ namespace PWManager
             }
             PopulateUserGrid();
         }
-        #endregion
-
-
         private void txtSiteSearch_TextChanged(object sender, EventArgs e)
         {
-            dgUser.DataSource = _decryptedUsers.Where(x => x.Site.Contains(txtSiteSearch.Text)).ToList();
+            FilterUserData();
         }
+
+        private void txtLoginSearch_TextChanged(object sender, EventArgs e)
+        {
+            FilterUserData();
+        }
+        #endregion
     }
 }

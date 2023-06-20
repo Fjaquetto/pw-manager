@@ -9,9 +9,7 @@ namespace PWManager.Domain.Model
 {
     public class User
     {
-        protected User() 
-        {
-        }
+        protected User() { }
         public User(string site, string login, string password, Guid? id = null, bool isActive = true)
         {
             Id = id ?? Guid.NewGuid();

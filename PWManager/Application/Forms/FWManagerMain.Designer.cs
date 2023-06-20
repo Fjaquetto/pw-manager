@@ -183,6 +183,7 @@ namespace PWManager
             txtLoginSearch.Name = "txtLoginSearch";
             txtLoginSearch.Size = new Size(100, 23);
             txtLoginSearch.TabIndex = 1;
+            txtLoginSearch.TextChanged += txtLoginSearch_TextChanged;
             // 
             // txtSiteSearch
             // 
