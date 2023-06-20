@@ -24,7 +24,7 @@ namespace PWManager
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
-            System.Windows.Forms.Application.Run(new Form0(serviceProvider));
+            System.Windows.Forms.Application.Run(new FWManagerKey(serviceProvider));
         }
     }
 }
