@@ -10,13 +10,15 @@ namespace PWManager.Infra.Context
 {
     public class PWDbContext : DbContext
     {
-        public PWDbContext() : this(new DbContextOptionsBuilder<PWDbContext>().UseSqlite($"Data Source={System.IO.Path.GetFullPath(System.IO.Path.Combine(AppContext.BaseDirectory, "..\\..\\..\\pwmanager.db"))}").Options)
+        private string _dbPath;
+
+        public PWDbContext(string dbPath)
         {
+            this._dbPath = dbPath;
         }
 
-        public PWDbContext(DbContextOptions<PWDbContext> options) : base(options)
-        {
-        }
+        protected override void OnConfiguring(DbContextOptionsBuilder options)
+            => options.UseSqlite($"Data Source={_dbPath}");
 
         public DbSet<User> User { get; set; }
 
