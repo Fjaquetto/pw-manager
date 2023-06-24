@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using PWManager.Domain.DataContracts;
 using PWManager.Domain.Model;
+using System.Security.Cryptography;
 using System.Windows.Forms;
 
 namespace PWManager
@@ -20,8 +21,18 @@ namespace PWManager
 
         private void PopulateUserGrid()
         {
-            var users = _repository.GetAllAsync().Result;
-            _decryptedUsers = users.Select(x => x.DecryptData()).ToList();
+            try
+            {
+                var users = _repository.GetAllAsync().Result;
+                _decryptedUsers = users.Select(x => x.DecryptData()).ToList();
+            }
+            catch (CryptographicException)
+            {
+                MessageBox.Show("Incorrect password.", "Alert");
+
+                System.Windows.Forms.Application.Exit();
+            }
+
             dgUser.DataSource = _decryptedUsers;
         }
 
