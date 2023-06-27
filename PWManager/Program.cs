@@ -35,7 +35,7 @@ namespace PWManager
             }
 
             ApplicationConfiguration.Initialize();
-            System.Windows.Forms.Application.Run(new FWManagerKey(serviceProvider));
+            System.Windows.Forms.Application.Run(new PWManagerKey(serviceProvider));
         }
     }
 }

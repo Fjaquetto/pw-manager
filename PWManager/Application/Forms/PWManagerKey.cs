@@ -12,10 +12,10 @@ using static System.Windows.Forms.DataFormats;
 
 namespace PWManager.Application.Forms
 {
-    public partial class FWManagerKey : Form
+    public partial class PWManagerKey : Form
     {
         private IServiceProvider _serviceProvider;
-        public FWManagerKey(IServiceProvider serviceProvider)
+        public PWManagerKey(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
             InitializeComponent();

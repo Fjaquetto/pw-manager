@@ -1,6 +1,6 @@
 ﻿namespace PWManager.Application.Forms
 {
-    partial class FWManagerKey
+    partial class PWManagerKey
     {
         /// <summary>
         /// Required designer variable.
@@ -35,16 +35,16 @@
             // 
             // txtEncryptor
             // 
-            txtEncryptor.Location = new Point(12, 27);
+            txtEncryptor.Location = new Point(81, 27);
             txtEncryptor.Name = "txtEncryptor";
-            txtEncryptor.Size = new Size(100, 23);
-            txtEncryptor.TabIndex = 0;
             txtEncryptor.PasswordChar = '*';
             txtEncryptor.ShortcutsEnabled = false;
+            txtEncryptor.Size = new Size(100, 23);
+            txtEncryptor.TabIndex = 0;
             // 
             // btnOk
             // 
-            btnOk.Location = new Point(12, 56);
+            btnOk.Location = new Point(81, 56);
             btnOk.Name = "btnOk";
             btnOk.Size = new Size(100, 23);
             btnOk.TabIndex = 1;
@@ -55,28 +55,28 @@
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(12, 9);
+            label1.Location = new Point(81, 9);
             label1.Name = "label1";
             label1.Size = new Size(57, 15);
             label1.TabIndex = 2;
             label1.Text = "Password";
             // 
-            // Form0
+            // PWManagerKey
             // 
+            AcceptButton = btnOk;
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(124, 97);
+            ClientSize = new Size(256, 97);
             Controls.Add(label1);
             Controls.Add(btnOk);
             Controls.Add(txtEncryptor);
-            Name = "Form0";
-            Text = "Form0";
+            FormBorderStyle = FormBorderStyle.FixedSingle;
+            MaximizeBox = false;
+            Name = "PWManagerKey";
+            StartPosition = FormStartPosition.CenterScreen;
+            Text = "PWManager";
             ResumeLayout(false);
             PerformLayout();
-            this.StartPosition = FormStartPosition.CenterScreen;
-            this.FormBorderStyle = FormBorderStyle.FixedSingle;
-            this.MaximizeBox = false;
-            this.AcceptButton = this.btnOk;
         }
 
         #endregion
