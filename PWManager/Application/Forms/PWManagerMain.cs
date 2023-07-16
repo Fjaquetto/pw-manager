@@ -46,8 +46,8 @@ namespace PWManager
         {
             dgUser.DataSource = _decryptedUsers
                 .Where(x =>
-                    x.Site.Contains(txtSiteSearch.Text) &&
-                    x.Login.Contains(txtLoginSearch.Text))
+                    x.Site.ToUpper().Contains(txtSiteSearch.Text.ToUpper()) &&
+                    x.Login.ToUpper().Contains(txtLoginSearch.Text.ToUpper()))
                 .ToList();
         }
 
@@ -56,6 +56,7 @@ namespace PWManager
         {
             var user = new User(txtSite.Text, txtLogin.Text, txtPassword.Text).EncryptData();
             _repository.AddAsync(user).Wait();
+
             PopulateUserGrid();
         }
 
@@ -67,6 +68,7 @@ namespace PWManager
                 var user = _repository.GetAsync(x => x.Id.Equals(id)).Result;
                 _repository.DeleteAsync(user).Wait();
             }
+
             PopulateUserGrid();
         }
         private void txtSiteSearch_TextChanged(object sender, EventArgs e)
