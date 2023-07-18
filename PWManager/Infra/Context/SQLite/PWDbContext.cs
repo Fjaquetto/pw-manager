@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PWManager.Infra.Context
+namespace PWManager.Infra.Context.SQLite
 {
     public class PWDbContext : DbContext
     {
@@ -14,7 +14,7 @@ namespace PWManager.Infra.Context
 
         public PWDbContext(string dbPath)
         {
-            this._dbPath = dbPath;
+            _dbPath = dbPath;
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)

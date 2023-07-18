@@ -1,11 +1,11 @@
-﻿using PWManager.Infra.Context.DataContracts;
+﻿using PWManager.Infra.Context.SQLite.DataContracts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PWManager.Infra.Context
+namespace PWManager.Infra.Context.SQLite
 {
     public class PWDbContextFactory : IPWDbContextFactory
     {
