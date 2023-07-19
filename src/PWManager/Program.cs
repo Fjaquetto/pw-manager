@@ -29,9 +29,9 @@ namespace PWManager
                 .AddSingleton<IPWDbContextFactory>(new PWDbContextFactory(dbFilePath))
                 .AddScoped<PWDbContext>(sp => sp.GetRequiredService<IPWDbContextFactory>().CreateDbContext())
                 .AddScoped(typeof(IRepository<>), typeof(Repository<>))
-                .AddSingleton<IFirestoreContext>(new FirestoreContext("pw-manager-19ac9"))
-                .AddScoped<IFirestoreRepository, FirestoreRepository>()
-                .AddSingleton<IFirebaseService>(new FirebaseService(firebaseKeyPath))
+                .AddSingleton<IFirestoreContext>(new FirestoreContext("pw-manager-19ac9", firebaseKeyPath))
+                .AddScoped(typeof(IFirestoreRepository<>), typeof(FirestoreRepository<>))
+                .AddScoped<IUserEncryptorService, UserEncryptorService>()
                 .BuildServiceProvider();
 
             using (var scope = serviceProvider.CreateScope())
@@ -39,9 +39,6 @@ namespace PWManager
                 var context = scope.ServiceProvider.GetRequiredService<PWDbContext>();
                 context.Database.Migrate();
             }
-
-            var firebaseService = serviceProvider.GetRequiredService<FirebaseService>();
-            firebaseService.InitializeFirebase();
 
             ApplicationConfiguration.Initialize();
             System.Windows.Forms.Application.Run(new PWManagerKey(serviceProvider));

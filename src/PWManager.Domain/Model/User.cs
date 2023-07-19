@@ -1,10 +1,8 @@
-﻿using PWManager.Infra.Extensions;
-
-namespace PWManager.Domain.Model
+﻿namespace PWManager.Domain.Model
 {
     public class User
     {
-        protected User() { }
+        public User() { }
         public User(string site, string login, string password, Guid? id = null, bool isActive = true)
         {
             Id = id ?? Guid.NewGuid();
@@ -21,23 +19,5 @@ namespace PWManager.Domain.Model
         public string Password { get; set; }
         public DateTime CreationDate { get; set; }
         public bool IsActive { get; set; }
-
-        public User EncryptData()
-        {
-            Site = EncryptorData.Encrypt(Site);
-            Login = EncryptorData.Encrypt(Login);
-            Password = EncryptorData.Encrypt(Password);
-
-            return this;
-        }
-
-        public User DecryptData()
-        {
-            Site = EncryptorData.Decrypt(Site);
-            Login = EncryptorData.Decrypt(Login);
-            Password = EncryptorData.Decrypt(Password);
-
-            return this;
-        }
     }
 }
