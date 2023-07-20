@@ -2,8 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using PWManager.Application.Forms;
 using PWManager.Domain.DataContracts;
-using PWManager.Infra.Context.Firestore.DataContracts;
-using PWManager.Infra.Context.Firestore;
 using PWManager.Infra.Context.SQLite;
 using PWManager.Infra.Context.SQLite.DataContracts;
 using PWManager.Infra.Repository;
@@ -29,8 +27,6 @@ namespace PWManager
                 .AddSingleton<IPWDbContextFactory>(new PWDbContextFactory(dbFilePath))
                 .AddScoped<PWDbContext>(sp => sp.GetRequiredService<IPWDbContextFactory>().CreateDbContext())
                 .AddScoped(typeof(IRepository<>), typeof(Repository<>))
-                .AddSingleton<IFirestoreContext>(new FirestoreContext("pw-manager-19ac9", firebaseKeyPath))
-                .AddScoped(typeof(IFirestoreRepository<>), typeof(FirestoreRepository<>))
                 .AddScoped<IUserEncryptorService, UserEncryptorService>()
                 .BuildServiceProvider();
 

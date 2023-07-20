@@ -1,7 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using PWManager.Domain.DataContracts;
 using PWManager.Domain.Model;
-using PWManager.Infra.Helpers;
 using System.Security.Cryptography;
 using System.Windows.Forms;
 
@@ -11,7 +10,6 @@ namespace PWManager
     {
         private readonly IRepository<User> _repository;
         private readonly IUserEncryptorService _userEncryptorService;
-        private readonly IFirestoreRepository<User> _firestoreRepository;
 
         private List<User> _decryptedUsers;
 
@@ -19,7 +17,6 @@ namespace PWManager
         {
             _repository = serviceProvider.GetRequiredService<IRepository<User>>();
             _userEncryptorService = serviceProvider.GetRequiredService<IUserEncryptorService>();
-            _firestoreRepository = serviceProvider.GetRequiredService<IFirestoreRepository<User>>();
 
             InitializeComponent();
             PopulateUserGrid();
@@ -30,7 +27,7 @@ namespace PWManager
         {
             try
             {
-                var users = _firestoreRepository.GetAllAsync(ObjectExtensions.DictionaryToEntity<User>).Result;
+                var users = _repository.GetAllAsync().Result;
                 _decryptedUsers = users.Select(x => _userEncryptorService.DecryptUser(x)).ToList();
             }
             catch (CryptographicException)
@@ -65,7 +62,6 @@ namespace PWManager
             _userEncryptorService.EncryptUser(user);
 
             _repository.AddAsync(user).Wait();
-            _firestoreRepository.AddAsync(user, ObjectExtensions.EntityToDictionary);
 
             PopulateUserGrid();
         }
@@ -77,7 +73,6 @@ namespace PWManager
                 var id = row.Cells["Id"].Value;
                 var user = _repository.GetAsync(x => x.Id.Equals(id)).Result;
                 _repository.DeleteAsync(user).Wait();
-                _firestoreRepository.DeleteAsync(user.Id.ToString());
             }
 
             PopulateUserGrid();
