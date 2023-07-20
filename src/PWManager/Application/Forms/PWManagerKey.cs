@@ -1,29 +1,24 @@
-﻿using PWManager.Infra.Extensions;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using static System.Windows.Forms.DataFormats;
+﻿using Microsoft.Extensions.DependencyInjection;
+using PWManager.Domain.DataContracts;
+using PWManager.Domain.Model;
+using PWManager.Infra.Services;
 
 namespace PWManager.Application.Forms
 {
     public partial class PWManagerKey : Form
     {
         private IServiceProvider _serviceProvider;
+
         public PWManagerKey(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
+
             InitializeComponent();
         }
 
         private void btnOk_Click(object sender, EventArgs e)
         {
-            EncryptorData.EncryptorPassword = txtEncryptor.Text;
+            EncryptorService.EncryptorPassword = txtEncryptor.Text;
 
             PWManager manager = new PWManager(_serviceProvider);
             manager.Show();

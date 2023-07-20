@@ -1,11 +1,8 @@
-﻿using System;
-using System.IO;
-using System.Security.Cryptography;
-using System.Text;
+﻿using System.Security.Cryptography;
 
-namespace PWManager.Infra.Extensions
+namespace PWManager.Infra.Services
 {
-    public static class EncryptorData
+    public static class EncryptorService
     {
         public static string EncryptorPassword { get; set; }
 

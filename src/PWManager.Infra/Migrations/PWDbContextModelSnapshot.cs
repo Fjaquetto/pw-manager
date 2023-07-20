@@ -2,19 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using PWManager.Infra.Context;
+using PWManager.Infra.Context.SQLite;
 
 #nullable disable
 
 namespace PWManager.Infra.Migrations
 {
     [DbContext(typeof(PWDbContext))]
-    [Migration("20230619035710_InitialCreate")]
-    partial class InitialCreate
+    partial class PWDbContextModelSnapshot : ModelSnapshot
     {
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "6.0.18");

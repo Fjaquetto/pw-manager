@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PWManager.Domain.DataContracts;
-using PWManager.Infra.Context;
+using PWManager.Infra.Context.SQLite;
 using System;
 using System.Collections.Generic;
 using System.Linq;
