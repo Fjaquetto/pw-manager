@@ -8,12 +8,10 @@ namespace PWManager.Application.Forms
     public partial class PWManagerKey : Form
     {
         private IServiceProvider _serviceProvider;
-        private IRepository<User> _repository;
 
         public PWManagerKey(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
-            _repository = _serviceProvider.GetRequiredService<IRepository<User>>();
 
             InitializeComponent();
         }
