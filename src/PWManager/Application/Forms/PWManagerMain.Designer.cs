@@ -47,6 +47,8 @@ namespace PWManager
             label4 = new Label();
             txtLoginSearch = new TextBox();
             txtSiteSearch = new TextBox();
+            txtGeneratePassword = new TextBox();
+            btnGeneratePassword = new Button();
             ((System.ComponentModel.ISupportInitialize)dgUser).BeginInit();
             contextDelete.SuspendLayout();
             groupBox1.SuspendLayout();
@@ -171,7 +173,7 @@ namespace PWManager
             // label4
             // 
             label4.AutoSize = true;
-            label4.Location = new Point(122, 19);
+            label4.Location = new Point(191, 19);
             label4.Name = "label4";
             label4.Size = new Size(37, 15);
             label4.TabIndex = 2;
@@ -179,9 +181,9 @@ namespace PWManager
             // 
             // txtLoginSearch
             // 
-            txtLoginSearch.Location = new Point(123, 32);
+            txtLoginSearch.Location = new Point(191, 32);
             txtLoginSearch.Name = "txtLoginSearch";
-            txtLoginSearch.Size = new Size(100, 23);
+            txtLoginSearch.Size = new Size(149, 23);
             txtLoginSearch.TabIndex = 1;
             txtLoginSearch.TextChanged += txtLoginSearch_TextChanged;
             // 
@@ -189,15 +191,35 @@ namespace PWManager
             // 
             txtSiteSearch.Location = new Point(6, 32);
             txtSiteSearch.Name = "txtSiteSearch";
-            txtSiteSearch.Size = new Size(100, 23);
+            txtSiteSearch.Size = new Size(154, 23);
             txtSiteSearch.TabIndex = 0;
             txtSiteSearch.TextChanged += txtSiteSearch_TextChanged;
+            // 
+            // txtGeneratePassword
+            // 
+            txtGeneratePassword.Location = new Point(12, 401);
+            txtGeneratePassword.Name = "txtGeneratePassword";
+            txtGeneratePassword.Size = new Size(343, 23);
+            txtGeneratePassword.TabIndex = 9;
+            txtGeneratePassword.TextAlign = HorizontalAlignment.Center;
+            // 
+            // btnGeneratePassword
+            // 
+            btnGeneratePassword.Location = new Point(12, 430);
+            btnGeneratePassword.Name = "btnGeneratePassword";
+            btnGeneratePassword.Size = new Size(343, 23);
+            btnGeneratePassword.TabIndex = 10;
+            btnGeneratePassword.Text = "Generate Password";
+            btnGeneratePassword.UseVisualStyleBackColor = true;
+            btnGeneratePassword.Click += btnGeneratePassword_Click;
             // 
             // PWManager
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(365, 407);
+            ClientSize = new Size(365, 469);
+            Controls.Add(btnGeneratePassword);
+            Controls.Add(txtGeneratePassword);
             Controls.Add(groupBox2);
             Controls.Add(label3);
             Controls.Add(label2);
@@ -238,5 +260,7 @@ namespace PWManager
         private Label label4;
         private TextBox txtLoginSearch;
         private TextBox txtSiteSearch;
+        private TextBox txtGeneratePassword;
+        private Button btnGeneratePassword;
     }
 }
