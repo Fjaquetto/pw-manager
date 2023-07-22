@@ -9,7 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "1 - Domain", "1 - Domain", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2 - Infra", "2 - Infra", "{72EB8669-F0C9-4088-B5DB-F9D05CC19841}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PWManager.Forms", "src\PWManager\PWManager.Forms.csproj", "{0013046A-8352-45C1-A400-2B43120A6A69}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PWManager", "src\PWManager\PWManager.csproj", "{0013046A-8352-45C1-A400-2B43120A6A69}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PWManager.Domain", "src\PWManager.Domain\PWManager.Domain.csproj", "{C4D564A2-E401-4791-8B6C-9CD3B59783CF}"
 EndProject

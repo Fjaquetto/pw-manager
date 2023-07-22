@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using PWManager.Application.Forms;
 using PWManager.Domain.DataContracts;
 using PWManager.Forms.Config;
