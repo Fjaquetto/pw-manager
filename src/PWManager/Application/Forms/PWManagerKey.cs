@@ -1,17 +1,14 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using PWManager.Domain.DataContracts;
-using PWManager.Domain.Model;
-using PWManager.Infra.Services;
+﻿using PWManager.Infra.Services;
 
 namespace PWManager.Application.Forms
 {
     public partial class PWManagerKey : Form
     {
-        private IServiceProvider _serviceProvider;
+        private readonly Lazy<PWManager> _pwManager;
 
-        public PWManagerKey(IServiceProvider serviceProvider)
+        public PWManagerKey(Lazy<PWManager> pwManager)
         {
-            _serviceProvider = serviceProvider;
+            _pwManager = pwManager;
 
             InitializeComponent();
         }
@@ -20,10 +17,9 @@ namespace PWManager.Application.Forms
         {
             EncryptorService.EncryptorPassword = txtEncryptor.Text;
 
-            PWManager manager = new PWManager(_serviceProvider);
-            manager.Show();
+            _pwManager.Value.Show();
 
-            manager.Closed += (_, args) => this.Close();
+            _pwManager.Value.Closed += (_, args) => this.Close();
 
             this.Hide();
         }
