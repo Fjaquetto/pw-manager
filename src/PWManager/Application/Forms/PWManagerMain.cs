@@ -13,10 +13,10 @@ namespace PWManager
 
         private List<User> _decryptedUsers;
 
-        public PWManager(IServiceProvider serviceProvider)
+        public PWManager(IRepository<User> repository, IUserEncryptorService userEncryptorService)
         {
-            _repository = serviceProvider.GetRequiredService<IRepository<User>>();
-            _userEncryptorService = serviceProvider.GetRequiredService<IUserEncryptorService>();
+            _repository = repository;
+            _userEncryptorService = userEncryptorService;
 
             InitializeComponent();
             PopulateUserGrid();
