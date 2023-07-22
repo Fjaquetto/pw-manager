@@ -1,8 +1,8 @@
 using Microsoft.Extensions.DependencyInjection;
 using PWManager.Domain.DataContracts;
 using PWManager.Domain.Model;
+using PWManager.Infra.Helpers;
 using System.Security.Cryptography;
-using System.Windows.Forms;
 
 namespace PWManager
 {
@@ -55,6 +55,13 @@ namespace PWManager
                 .ToList();
         }
 
+        private void CleanFields()
+        {
+            txtSite.Clear();
+            txtLogin.Clear();
+            txtPassword.Clear();
+        }
+
         #region Events
         private void btnInserir_Click(object sender, EventArgs e)
         {
@@ -64,6 +71,7 @@ namespace PWManager
             _repository.AddAsync(user).Wait();
 
             PopulateUserGrid();
+            CleanFields();
         }
 
         private void deleteToolStripMenuItem_Click(object sender, EventArgs e)
@@ -85,6 +93,11 @@ namespace PWManager
         private void txtLoginSearch_TextChanged(object sender, EventArgs e)
         {
             FilterUserData();
+        }
+
+        private void btnGeneratePassword_Click(object sender, EventArgs e)
+        {
+            txtGeneratePassword.Text = GeneratePasswordExtension.Generate(12);
         }
         #endregion
     }
