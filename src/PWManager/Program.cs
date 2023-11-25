@@ -3,7 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PWManager.Application.Forms;
 using PWManager.Domain.DataContracts;
-using PWManager.Forms.Config;
+using PWManager.Infra.Config;
 using PWManager.Infra.Context.SQLite;
 using PWManager.Infra.Context.SQLite.DataContracts;
 using PWManager.Infra.Repository;

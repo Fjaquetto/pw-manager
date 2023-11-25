@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
 
-namespace PWManager.Forms.Config
+namespace PWManager.Infra.Config
 {
     public class DatabaseConfig
     {

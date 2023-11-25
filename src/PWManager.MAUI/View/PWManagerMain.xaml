@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="PWManager.MAUI.View.PWManagerMain"
+             Title="PWManager"
+             BackgroundColor="#2C2C2C">
+    <Grid HorizontalOptions="FillAndExpand" VerticalOptions="Start">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="25*" />
+            <ColumnDefinition Width="50*" />
+            <ColumnDefinition Width="25*" />
+        </Grid.ColumnDefinitions>
+
+        <StackLayout Grid.Column="1" Padding="15">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Label Text="Site" Grid.Row="0" TextColor="#FFA500" />
+                <Entry x:Name="SiteEntry" Placeholder="Enter site here..." Grid.Row="1" TextColor="#FFA500" PlaceholderColor="#C26100" BackgroundColor="#404040" />
+
+                <Label Text="Login" Grid.Row="2" TextColor="#FFA500" />
+                <Entry x:Name="LoginEntry" Placeholder="Enter login here..." Grid.Row="3" TextColor="#FFA500" PlaceholderColor="#C26100" BackgroundColor="#404040" />
+
+                <Label Text="Password" Grid.Row="4" TextColor="#FFA500" />
+                <Entry x:Name="PasswordEntry" Placeholder="Enter password here..." Grid.Row="5" TextColor="#FFA500" PlaceholderColor="#C26100" BackgroundColor="#404040" />
+            </Grid>
+
+            <Button x:Name="InsertButton" Text="Insert" Clicked="OnInsertClicked" BackgroundColor="#757575" TextColor="#FFA500" Margin="0,20,0,0" />
+
+            <CollectionView x:Name="DataGrid" ItemsSource="{Binding Items}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Padding="10" RowSpacing="10" ColumnSpacing="10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Label Text="{Binding Site}" Grid.Column="0" TextColor="#FFA500" />
+                            <Label Text="{Binding Login}" Grid.Column="1" TextColor="#FFA500" />
+                            <Label Text="{Binding Password}" Grid.Column="2" TextColor="#FFA500" />
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </StackLayout>
+    </Grid>
+
+</ContentPage>
