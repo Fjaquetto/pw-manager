@@ -1,12 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using PWManager.Domain.DataContracts;
+using PWManager.Domain.DataContracts.Repository;
 using PWManager.Infra.Context.SQLite;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PWManager.Infra.Repository
 {

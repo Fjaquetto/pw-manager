@@ -1,4 +1,4 @@
-﻿using PWManager.Domain.DataContracts;
+﻿using PWManager.Domain.DataContracts.InfraService;
 using PWManager.Domain.Model;
 
 namespace PWManager.Infra.Services

@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PWManager.Domain.DataContracts
+namespace PWManager.Domain.DataContracts.Repository
 {
     public interface IRepository<T> where T : class
     {

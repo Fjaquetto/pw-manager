@@ -1,5 +1,5 @@
-using Microsoft.Extensions.DependencyInjection;
-using PWManager.Domain.DataContracts;
+using PWManager.Application.DataContracts;
+using PWManager.Domain.DataContracts.InfraService;
 using PWManager.Domain.Model;
 using PWManager.Infra.Helpers;
 using System.Security.Cryptography;
@@ -8,15 +8,16 @@ namespace PWManager
 {
     public partial class PWManager : Form
     {
-        private readonly IRepository<User> _repository;
+        private readonly IUserApplication _userApplication;
         private readonly IUserEncryptorService _userEncryptorService;
 
         private List<User> _decryptedUsers;
+        private const int PASSWORD_LENGTH = 12;
 
-        public PWManager(IRepository<User> repository, IUserEncryptorService userEncryptorService)
+        public PWManager(IUserEncryptorService userEncryptorService, IUserApplication userApplication)
         {
-            _repository = repository;
             _userEncryptorService = userEncryptorService;
+            _userApplication = userApplication;
 
             InitializeComponent();
             PopulateUserGrid();
@@ -27,7 +28,7 @@ namespace PWManager
         {
             try
             {
-                var users = _repository.GetAllAsync().Result;
+                var users = _userApplication.GetAllUsersAsync().Result;
                 _decryptedUsers = users.Select(x => _userEncryptorService.DecryptUser(x)).ToList();
             }
             catch (CryptographicException)
@@ -68,7 +69,7 @@ namespace PWManager
             var user = new User(txtSite.Text, txtLogin.Text, txtPassword.Text);
             _userEncryptorService.EncryptUser(user);
 
-            _repository.AddAsync(user).Wait();
+            _userApplication.AddUserAsync(user).Wait();
 
             PopulateUserGrid();
             CleanFields();
@@ -78,9 +79,9 @@ namespace PWManager
         {
             foreach (DataGridViewRow row in dgUser.SelectedRows)
             {
-                var id = row.Cells["Id"].Value;
-                var user = _repository.GetAsync(x => x.Id.Equals(id)).Result;
-                _repository.DeleteAsync(user).Wait();
+                var id = row.Cells["Id"].Value.ToString();
+                var user = _userApplication.GetUserByIdAsync(Guid.Parse(id)).Result;
+                _userApplication.DeleteUserAsync(user).Wait();
             }
 
             PopulateUserGrid();
@@ -97,7 +98,7 @@ namespace PWManager
 
         private void btnGeneratePassword_Click(object sender, EventArgs e)
         {
-            txtGeneratePassword.Text = GeneratePasswordExtension.Generate(12);
+            txtGeneratePassword.Text = GeneratePasswordExtension.Generate(PASSWORD_LENGTH);
         }
         #endregion
     }

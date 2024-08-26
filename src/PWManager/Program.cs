@@ -1,8 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using PWManager.Application;
+using PWManager.Application.DataContracts;
 using PWManager.Application.Forms;
-using PWManager.Domain.DataContracts;
+using PWManager.Domain.DataContracts.InfraService;
+using PWManager.Domain.DataContracts.Repository;
 using PWManager.Forms.Config;
 using PWManager.Infra.Context.SQLite;
 using PWManager.Infra.Context.SQLite.DataContracts;
@@ -33,6 +36,8 @@ namespace PWManager
             });
             services.AddScoped(sp => sp.GetRequiredService<IPWDbContextFactory>().CreateDbContext());
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IUserApplication, UserApplication>();
             services.AddScoped<IUserEncryptorService, UserEncryptorService>();
             services.AddScoped<PWManagerKey>();
             services.AddScoped<PWManager>();
