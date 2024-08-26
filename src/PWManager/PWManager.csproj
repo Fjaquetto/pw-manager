@@ -15,8 +15,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\PWManager.Application\PWManager.Application.csproj" />
     <ProjectReference Include="..\PWManager.Domain\PWManager.Domain.csproj" />
-    <ProjectReference Include="..\PWManager.Infra\PWManager.Infra.csproj" />
   </ItemGroup>
 
   <ItemGroup>
