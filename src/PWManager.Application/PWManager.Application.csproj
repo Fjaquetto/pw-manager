@@ -7,7 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FirebaseAdmin" Version="2.4.0" />
+    <ProjectReference Include="..\PWManager.Domain\PWManager.Domain.csproj" />
+    <ProjectReference Include="..\PWManager.Infra\PWManager.Infra.csproj" />
   </ItemGroup>
 
 </Project>

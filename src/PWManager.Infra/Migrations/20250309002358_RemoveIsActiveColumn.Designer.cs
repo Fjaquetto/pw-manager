@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PWManager.Infra.Context.SQLite;
 
@@ -10,9 +11,11 @@ using PWManager.Infra.Context.SQLite;
 namespace PWManager.Infra.Migrations
 {
     [DbContext(typeof(PWDbContext))]
-    partial class PWDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250309002358_RemoveIsActiveColumn")]
+    partial class RemoveIsActiveColumn
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.0");

@@ -1,10 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PWManager.Domain.Model;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PWManager.Infra.Context.SQLite
 {
@@ -27,6 +22,10 @@ namespace PWManager.Infra.Context.SQLite
             modelBuilder.Entity<User>()
                 .ToTable("User")
                 .HasKey(u => u.Id);
+                
+            modelBuilder.Entity<User>()
+                .Property(u => u.LastUpdated)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP");
         }
     }
 }
