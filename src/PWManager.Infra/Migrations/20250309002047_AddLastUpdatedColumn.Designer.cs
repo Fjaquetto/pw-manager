@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PWManager.Infra.Context.SQLite;
 
@@ -10,9 +11,11 @@ using PWManager.Infra.Context.SQLite;
 namespace PWManager.Infra.Migrations
 {
     [DbContext(typeof(PWDbContext))]
-    partial class PWDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250309002047_AddLastUpdatedColumn")]
+    partial class AddLastUpdatedColumn
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.0");
@@ -25,6 +28,11 @@ namespace PWManager.Infra.Migrations
 
                     b.Property<DateTime>("CreationDate")
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(true);
 
                     b.Property<DateTime>("LastUpdated")
                         .ValueGeneratedOnAdd()

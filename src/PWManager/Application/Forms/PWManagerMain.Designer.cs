@@ -33,6 +33,7 @@ namespace PWManager
             components = new System.ComponentModel.Container();
             dgUser = new DataGridView();
             contextDelete = new ContextMenuStrip(components);
+            editToolStripMenuItem = new ToolStripMenuItem();
             deleteToolStripMenuItem = new ToolStripMenuItem();
             txtSite = new TextBox();
             txtLogin = new TextBox();
@@ -41,6 +42,7 @@ namespace PWManager
             label2 = new Label();
             label3 = new Label();
             groupBox1 = new GroupBox();
+            btnClear = new Button();
             btnInserir = new Button();
             groupBox2 = new GroupBox();
             label5 = new Label();
@@ -67,10 +69,17 @@ namespace PWManager
             // 
             // contextDelete
             // 
-            contextDelete.Items.AddRange(new ToolStripItem[] { deleteToolStripMenuItem });
+            contextDelete.Items.AddRange(new ToolStripItem[] { editToolStripMenuItem, deleteToolStripMenuItem });
             contextDelete.Name = "contextDelete";
-            contextDelete.Size = new Size(108, 26);
-            contextDelete.Text = "Delete";
+            contextDelete.Size = new Size(108, 48);
+            contextDelete.Text = "Options";
+            // 
+            // editToolStripMenuItem
+            // 
+            editToolStripMenuItem.Name = "editToolStripMenuItem";
+            editToolStripMenuItem.Size = new Size(107, 22);
+            editToolStripMenuItem.Text = "Edit";
+            editToolStripMenuItem.Click += editToolStripMenuItem_Click;
             // 
             // deleteToolStripMenuItem
             // 
@@ -129,6 +138,7 @@ namespace PWManager
             // 
             // groupBox1
             // 
+            groupBox1.Controls.Add(btnClear);
             groupBox1.Controls.Add(btnInserir);
             groupBox1.Controls.Add(txtSite);
             groupBox1.Controls.Add(txtLogin);
@@ -138,13 +148,23 @@ namespace PWManager
             groupBox1.TabIndex = 7;
             groupBox1.TabStop = false;
             // 
+            // btnClear
+            // 
+            btnClear.Location = new Point(156, 50);
+            btnClear.Name = "btnClear";
+            btnClear.Size = new Size(94, 23);
+            btnClear.TabIndex = 7;
+            btnClear.Text = "Clear";
+            btnClear.UseVisualStyleBackColor = true;
+            btnClear.Click += btnClear_Click;
+            // 
             // btnInserir
             // 
-            btnInserir.Location = new Point(6, 47);
+            btnInserir.Location = new Point(256, 50);
             btnInserir.Name = "btnInserir";
-            btnInserir.Size = new Size(334, 23);
-            btnInserir.TabIndex = 0;
-            btnInserir.Text = "Inserir";
+            btnInserir.Size = new Size(94, 23);
+            btnInserir.TabIndex = 6;
+            btnInserir.Text = "Insert";
             btnInserir.UseVisualStyleBackColor = true;
             btnInserir.Click += btnInserir_Click;
             // 
@@ -252,8 +272,10 @@ namespace PWManager
         private Label label2;
         private Label label3;
         private GroupBox groupBox1;
+        private Button btnClear;
         private Button btnInserir;
         private ContextMenuStrip contextDelete;
+        private ToolStripMenuItem editToolStripMenuItem;
         private ToolStripMenuItem deleteToolStripMenuItem;
         private GroupBox groupBox2;
         private Label label5;

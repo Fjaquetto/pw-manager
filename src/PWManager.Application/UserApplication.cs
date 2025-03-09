@@ -32,5 +32,10 @@ namespace PWManager.Application
         {
             await _userRepository.DeleteAsync(user);
         }
+
+        public async Task UpdateUserAsync(User user)
+        {
+            await _userRepository.UpdateAsync(user);
+        }
     }
 }
