@@ -63,7 +63,6 @@ namespace PWManager
             dgUser.ContextMenuStrip = contextDelete;
             dgUser.Location = new Point(12, 160);
             dgUser.Name = "dgUser";
-            dgUser.RowTemplate.Height = 25;
             dgUser.Size = new Size(343, 235);
             dgUser.TabIndex = 0;
             // 
@@ -150,7 +149,7 @@ namespace PWManager
             // 
             // btnClear
             // 
-            btnClear.Location = new Point(156, 50);
+            btnClear.Location = new Point(66, 50);
             btnClear.Name = "btnClear";
             btnClear.Size = new Size(94, 23);
             btnClear.TabIndex = 7;
@@ -160,7 +159,7 @@ namespace PWManager
             // 
             // btnInserir
             // 
-            btnInserir.Location = new Point(256, 50);
+            btnInserir.Location = new Point(191, 50);
             btnInserir.Name = "btnInserir";
             btnInserir.Size = new Size(94, 23);
             btnInserir.TabIndex = 6;
