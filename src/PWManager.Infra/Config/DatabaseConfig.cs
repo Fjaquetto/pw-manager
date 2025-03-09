@@ -1,11 +1,13 @@
-﻿using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Options;
+using System;
+using System.IO;
 
-namespace PWManager.Forms.Config
+namespace PWManager.Infra.Config
 {
     public class DatabaseConfig
     {
-        public string AppFolder { get; set; }
-        public string DbFile { get; set; }
+        public string AppFolder { get; set; } = "PWManager";
+        public string DbFile { get; set; } = "pwmanager.db";
     }
 
     public class DatabaseConfigurator
@@ -28,4 +30,4 @@ namespace PWManager.Forms.Config
             return dbFilePath;
         }
     }
-}
+} 

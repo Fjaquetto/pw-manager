@@ -6,7 +6,7 @@ using PWManager.Application.DataContracts;
 using PWManager.Application.Forms;
 using PWManager.Domain.DataContracts.InfraService;
 using PWManager.Domain.DataContracts.Repository;
-using PWManager.Forms.Config;
+using PWManager.Infra.Config;
 using PWManager.Infra.Context.SQLite;
 using PWManager.Infra.Context.SQLite.DataContracts;
 using PWManager.Infra.Repository;
@@ -46,6 +46,7 @@ namespace PWManager
             var serviceProvider = services.BuildServiceProvider();
             using (var scope = serviceProvider.CreateScope())
             {
+                // Ensure the database exists and is up to date with the latest migrations
                 var context = scope.ServiceProvider.GetRequiredService<PWDbContext>();
                 context.Database.Migrate();
             }

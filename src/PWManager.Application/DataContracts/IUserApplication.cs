@@ -8,5 +8,6 @@ namespace PWManager.Application.DataContracts
         Task AddUserAsync(User user);
         Task<IEnumerable<User>> GetAllUsersAsync();
         Task DeleteUserAsync(User user);
+        Task UpdateUserAsync(User user);
     }
 }
