@@ -24,6 +24,7 @@ namespace PWManager
             PopulateUserGrid();
             HideColumnsInDataGrid();
             SetupDataGridViewEvents();
+            SetupControlEvents();
         }
 
         private void PopulateUserGrid()
@@ -51,13 +52,13 @@ namespace PWManager
             if (dgUser.Columns.Contains("LastUpdated"))
             {
                 dgUser.Columns["LastUpdated"].HeaderText = "Last Updated";
-                dgUser.Columns["LastUpdated"].DefaultCellStyle.Format = "g"; // Short date and time pattern
+                dgUser.Columns["LastUpdated"].DefaultCellStyle.Format = "g";
             }
             
             if (dgUser.Columns.Contains("CreationDate"))
             {
                 dgUser.Columns["CreationDate"].HeaderText = "Creation Date";
-                dgUser.Columns["CreationDate"].DefaultCellStyle.Format = "g"; // Short date and time pattern
+                dgUser.Columns["CreationDate"].DefaultCellStyle.Format = "g";
             }
         }
 
@@ -69,69 +70,17 @@ namespace PWManager
             dgUser.CellClick += DgUser_CellClick;
         }
 
-        private void DgUser_SelectionChanged(object? sender, EventArgs e)
+        private void SetupControlEvents()
         {
-            if (dgUser.SelectedRows.Count > 0)
-            {
-                var row = dgUser.SelectedRows[0];
-                _selectedUserId = Guid.Parse(row.Cells["Id"].Value.ToString());
-                
-                // Fill the form fields with the selected user data
-                txtSite.Text = row.Cells["Site"].Value.ToString();
-                txtLogin.Text = row.Cells["Login"].Value.ToString();
-                txtPassword.Text = row.Cells["Password"].Value.ToString();
-                
-                // Change the button text to indicate update mode
-                btnInserir.Text = "Update";
-            }
-            else
-            {
-                CleanFields();
-                _selectedUserId = null;
-                btnInserir.Text = "Insert";
-            }
-        }
+            btnClear.Click += btnClear_Click;
+            btnInserir.Click += btnInserir_Click;
+            btnGeneratePassword.Click += btnGeneratePassword_Click;
 
-        private void DgUser_CellDoubleClick(object? sender, DataGridViewCellEventArgs e)
-        {
-            if (e.RowIndex >= 0)
-            {
-                var row = dgUser.Rows[e.RowIndex];
-                _selectedUserId = Guid.Parse(row.Cells["Id"].Value.ToString());
-                
-                // Fill the form fields with the selected user data
-                txtSite.Text = row.Cells["Site"].Value.ToString();
-                txtLogin.Text = row.Cells["Login"].Value.ToString();
-                txtPassword.Text = row.Cells["Password"].Value.ToString();
-                
-                // Change the button text to indicate update mode
-                btnInserir.Text = "Update";
-                
-                // Focus on the first field
-                txtSite.Focus();
-            }
-        }
+            txtLoginSearch.TextChanged += txtLoginSearch_TextChanged;
+            txtSiteSearch.TextChanged += txtSiteSearch_TextChanged;
 
-        private void DgUser_KeyDown(object? sender, KeyEventArgs e)
-        {
-            if (e.KeyCode == Keys.Delete && dgUser.SelectedRows.Count > 0)
-            {
-                deleteToolStripMenuItem_Click(sender, e);
-            }
-        }
-
-        private void DgUser_CellClick(object? sender, DataGridViewCellEventArgs e)
-        {
-            if (e.RowIndex >= 0 && e.ColumnIndex >= 0)
-            {
-                var columnName = dgUser.Columns[e.ColumnIndex].Name;
-                if (columnName == "Password")
-                {
-                    var password = dgUser.Rows[e.RowIndex].Cells[e.ColumnIndex].Value.ToString();
-                    Clipboard.SetText(password);
-                    MessageBox.Show("Password copied to clipboard!", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-            }
+            editToolStripMenuItem.Click += editToolStripMenuItem_Click;
+            deleteToolStripMenuItem.Click += deleteToolStripMenuItem_Click;
         }
 
         private void FilterUserData()
@@ -151,7 +100,6 @@ namespace PWManager
             _selectedUserId = null;
             btnInserir.Text = "Insert";
             
-            // Clear selection in the grid
             dgUser.ClearSelection();
         }
 
@@ -160,18 +108,13 @@ namespace PWManager
         {
             if (_selectedUserId.HasValue)
             {
-                // Update existing user
                 var user = _userApplication.GetUserByIdAsync(_selectedUserId.Value).Result;
                 var decryptedUser = _userEncryptorService.DecryptUser(user);
                 
-                // Only update the fields that can be edited in the form
                 decryptedUser.Site = txtSite.Text;
                 decryptedUser.Login = txtLogin.Text;
                 decryptedUser.Password = txtPassword.Text;
                 decryptedUser.LastUpdated = DateTime.Now;
-                
-                // Keep other properties unchanged
-                // Id and CreationDate remain the same
                 
                 var encryptedUser = _userEncryptorService.EncryptUser(decryptedUser);
                 _userApplication.UpdateUserAsync(encryptedUser).Wait();
@@ -180,7 +123,6 @@ namespace PWManager
             }
             else
             {
-                // Add new user
                 var user = new User(txtSite.Text, txtLogin.Text, txtPassword.Text);
                 _userEncryptorService.EncryptUser(user);
                 _userApplication.AddUserAsync(user).Wait();
@@ -249,16 +191,79 @@ namespace PWManager
                 var row = dgUser.SelectedRows[0];
                 _selectedUserId = Guid.Parse(row.Cells["Id"].Value.ToString());
                 
-                // Fill the form fields with the selected user data
                 txtSite.Text = row.Cells["Site"].Value.ToString();
                 txtLogin.Text = row.Cells["Login"].Value.ToString();
                 txtPassword.Text = row.Cells["Password"].Value.ToString();
                 
-                // Change the button text to indicate update mode
                 btnInserir.Text = "Update";
                 
-                // Focus on the first field
                 txtSite.Focus();
+            }
+        }
+
+                private void DgUser_SelectionChanged(object? sender, EventArgs e)
+        {
+            if (dgUser.SelectedRows.Count > 0)
+            {
+                var row = dgUser.SelectedRows[0];
+                _selectedUserId = Guid.Parse(row.Cells["Id"].Value.ToString());
+                
+                txtSite.Text = row.Cells["Site"].Value.ToString();
+                txtLogin.Text = row.Cells["Login"].Value.ToString();
+                txtPassword.Text = row.Cells["Password"].Value.ToString();
+                
+                btnInserir.Text = "Update";
+            }
+            else
+            {
+                CleanFields();
+                _selectedUserId = null;
+                btnInserir.Text = "Insert";
+            }
+        }
+
+        private void DgUser_CellDoubleClick(object? sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0)
+            {
+                var row = dgUser.Rows[e.RowIndex];
+                _selectedUserId = Guid.Parse(row.Cells["Id"].Value.ToString());
+                
+                txtSite.Text = row.Cells["Site"].Value.ToString();
+                txtLogin.Text = row.Cells["Login"].Value.ToString();
+                txtPassword.Text = row.Cells["Password"].Value.ToString();
+                
+                btnInserir.Text = "Update";
+                
+                txtSite.Focus();
+            }
+        }
+
+        private void DgUser_KeyDown(object? sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Delete && dgUser.SelectedRows.Count > 0)
+            {
+                deleteToolStripMenuItem_Click(sender, e);
+            }
+        }
+
+        private void DgUser_CellClick(object? sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0 && e.ColumnIndex >= 0)
+            {
+                var columnName = dgUser.Columns[e.ColumnIndex].Name;
+                var cellValue = dgUser.Rows[e.RowIndex].Cells[e.ColumnIndex].Value.ToString();
+
+                if (columnName == "Password")
+                {
+                    Clipboard.SetText(cellValue);
+                    MessageBox.Show("Password copied to clipboard!", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else if (columnName == "Login")
+                {
+                    Clipboard.SetText(cellValue);
+                    MessageBox.Show("Login copied to clipboard!", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
             }
         }
         #endregion
