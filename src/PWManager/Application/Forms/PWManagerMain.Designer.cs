@@ -78,14 +78,12 @@ namespace PWManager
             editToolStripMenuItem.Name = "editToolStripMenuItem";
             editToolStripMenuItem.Size = new Size(107, 22);
             editToolStripMenuItem.Text = "Edit";
-            editToolStripMenuItem.Click += editToolStripMenuItem_Click;
             // 
             // deleteToolStripMenuItem
             // 
             deleteToolStripMenuItem.Name = "deleteToolStripMenuItem";
             deleteToolStripMenuItem.Size = new Size(107, 22);
             deleteToolStripMenuItem.Text = "Delete";
-            deleteToolStripMenuItem.Click += deleteToolStripMenuItem_Click;
             // 
             // txtSite
             // 
@@ -155,7 +153,6 @@ namespace PWManager
             btnClear.TabIndex = 7;
             btnClear.Text = "Clear";
             btnClear.UseVisualStyleBackColor = true;
-            btnClear.Click += btnClear_Click;
             // 
             // btnInserir
             // 
@@ -165,7 +162,6 @@ namespace PWManager
             btnInserir.TabIndex = 6;
             btnInserir.Text = "Insert";
             btnInserir.UseVisualStyleBackColor = true;
-            btnInserir.Click += btnInserir_Click;
             // 
             // groupBox2
             // 
@@ -204,7 +200,6 @@ namespace PWManager
             txtLoginSearch.Name = "txtLoginSearch";
             txtLoginSearch.Size = new Size(149, 23);
             txtLoginSearch.TabIndex = 1;
-            txtLoginSearch.TextChanged += txtLoginSearch_TextChanged;
             // 
             // txtSiteSearch
             // 
@@ -212,7 +207,6 @@ namespace PWManager
             txtSiteSearch.Name = "txtSiteSearch";
             txtSiteSearch.Size = new Size(154, 23);
             txtSiteSearch.TabIndex = 0;
-            txtSiteSearch.TextChanged += txtSiteSearch_TextChanged;
             // 
             // txtGeneratePassword
             // 
@@ -230,7 +224,6 @@ namespace PWManager
             btnGeneratePassword.TabIndex = 10;
             btnGeneratePassword.Text = "Generate Password";
             btnGeneratePassword.UseVisualStyleBackColor = true;
-            btnGeneratePassword.Click += btnGeneratePassword_Click;
             // 
             // PWManager
             // 
