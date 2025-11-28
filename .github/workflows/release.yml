@@ -1,0 +1,229 @@
+name: Release and Publish
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 
+      
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+      
+      - name: Get latest tag
+        id: get_latest_tag
+        shell: pwsh
+        run: |
+          $tags = git tag --sort=-version:refname
+          if ($tags) {
+            $latestTag = $tags[0]
+            echo "latest_tag=$latestTag" >> $env:GITHUB_OUTPUT
+            echo "Latest tag found: $latestTag"
+          } else {
+            echo "latest_tag=v0.0.0" >> $env:GITHUB_OUTPUT
+            echo "No tags found, starting from v0.0.0"
+          }
+      
+      - name: Determine version bump
+        id: version_bump
+        shell: pwsh
+        run: |
+          $latestTag = "${{ steps.get_latest_tag.outputs.latest_tag }}"
+          
+          # Remove o 'v' prefix se existir
+          $version = $latestTag -replace '^v', ''
+          
+          # Parse version
+          $versionParts = $version -split '\.'
+          $major = [int]$versionParts[0]
+          $minor = [int]$versionParts[1]
+          $patch = [int]$versionParts[2]
+          
+          # Get commits since last tag
+          if ($latestTag -eq "v0.0.0") {
+            $commits = git log --pretty=format:"%s"
+          } else {
+            $commits = git log "$latestTag..HEAD" --pretty=format:"%s"
+          }
+          
+          if (-not $commits) {
+            echo "No new commits found. Skipping release."
+            echo "should_release=false" >> $env:GITHUB_OUTPUT
+            exit 0
+          }
+          
+          echo "Analyzing commits:"
+          echo $commits
+          
+          $shouldRelease = $true
+          $bumpType = "patch"
+          
+          # Check for BREAKING CHANGE or feat! (major)
+          if ($commits -match "BREAKING CHANGE:|^[a-z]+!:") {
+            $major++
+            $minor = 0
+            $patch = 0
+            $bumpType = "major"
+          }
+          # Check for feat: (minor)
+          elseif ($commits -match "^feat:|^feat\(") {
+            $minor++
+            $patch = 0
+            $bumpType = "minor"
+          }
+          # Check for fix: or other conventional commits (patch)
+          elseif ($commits -match "^fix:|^fix\(|^chore:|^docs:|^style:|^refactor:|^perf:|^test:") {
+            $patch++
+            $bumpType = "patch"
+          }
+          else {
+            echo "No conventional commits found. Skipping release."
+            $shouldRelease = $false
+          }
+          
+          if ($shouldRelease) {
+            $newVersion = "$major.$minor.$patch"
+            echo "new_version=$newVersion" >> $env:GITHUB_OUTPUT
+            echo "should_release=true" >> $env:GITHUB_OUTPUT
+            echo "bump_type=$bumpType" >> $env:GITHUB_OUTPUT
+            echo "New version will be: v$newVersion (bump type: $bumpType)"
+          } else {
+            echo "should_release=false" >> $env:GITHUB_OUTPUT
+          }
+      
+      - name: Restore dependencies
+        if: steps.version_bump.outputs.should_release == 'true'
+        run: dotnet restore
+      
+      - name: Publish application
+        if: steps.version_bump.outputs.should_release == 'true'
+        run: |
+          dotnet publish src/PWManager/PWManager.csproj `
+            -c Release `
+            -r win-x64 `
+            --self-contained true `
+            -p:PublishSingleFile=true `
+            -p:IncludeNativeLibrariesForSelfExtract=true `
+            -p:Version=${{ steps.version_bump.outputs.new_version }} `
+            -o ./publish
+      
+      - name: Create release archive
+        if: steps.version_bump.outputs.should_release == 'true'
+        shell: pwsh
+        run: |
+          $version = "${{ steps.version_bump.outputs.new_version }}"
+          $archiveName = "PWManager-v$version-win-x64.zip"
+          
+          # Create zip archive
+          Compress-Archive -Path ./publish/* -DestinationPath $archiveName
+          
+          echo "archive_name=$archiveName" >> $env:GITHUB_OUTPUT
+          echo "Archive created: $archiveName"
+        id: create_archive
+      
+      - name: Generate changelog
+        if: steps.version_bump.outputs.should_release == 'true'
+        id: changelog
+        shell: pwsh
+        run: |
+          $latestTag = "${{ steps.get_latest_tag.outputs.latest_tag }}"
+          
+          if ($latestTag -eq "v0.0.0") {
+            $commits = git log --pretty=format:"- %s (%h)" --reverse
+          } else {
+            $commits = git log "$latestTag..HEAD" --pretty=format:"- %s (%h)" --reverse
+          }
+          
+          # Group commits by type
+          $features = @()
+          $fixes = @()
+          $breaking = @()
+          $others = @()
+          
+          foreach ($commit in $commits) {
+            if ($commit -match "BREAKING CHANGE:|^[a-z]+!:") {
+              $breaking += $commit
+            }
+            elseif ($commit -match "^- feat:|^- feat\(") {
+              $features += $commit
+            }
+            elseif ($commit -match "^- fix:|^- fix\(") {
+              $fixes += $commit
+            }
+            else {
+              $others += $commit
+            }
+          }
+          
+          $changelog = "## What's Changed`n`n"
+          
+          if ($breaking.Count -gt 0) {
+            $changelog += "### ⚠️ BREAKING CHANGES`n"
+            $changelog += ($breaking -join "`n") + "`n`n"
+          }
+          
+          if ($features.Count -gt 0) {
+            $changelog += "### ✨ New Features`n"
+            $changelog += ($features -join "`n") + "`n`n"
+          }
+          
+          if ($fixes.Count -gt 0) {
+            $changelog += "### 🐛 Bug Fixes`n"
+            $changelog += ($fixes -join "`n") + "`n`n"
+          }
+          
+          if ($others.Count -gt 0) {
+            $changelog += "### 🔧 Other Changes`n"
+            $changelog += ($others -join "`n") + "`n`n"
+          }
+          
+          # Save to file for GitHub Release
+          $changelog | Out-File -FilePath changelog.txt -Encoding UTF8
+          
+          echo "Changelog generated successfully"
+      
+      - name: Create Git Tag
+        if: steps.version_bump.outputs.should_release == 'true'
+        shell: pwsh
+        run: |
+          $newVersion = "v${{ steps.version_bump.outputs.new_version }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a $newVersion -m "Release $newVersion"
+          git push origin $newVersion
+          echo "Tag $newVersion created and pushed"
+      
+      - name: Create GitHub Release
+        if: steps.version_bump.outputs.should_release == 'true'
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ steps.version_bump.outputs.new_version }}
+          name: Release v${{ steps.version_bump.outputs.new_version }}
+          body_path: changelog.txt
+          files: ${{ steps.create_archive.outputs.archive_name }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Release Summary
+        if: steps.version_bump.outputs.should_release == 'true'
+        shell: pwsh
+        run: |
+          echo "🎉 Release v${{ steps.version_bump.outputs.new_version }} created successfully!"
+          echo "📦 Archive: ${{ steps.create_archive.outputs.archive_name }}"
+          echo "🔖 Bump type: ${{ steps.version_bump.outputs.bump_type }}"
+
