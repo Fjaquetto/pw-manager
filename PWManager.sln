@@ -1,15 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.6.33801.468
+# Visual Studio Version 18
+VisualStudioVersion = 18.5.11723.231 stable
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "0 - Presentation", "0 - Presentation", "{5EDA42A1-140C-46DA-B2C0-D8D504790FBA}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2 - Domain", "2 - Domain", "{DAB60331-9C74-449E-AFF6-31665BD01782}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "3 - Infra", "3 - Infra", "{72EB8669-F0C9-4088-B5DB-F9D05CC19841}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PWManager", "src\PWManager\PWManager.csproj", "{0013046A-8352-45C1-A400-2B43120A6A69}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PWManager.Domain", "src\PWManager.Domain\PWManager.Domain.csproj", "{C4D564A2-E401-4791-8B6C-9CD3B59783CF}"
 EndProject
@@ -35,18 +33,6 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{0013046A-8352-45C1-A400-2B43120A6A69}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0013046A-8352-45C1-A400-2B43120A6A69}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0013046A-8352-45C1-A400-2B43120A6A69}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{0013046A-8352-45C1-A400-2B43120A6A69}.Debug|x64.Build.0 = Debug|Any CPU
-		{0013046A-8352-45C1-A400-2B43120A6A69}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{0013046A-8352-45C1-A400-2B43120A6A69}.Debug|x86.Build.0 = Debug|Any CPU
-		{0013046A-8352-45C1-A400-2B43120A6A69}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0013046A-8352-45C1-A400-2B43120A6A69}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0013046A-8352-45C1-A400-2B43120A6A69}.Release|x64.ActiveCfg = Release|Any CPU
-		{0013046A-8352-45C1-A400-2B43120A6A69}.Release|x64.Build.0 = Release|Any CPU
-		{0013046A-8352-45C1-A400-2B43120A6A69}.Release|x86.ActiveCfg = Release|Any CPU
-		{0013046A-8352-45C1-A400-2B43120A6A69}.Release|x86.Build.0 = Release|Any CPU
 		{C4D564A2-E401-4791-8B6C-9CD3B59783CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C4D564A2-E401-4791-8B6C-9CD3B59783CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C4D564A2-E401-4791-8B6C-9CD3B59783CF}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -112,7 +98,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{0013046A-8352-45C1-A400-2B43120A6A69} = {5EDA42A1-140C-46DA-B2C0-D8D504790FBA}
 		{C4D564A2-E401-4791-8B6C-9CD3B59783CF} = {DAB60331-9C74-449E-AFF6-31665BD01782}
 		{0C683530-505F-4AA4-B727-23D0A5B8A303} = {72EB8669-F0C9-4088-B5DB-F9D05CC19841}
 		{AB6D8175-9431-455C-8D94-1B8ADED28E49} = {27CF2402-5BE7-4C93-BBBD-30AC2DC14A46}
