@@ -23,7 +23,7 @@ namespace PWManager.Infra.Repository
 
         public async Task<T> GetAsync(Expression<Func<T, bool>> predicate)
         {
-            return await entities.FirstOrDefaultAsync(predicate);
+            return await entities.AsNoTracking().FirstOrDefaultAsync(predicate);
         }
 
         public async Task AddAsync(T entity)
