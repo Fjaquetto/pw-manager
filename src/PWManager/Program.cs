@@ -16,9 +16,6 @@ namespace PWManager
 {
     internal static class Program
     {
-        /// <summary>
-        ///  The main entry point for the application.
-        /// </summary>
         [STAThread]
         static void Main()
         {
@@ -46,7 +43,6 @@ namespace PWManager
             var serviceProvider = services.BuildServiceProvider();
             using (var scope = serviceProvider.CreateScope())
             {
-                // Ensure the database exists and is up to date with the latest migrations
                 var context = scope.ServiceProvider.GetRequiredService<PWDbContext>();
                 context.Database.Migrate();
             }

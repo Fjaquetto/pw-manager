@@ -1,0 +1,182 @@
+﻿<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <Style Selector="Window">
+    <Setter Property="Background" Value="{StaticResource AppBgBrush}"/>
+    <Setter Property="FontFamily" Value="Inter, Segoe UI, Arial, Sans-Serif"/>
+    <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+  </Style>
+
+  <!-- TextBox base style -->
+  <Style Selector="TextBox">
+    <Setter Property="Background" Value="{StaticResource InputBgBrush}"/>
+    <Setter Property="BorderBrush" Value="{StaticResource InputBorderBrush}"/>
+    <Setter Property="BorderThickness" Value="1"/>
+    <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+    <Setter Property="CaretBrush" Value="{StaticResource AccentBlueBrightBrush}"/>
+    <Setter Property="CornerRadius" Value="8"/>
+    <Setter Property="Padding" Value="12,8"/>
+    <Setter Property="FontSize" Value="13"/>
+    <Setter Property="MinHeight" Value="38"/>
+    <Setter Property="SelectionBrush" Value="{StaticResource AccentBlueBrush}"/>
+  </Style>
+
+  <Style Selector="TextBox:focus">
+    <Setter Property="BorderBrush" Value="{StaticResource AccentBlueBrightBrush}"/>
+  </Style>
+
+  <!-- Suppress Fluent theme internal PART_BorderElement to avoid focus square -->
+  <Style Selector="TextBox /template/ Border#PART_BorderElement">
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="BorderBrush" Value="Transparent"/>
+    <Setter Property="BorderThickness" Value="0"/>
+  </Style>
+
+  <Style Selector="TextBox:pointerover /template/ Border#PART_BorderElement">
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="BorderBrush" Value="Transparent"/>
+  </Style>
+
+  <Style Selector="TextBox:focus /template/ Border#PART_BorderElement">
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="BorderBrush" Value="Transparent"/>
+  </Style>
+
+  <Style Selector="TextBox:focus:pointerover /template/ Border#PART_BorderElement">
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="BorderBrush" Value="Transparent"/>
+  </Style>
+
+  <!-- Primary Button (teal accent) -->
+  <Style Selector="Button.primary">
+    <Setter Property="Background" Value="{StaticResource AccentBlueBrush}"/>
+    <Setter Property="Foreground" Value="White"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="CornerRadius" Value="8"/>
+    <Setter Property="Padding" Value="16,10"/>
+    <Setter Property="FontSize" Value="13"/>
+    <Setter Property="FontWeight" Value="SemiBold"/>
+    <Setter Property="Cursor" Value="Hand"/>
+  </Style>
+
+  <Style Selector="Button.primary:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource AccentBlueDarkBrush}"/>
+  </Style>
+
+  <Style Selector="Button.primary:pressed /template/ ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource AccentBlueDarkBrush}"/>
+    <Setter Property="Opacity" Value="0.85"/>
+  </Style>
+
+  <!-- Unlock Button (teal accent, matches primary action color) -->
+  <Style Selector="Button.unlock-btn">
+    <Setter Property="Background" Value="{StaticResource AccentBlueBrush}"/>
+    <Setter Property="Foreground" Value="White"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="CornerRadius" Value="8"/>
+    <Setter Property="Padding" Value="16,10"/>
+    <Setter Property="FontSize" Value="15"/>
+    <Setter Property="FontWeight" Value="SemiBold"/>
+    <Setter Property="Cursor" Value="Hand"/>
+  </Style>
+
+  <Style Selector="Button.unlock-btn:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource AccentBlueDarkBrush}"/>
+  </Style>
+
+  <Style Selector="Button.unlock-btn:pressed /template/ ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource AccentBlueDarkBrush}"/>
+    <Setter Property="Opacity" Value="0.85"/>
+  </Style>
+
+  <!-- Secondary Button -->
+  <Style Selector="Button.secondary">
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+    <Setter Property="BorderThickness" Value="1"/>
+    <Setter Property="BorderBrush" Value="{StaticResource CardBorderBrush}"/>
+    <Setter Property="CornerRadius" Value="8"/>
+    <Setter Property="Padding" Value="14,8"/>
+    <Setter Property="FontSize" Value="13"/>
+    <Setter Property="Cursor" Value="Hand"/>
+  </Style>
+
+  <Style Selector="Button.secondary:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource SidebarSelectedBrush}"/>
+  </Style>
+
+  <!-- Icon Button -->
+  <Style Selector="Button.icon">
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="Padding" Value="6"/>
+    <Setter Property="Cursor" Value="Hand"/>
+    <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+  </Style>
+
+  <Style Selector="Button.icon:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="Opacity" Value="0.7"/>
+  </Style>
+
+  <!-- Card Border -->
+  <Style Selector="Border.card">
+    <Setter Property="Background" Value="{StaticResource CardBgBrush}"/>
+    <Setter Property="BorderBrush" Value="{StaticResource CardBorderBrush}"/>
+    <Setter Property="BorderThickness" Value="1"/>
+    <Setter Property="CornerRadius" Value="12"/>
+    <Setter Property="Padding" Value="20"/>
+  </Style>
+
+  <!-- CheckBox -->
+  <Style Selector="CheckBox">
+    <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+    <Setter Property="FontSize" Value="13"/>
+  </Style>
+
+  <!-- Slider -->
+  <Style Selector="Slider">
+    <Setter Property="Foreground" Value="{StaticResource AccentBlueBrush}"/>
+  </Style>
+
+  <!-- DataGrid -->
+  <Style Selector="DataGrid">
+    <Setter Property="Background" Value="{StaticResource CardBgBrush}"/>
+    <Setter Property="BorderBrush" Value="Transparent"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="RowBackground" Value="{StaticResource CardBgBrush}"/>
+    <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+    <Setter Property="FontSize" Value="13"/>
+    <Setter Property="ColumnHeaderHeight" Value="40"/>
+    <Setter Property="RowHeight" Value="44"/>
+    <Setter Property="GridLinesVisibility" Value="Horizontal"/>
+    <Setter Property="HorizontalGridLinesBrush" Value="{StaticResource CardBorderBrush}"/>
+    <Setter Property="CanUserResizeColumns" Value="True"/>
+    <Setter Property="IsReadOnly" Value="True"/>
+    <Setter Property="SelectionMode" Value="Single"/>
+  </Style>
+
+  <Style Selector="DataGridColumnHeader">
+    <Setter Property="Background" Value="{StaticResource AppBg2Brush}"/>
+    <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+    <Setter Property="FontWeight" Value="SemiBold"/>
+    <Setter Property="FontSize" Value="12"/>
+    <Setter Property="Padding" Value="12,0"/>
+    <Setter Property="BorderBrush" Value="{StaticResource CardBorderBrush}"/>
+    <Setter Property="BorderThickness" Value="0,0,0,1"/>
+  </Style>
+
+  <Style Selector="DataGridRow">
+    <Setter Property="Background" Value="{StaticResource CardBgBrush}"/>
+  </Style>
+
+  <Style Selector="DataGridRow:pointerover /template/ Rectangle#BackgroundRectangle">
+    <Setter Property="Fill" Value="{StaticResource SidebarSelectedBrush}"/>
+  </Style>
+
+  <Style Selector="DataGridCell">
+    <Setter Property="Padding" Value="12,0"/>
+    <Setter Property="BorderThickness" Value="0"/>
+  </Style>
+
+</Styles>
