@@ -107,6 +107,14 @@ jobs:
       - name: Restore dependencies
         if: steps.version_bump.outputs.should_release == 'true'
         run: dotnet restore
+
+      - name: Run unit tests
+        if: steps.version_bump.outputs.should_release == 'true'
+        run: dotnet test src/PWManager.UnitTests/PWManager.UnitTests.csproj --no-restore --verbosity normal
+      
+      - name: Run unit tests
+        if: steps.version_bump.outputs.should_release == 'true'
+        run: dotnet test src/PWManager.UnitTests/PWManager.UnitTests.csproj --no-restore --verbosity normal
       
       - name: Run unit tests
         if: steps.version_bump.outputs.should_release == 'true'
