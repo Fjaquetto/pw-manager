@@ -23,7 +23,7 @@ namespace PWManager.Infra.Repository
 
         public async Task<T> GetAsync(Expression<Func<T, bool>> predicate)
         {
-            return await entities.FirstOrDefaultAsync(predicate);
+            return await entities.AsNoTracking().FirstOrDefaultAsync(predicate);
         }
 
         public async Task AddAsync(T entity)
@@ -35,6 +35,7 @@ namespace PWManager.Infra.Repository
 
             await entities.AddAsync(entity);
             await context.SaveChangesAsync();
+            context.ChangeTracker.Clear();
         }
 
         public async Task UpdateAsync(T entity)
@@ -46,6 +47,7 @@ namespace PWManager.Infra.Repository
 
             entities.Update(entity);
             await context.SaveChangesAsync();
+            context.ChangeTracker.Clear();
         }
 
         public async Task DeleteAsync(T entity)
@@ -57,6 +59,7 @@ namespace PWManager.Infra.Repository
 
             entities.Remove(entity);
             await context.SaveChangesAsync();
+            context.ChangeTracker.Clear();
         }
     }
 }

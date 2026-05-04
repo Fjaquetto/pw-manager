@@ -107,6 +107,14 @@ jobs:
       - name: Restore dependencies
         if: steps.version_bump.outputs.should_release == 'true'
         run: dotnet restore
+
+      - name: Run unit tests
+        if: steps.version_bump.outputs.should_release == 'true'
+        run: dotnet test src/PWManager.UnitTests/PWManager.UnitTests.csproj --no-restore --verbosity normal
+      
+      - name: Run unit tests
+        if: steps.version_bump.outputs.should_release == 'true'
+        run: dotnet test src/PWManager.UnitTests/PWManager.UnitTests.csproj --no-restore --verbosity normal
       
       - name: Publish application
         if: steps.version_bump.outputs.should_release == 'true'
@@ -171,22 +179,22 @@ jobs:
           $changelog = "## What's Changed`n`n"
           
           if ($breaking.Count -gt 0) {
-            $changelog += "### ⚠️ BREAKING CHANGES`n"
+            $changelog += "### BREAKING CHANGES`n"
             $changelog += ($breaking -join "`n") + "`n`n"
           }
           
           if ($features.Count -gt 0) {
-            $changelog += "### ✨ New Features`n"
+            $changelog += "### New Features`n"
             $changelog += ($features -join "`n") + "`n`n"
           }
           
           if ($fixes.Count -gt 0) {
-            $changelog += "### 🐛 Bug Fixes`n"
+            $changelog += "### Bug Fixes`n"
             $changelog += ($fixes -join "`n") + "`n`n"
           }
           
           if ($others.Count -gt 0) {
-            $changelog += "### 🔧 Other Changes`n"
+            $changelog += "### Other Changes`n"
             $changelog += ($others -join "`n") + "`n`n"
           }
           
@@ -223,7 +231,7 @@ jobs:
         if: steps.version_bump.outputs.should_release == 'true'
         shell: pwsh
         run: |
-          echo "🎉 Release v${{ steps.version_bump.outputs.new_version }} created successfully!"
-          echo "📦 Archive: ${{ steps.create_archive.outputs.archive_name }}"
-          echo "🔖 Bump type: ${{ steps.version_bump.outputs.bump_type }}"
+          echo "Release v${{ steps.version_bump.outputs.new_version }} created successfully!"
+          echo "Archive: ${{ steps.create_archive.outputs.archive_name }}"
+          echo "Bump type: ${{ steps.version_bump.outputs.bump_type }}"
 
