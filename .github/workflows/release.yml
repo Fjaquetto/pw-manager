@@ -123,7 +123,7 @@ jobs:
       - name: Publish application
         if: steps.version_bump.outputs.should_release == 'true'
         run: |
-          dotnet publish src/PWManager/PWManager.csproj `
+          dotnet publish src/PWManager.Avalonia/PWManager.Avalonia.csproj `
             -c Release `
             -r win-x64 `
             --self-contained true `
