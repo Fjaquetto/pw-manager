@@ -22,7 +22,7 @@
   <ItemGroup>
     <ProjectReference Include="..\PWManager.Application\PWManager.Application.csproj" />
     <ProjectReference Include="..\PWManager.Domain\PWManager.Domain.csproj" />
-    <ProjectReference Include="..\PWManager.Avalonia\PWManager.Avalonia.csproj" />
+    <ProjectReference Include="..\PWManager\PWManager.csproj" />
   </ItemGroup>
 
 </Project>

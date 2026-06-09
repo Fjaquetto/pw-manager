@@ -1,12 +1,12 @@
-using Avalonia;
+﻿using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PWManager.Application.DataContracts;
-using PWManager.Avalonia.Services;
-using PWManager.Avalonia.ViewModels;
-using PWManager.Avalonia.Views;
+using PWManager.Services;
+using PWManager.ViewModels;
+using PWManager.Views;
 using PWManager.Domain.DataContracts.InfraService;
 using PWManager.Domain.DataContracts.Repository;
 using PWManager.Infra.Config;
@@ -18,7 +18,7 @@ using System;
 using System.IO;
 using AvaloniaApp = Avalonia.Application;
 
-namespace PWManager.Avalonia;
+namespace PWManager;
 
 public partial class App : AvaloniaApp
 {

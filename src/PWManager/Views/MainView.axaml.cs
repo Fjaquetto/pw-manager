@@ -1,11 +1,11 @@
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
-using PWManager.Avalonia.ViewModels;
+using PWManager.ViewModels;
 using System;
 using System.Threading.Tasks;
 
-namespace PWManager.Avalonia.Views;
+namespace PWManager.Views;
 
 public partial class MainView : Window
 {

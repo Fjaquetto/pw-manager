@@ -1,10 +1,10 @@
-using Avalonia.Controls.ApplicationLifetimes;
+﻿using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Threading;
-using PWManager.Avalonia.ViewModels;
-using PWManager.Avalonia.Views;
+using PWManager.ViewModels;
+using PWManager.Views;
 using System.Linq;
 
-namespace PWManager.Avalonia.Services;
+namespace PWManager.Services;
 
 public class NavigationService
 {

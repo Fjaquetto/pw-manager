@@ -1,8 +1,8 @@
-using Avalonia.Controls.ApplicationLifetimes;
+﻿using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Input.Platform;
 using System.Threading.Tasks;
 
-namespace PWManager.Avalonia.Services;
+namespace PWManager.Services;
 
 public class ClipboardService
 {
