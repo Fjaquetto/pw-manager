@@ -10,6 +10,7 @@ public partial class UnlockView : Window
     public UnlockView()
     {
         InitializeComponent();
+        Opened += (_, _) => this.FindControl<TextBox>("PasswordBox")?.Focus();
     }
 
     private void CloseButton_Click(object? sender, RoutedEventArgs e)
