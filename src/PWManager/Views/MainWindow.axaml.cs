@@ -1,6 +1,6 @@
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
 
-namespace PWManager.Avalonia.Views;
+namespace PWManager.Views;
 
 public partial class MainWindow : Window
 {

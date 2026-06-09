@@ -1,8 +1,8 @@
-using Avalonia.Threading;
+﻿using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PWManager.Application.DataContracts;
-using PWManager.Avalonia.Services;
+using PWManager.Services;
 using PWManager.Domain.DataContracts.InfraService;
 using PWManager.Domain.Model;
 using System;
@@ -11,7 +11,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace PWManager.Avalonia.ViewModels;
+namespace PWManager.ViewModels;
 
 public partial class MainViewModel : ViewModelBase
 {

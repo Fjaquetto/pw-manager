@@ -1,10 +1,10 @@
-using System;
+﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
-using PWManager.Avalonia.ViewModels;
+using PWManager.ViewModels;
 
-namespace PWManager.Avalonia;
+namespace PWManager;
 
 /// <summary>
 /// Given a view model, returns the corresponding view if possible.

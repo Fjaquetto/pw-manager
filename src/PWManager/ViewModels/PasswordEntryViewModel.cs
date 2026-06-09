@@ -1,8 +1,8 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using PWManager.Domain.Model;
 using System;
 
-namespace PWManager.Avalonia.ViewModels;
+namespace PWManager.ViewModels;
 
 public partial class PasswordEntryViewModel : ViewModelBase
 {

@@ -1,6 +1,6 @@
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 
-namespace PWManager.Avalonia;
+namespace PWManager;
 
 internal static class ServiceProviderExtensions
 {

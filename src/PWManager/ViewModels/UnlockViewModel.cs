@@ -1,12 +1,12 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using PWManager.Avalonia.Services;
+using PWManager.Services;
 using PWManager.Domain.DataContracts.InfraService;
 using PWManager.Infra.Services;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 
-namespace PWManager.Avalonia.ViewModels;
+namespace PWManager.ViewModels;
 
 public partial class UnlockViewModel : ViewModelBase
 {

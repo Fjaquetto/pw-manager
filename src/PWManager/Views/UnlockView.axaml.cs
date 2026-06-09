@@ -1,9 +1,9 @@
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
-using PWManager.Avalonia.ViewModels;
+using PWManager.ViewModels;
 
-namespace PWManager.Avalonia.Views;
+namespace PWManager.Views;
 
 public partial class UnlockView : Window
 {
