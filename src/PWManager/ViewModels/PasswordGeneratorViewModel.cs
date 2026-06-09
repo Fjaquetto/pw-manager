@@ -1,12 +1,12 @@
-using Avalonia.Media;
+﻿using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using PWManager.Avalonia.Services;
+using PWManager.Services;
 using System;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace PWManager.Avalonia.ViewModels;
+namespace PWManager.ViewModels;
 
 public partial class PasswordGeneratorViewModel : ViewModelBase
 {

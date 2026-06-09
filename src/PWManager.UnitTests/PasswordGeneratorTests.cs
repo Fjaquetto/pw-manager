@@ -1,4 +1,4 @@
-using PWManager.Avalonia.ViewModels;
+using PWManager.ViewModels;
 using System.Linq;
 using Xunit;
 

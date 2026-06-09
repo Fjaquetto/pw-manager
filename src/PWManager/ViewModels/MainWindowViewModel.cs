@@ -1,4 +1,4 @@
-﻿namespace PWManager.Avalonia.ViewModels;
+﻿namespace PWManager.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
