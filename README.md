@@ -25,10 +25,10 @@ The UI was migrated from Windows Forms to **Avalonia UI** with a modern dark the
 
 ```
 ┌─ Header: Logo | Storage status | Global search bar ─────────────┐
-│ Sidebar │ [Add New Entry card]                                    │
-│  (home) │ [Password Generator card]                              │
+│ Sidebar │ [Add New Entry card]                                  │
+│  (home) │ [Password Generator card]                             │
 │         │  Filter by site…  |  Filter by login…  | Clear        │
-│         │ [Entries DataGrid]                                      │
+│         │ [Entries DataGrid]                                    │
 └─ Footer: Encrypted notice | Entry count ────────────────────────┘
 ```
 
