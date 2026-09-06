@@ -1,0 +1,55 @@
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:PWManager.ViewModels" xmlns:material="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             x:Class="PWManager.Views.EntryDetailsView" x:DataType="vm:MainViewModel">
+  <Grid x:Name="DetailLayout" RowDefinitions="*,Auto">
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+      <StackPanel x:Name="DetailFields">
+        <Grid ColumnDefinitions="56,*" ColumnSpacing="16">
+          <Border Width="56" Height="56" CornerRadius="16" Background="{StaticResource AccentSurfaceBrush}" HorizontalAlignment="Left">
+            <TextBlock Text="{Binding SelectedEntry.Initial}" Foreground="{StaticResource FocusBrush}" FontSize="24" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+          </Border>
+          <StackPanel Grid.Column="1" Spacing="8" VerticalAlignment="Center">
+            <TextBlock Text="{Binding SelectedEntry.Site}" Classes="heading" TextWrapping="Wrap"/>
+            <TextBlock Text="ENTRY DETAILS" Classes="section"/>
+          </StackPanel>
+        </Grid>
+        <StackPanel Spacing="8">
+          <TextBlock Text="Login" Classes="secondary"/>
+          <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+            <TextBox Text="{Binding SelectedEntry.Login, Mode=OneWay}" Classes="readonly" IsReadOnly="True" AutomationProperties.Name="Login"/>
+            <Button Grid.Column="1" Classes="ghost" Content="Copy" Command="{Binding CopyLoginCommand}" AutomationProperties.Name="Copy login"/>
+          </Grid>
+        </StackPanel>
+        <StackPanel Spacing="8">
+          <TextBlock Text="Password" Classes="secondary"/>
+          <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+            <TextBox x:Name="DetailPassword" Text="{Binding SelectedEntry.Password, Mode=OneWay}"
+                     PasswordChar="{Binding SelectedEntry.PasswordMask}" Classes="readonly secret" IsReadOnly="True"
+                     AutomationProperties.Name="Password"/>
+            <Button Grid.Column="1" Classes="ghost icon" Command="{Binding ToggleDetailPasswordCommand}"
+                    AutomationProperties.Name="{Binding SelectedEntry.VisibilityLabel}" ToolTip.Tip="{Binding SelectedEntry.VisibilityLabel}">
+              <Grid><material:MaterialIcon Kind="EyeOutline" Width="18" Height="18" IsVisible="{Binding !SelectedEntry.IsPasswordVisible}"/><material:MaterialIcon Kind="EyeOffOutline" Width="18" Height="18" IsVisible="{Binding SelectedEntry.IsPasswordVisible}"/></Grid>
+            </Button>
+            <Button x:Name="DetailCopyPassword" Grid.Column="2" Classes="ghost" Content="Copy" Command="{Binding CopyPasswordCommand}"
+                    CommandParameter="{Binding SelectedEntry}" AutomationProperties.Name="Copy password"/>
+          </Grid>
+        </StackPanel>
+        <Border Height="1" Background="{StaticResource LineBrush}"/>
+        <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
+          <StackPanel Spacing="8">
+            <TextBlock Text="Created" Classes="caption"/>
+            <TextBlock Text="{Binding SelectedEntry.CreationDate, StringFormat='{}{0:yyyy-MM-dd · HH:mm}'}" FontSize="13" TextWrapping="Wrap"/>
+          </StackPanel>
+          <StackPanel Grid.Column="1" Spacing="8">
+            <TextBlock Text="Last updated" Classes="caption"/>
+            <TextBlock Text="{Binding SelectedEntry.LastUpdated, StringFormat='{}{0:yyyy-MM-dd · HH:mm}'}" FontSize="13" TextWrapping="Wrap"/>
+          </StackPanel>
+        </Grid>
+      </StackPanel>
+    </ScrollViewer>
+    <Grid Grid.Row="1" ColumnDefinitions="Auto,*,Auto">
+      <Button Classes="primary" Content="Edit entry" Command="{Binding EditEntryCommand}"/>
+      <Button x:Name="DetailDelete" Grid.Column="2" Classes="ghost danger" Content="Delete" Command="{Binding RequestDeleteCommand}"/>
+    </Grid>
+  </Grid>
+</UserControl>

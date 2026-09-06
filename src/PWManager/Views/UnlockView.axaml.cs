@@ -1,7 +1,5 @@
-﻿using Avalonia.Controls;
-using Avalonia.Input;
-using Avalonia.Interactivity;
-using PWManager.ViewModels;
+using System;
+using Avalonia.Controls;
 
 namespace PWManager.Views;
 
@@ -10,25 +8,17 @@ public partial class UnlockView : Window
     public UnlockView()
     {
         InitializeComponent();
-        Opened += (_, _) => this.FindControl<TextBox>("PasswordBox")?.Focus();
-    }
+        Opened += (_, _) =>
+        {
+            var screen = Screens.ScreenFromWindow(this);
 
-    private void CloseButton_Click(object? sender, RoutedEventArgs e)
-    {
-        Close();
-    }
+            if (screen is not null)
+            {
+                Width = Math.Min(Width, screen.WorkingArea.Width / screen.Scaling);
+                Height = Math.Min(Height, screen.WorkingArea.Height / screen.Scaling - 40);
+            }
 
-    private void TogglePassword_Click(object? sender, RoutedEventArgs e)
-    {
-        var box = this.FindControl<TextBox>("PasswordBox");
-        if (box != null)
-            box.PasswordChar = box.PasswordChar == '\0' ? '•' : '\0';
-    }
-
-    private void Header_PointerPressed(object? sender, PointerPressedEventArgs e)
-    {
-        if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
-            BeginMoveDrag(e);
+            this.FindControl<TextBox>("PasswordBox")?.Focus();
+        };
     }
 }
-

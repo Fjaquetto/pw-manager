@@ -1,101 +1,172 @@
-﻿# PWManager
+# PWManager
 
-A simple and secure password manager using AES-256 encryption with PBKDF2 key derivation.
+A personal desktop password manager built with .NET 10 and Avalonia UI. Keep credentials in a local SQLite database and find, copy, or update them through a focused dark interface.
 
-## Overview
-
-PWManager is a cross-platform desktop application developed in .NET 10.0 that allows you to store and manage your passwords securely. Data is encrypted before being stored in a local SQLite database, ensuring that your sensitive information remains protected.
-
-The UI was migrated from Windows Forms to **Avalonia UI** with a modern dark theme. The security, encryption, and persistence logic remains unchanged.
+![PWManager vault](docs/screenshots/vault.png)
 
 ## Features
 
-- Secure password storage with AES-256 encryption
-- Modern dark UI using Avalonia UI (MVVM pattern) — dark charcoal + teal accent color scheme
-- Master password unlock screen with metallic button style
-- Add, edit, delete password entries
-- Global search bar in the header (filters entries by site or login simultaneously)
-- Inline filter strip above the entries grid (separate site and login filters)
-- Built-in password generator card positioned above the entries grid for a faster generate → fill → save flow
-- Quick copy of passwords to clipboard
-- Local storage in SQLite database (data never leaves your device)
-- Tracking of creation date and last update of passwords
+- Neutral black and teal theme, with readable text, visible keyboard focus, and labeled actions.
+- Search across site and login, plus optional site/login filters.
+- Sort by site, login, creation date, or last update, in either direction.
+- Virtualized entry list with quick password copy and a separate details pane.
+- Create and edit entries in a draft; changes are saved only when you choose Save.
+- Field validation, explicit deletion confirmation, and a prompt before discarding unsaved changes.
+- Copy login or password without revealing it; show/hide controls reset when changing context.
+- Password generator with a length slider and numeric input, uppercase/lowercase, numbers, symbols, and an estimated strength indicator.
+- Loading, empty-vault, no-results, and retry states, with consistent success and error messages.
+- Responsive layout: list and details side by side at widths of 1000 logical pixels or more; a single pane with **Back to entries** below that.
+- AES-256 encryption of credential fields before local persistence, using the existing PBKDF2 derivation and storage format.
 
-## UI Layout
+The redesign does not migrate the database or change the encryption format.
 
+## Using the vault
+
+Enter your master password on **Unlock your vault**. For an empty vault, the application retains its existing behavior: the entered password is used to encrypt the entries you subsequently save.
+
+Search in the header, then select an entry to see its login, password, creation date, and last update. The copy icon in a list row copies its password directly. In the details pane, **Copy** is available beside both login and password.
+
+**Filters** expands the separate site and login fields. Global search matches site **or** login; the specific filters are combined with it using **and**. Matching is case-insensitive. **Clear filters** also clears global search.
+
+Choose **New entry** to create a credential, or **Edit entry** from its details. Site accepts either a domain or a descriptive name. Password content, including leading or trailing spaces, is preserved. Failed saves keep the draft available for another attempt. If an entry disappears during editing, **Save as new entry** lets you preserve the draft as a new record.
+
+After saving, the saved entry remains selected. If filters hide it from the list, a message and **Clear filters** action explain how to show it again. **Cancel**, navigation away from an altered draft, and window closing prompt before discarding changes. **Delete** requires a separate confirmation.
+
+### Password generator
+
+![Password generator](docs/screenshots/generator.png)
+
+Open **Generator** in the header for standalone use, or **Generate a password** in the editor.
+
+- Length ranges from 8 to 48 characters; the default is 20.
+- Changing length or character options generates a fresh password. **Generate again** regenerates manually.
+- If all character options are off, lowercase letters are used and the dialog explains the fallback.
+- **Copy password** copies the result.
+- **Use password**, when opened from the editor, fills the current draft.
+- **Use in new entry**, when opened from the header, starts a new draft and prompts before replacing unsaved work.
+
+The strength indicator is an estimate based on the existing length/options scoring, not a guarantee about a generated password. The existing generator selects characters from the enabled pool; it does not guarantee every enabled category appears in every result.
+
+### Keyboard shortcuts
+
+| Shortcut | Action |
+|---|---|
+| Ctrl+F | Focus and select the search text |
+| Ctrl+N | Start a new entry |
+| Ctrl+S | Save the current editor |
+| Esc | Close the generator, cancel a confirmation, or leave the current editor/pane |
+| Enter | Unlock from the master password field |
+| Tab / Shift+Tab | Move between controls; focus stays within an open dialog |
+| Arrow keys | Navigate the entry list |
+
+Success notifications disappear after three seconds. Errors remain until corrected, retried, or dismissed. Passwords return to their masked state when the relevant context changes.
+
+## Requirements
+
+- **Development:** .NET 10 SDK.
+- **Framework-dependent execution:** .NET 10 Runtime and the native dependencies required by Avalonia on your OS.
+- **Published Windows release:** the self-contained win-x64 package includes the runtime; a separate .NET installation is unnecessary.
+- Windows is the build/test target used by the included workflows. Avalonia also supports other desktop platforms, whose native window and clipboard integration should be verified on the target OS.
+
+## Build and run
+
+From the repository root:
+
+```powershell
+dotnet restore PWManager.sln
+dotnet build PWManager.sln -c Debug --no-restore
+dotnet build PWManager.sln -c Release --no-restore
+dotnet run --project src/PWManager/PWManager.csproj -c Release --no-build
 ```
-┌─ Header: Logo | Storage status | Global search bar ─────────────┐
-│ Sidebar │ [Add New Entry card]                                  │
-│  (home) │ [Password Generator card]                             │
-│         │  Filter by site…  |  Filter by login…  | Clear        │
-│         │ [Entries DataGrid]                                    │
-└─ Footer: Encrypted notice | Entry count ────────────────────────┘
+
+To execute the compiled assembly directly:
+
+```powershell
+dotnet src/PWManager/bin/Release/net10.0/PWManager.dll
 ```
 
-## System Requirements
+To produce a self-contained Windows package locally:
 
-- Windows 10 or higher (or any OS supported by Avalonia)
-- .NET 10.0 Runtime
-
-## Running the Application
-
-```bash
-cd src/PWManager.Avalonia
-dotnet run
+```powershell
+dotnet publish src/PWManager/PWManager.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish
 ```
 
-Or build and run the release:
+Run `publish/PWManager.exe` and keep the generated `appsettings.json` alongside it.
 
-```bash
-dotnet build PWManager.sln -c Release
-dotnet src/PWManager.Avalonia/bin/Release/net10.0/PWManager.Avalonia.exe
+## Tests
+
+```powershell
+dotnet test PWManager.sln -c Release --no-build --no-restore
 ```
 
-## Technologies Used
+Build the Release solution first. The solution contains:
 
-- .NET 10.0
-- Avalonia UI 12.x (cross-platform UI)
-- CommunityToolkit.Mvvm (MVVM)
-- Entity Framework Core 10.x
-- SQLite (local encrypted storage)
-- Microsoft.Extensions.DependencyInjection
-- Clean Architecture (Domain / Application / Infra / UI)
+- **PWManager.UnitTests:** xUnit 2 application tests, generator and vault service tests, ViewModel/interaction tests, fake-time notification tests, and a temporary SQLite persistence cycle.
+- **PWManager.UITests:** xUnit 3 with Avalonia.Headless.XUnit 12.0.2. Exercises production views and styles with fake credentials and services, including compiled bindings, copy actions, keyboard focus, dialogs, responsive layout, virtualization with 1000 entries, and 100%/150%/200% rendering scales.
 
-## Security Notes
+The UI test application skips production startup, so it never opens the personal vault. Persistence tests create an isolated temporary SQLite database and remove it afterward. Tests do not use the system clipboard.
 
-- Master password is **never stored in plain text**
-- All password entries are encrypted with AES-256 before being saved
-- Key derivation uses PBKDF2 (Rfc2898DeriveBytes)
-- Passwords are only decrypted in-memory when displayed
-- The SQLite database file is located at `%AppData%\PWManager\pwmanager.db`
+To regenerate screenshots from the actual Avalonia controls with sample data:
+
+```powershell
+$env:PWMANAGER_SCREENSHOTS = "$PWD/artifacts/screenshots"
+dotnet test src/PWManager.UITests/PWManager.UITests.csproj -c Release --no-build --no-restore
+Remove-Item Env:PWMANAGER_SCREENSHOTS
+```
+
+The images in this README are headless renders of the production Avalonia views using fictitious entries. Native title bars are supplied by the OS and are not included in these renders.
+
+Pull requests run restore, Debug/Release builds, and all tests. The existing main-branch release workflow builds and tests the entire solution before packaging.
+
+### Existing build notices
+
+The redesign removes the deprecated Avalonia properties from the active views. The solution still reports pre-existing nullable-reference and cryptographic-API warnings, and the NuGet `NU1903` advisory for the transitive `SQLitePCLRaw.lib.e_sqlite3` dependency. Those warnings have not been suppressed or represented as fixed by the UI work.
+
+## Storage and security behavior
+
+- By default, the database is `%AppData%\PWManager\pwmanager.db` on Windows. Other platforms use .NET's application-data location.
+- `DatabaseConfig.AppFolder` and `DatabaseConfig.DbFile` in `appsettings.json` control the location.
+- Site, login, and password fields are encrypted before they are written. This does **not** mean the entire SQLite file is encrypted; IDs and timestamps remain database metadata.
+- The application uses AES-256 and the existing PBKDF2 key derivation.
+- Credentials are decrypted and held in memory during an unlocked session to support searching and use. Masking controls their visual display.
+- The master password is not persisted by the application; the existing encryption service retains it in memory for the unlocked session.
+- Copy actions place the selected content on the OS clipboard. This version does not automatically clear it.
+- The application does not synchronize or transmit vault entries to a remote service.
 
 ## Architecture
 
-```
-PWManager.Domain       - Entities, repository contracts, service contracts
-PWManager.Application  - Use cases (IUserApplication)
-PWManager.Infra        - EF Core DbContext, repositories, encryption service
-PWManager.Avalonia     - Avalonia UI (MVVM): Views, ViewModels, Services
-PWManager (legacy)     - Original Windows Forms UI (kept for reference)
-```
-
-## Project Structure
-
-The solution follows the principles of Clean Architecture, divided into layers:
-
-- **PWManager.Domain**: Contains domain entities and business rules
-- **PWManager.Application**: Implements application use cases
-- **PWManager.Infra**: Handles data persistence and external services
-- **PWManager.Avalonia**: Main project with the graphical interface (Avalonia UI)
-
-## Color Scheme
-
-The UI uses a dark charcoal + teal accent palette:
-
-| Role | Value |
+| Project | Responsibility |
 |---|---|
-| App background | `#111118` |
-| Card background | `#1C1C26` |
-| Accent (teal) | `#3ECAB5` |
-| Text primary | `#E8E8F2` |
-| Text secondary | `#8888A8` |
+| PWManager.Domain | Entities and repository/encryption contracts |
+| PWManager.Application | Application use cases |
+| PWManager.Infra | SQLite/EF Core persistence and encryption |
+| PWManager | Avalonia views, ViewModels, styles, and desktop services |
+| PWManager.UnitTests | Application, ViewModel, interaction, and persistence tests |
+| PWManager.UITests | Headless UI and rendering tests |
+
+The UI uses CommunityToolkit.Mvvm, compiled bindings, Inter, FluentTheme, and Material Icons. ViewModels coordinate screen state, navigation requests, filters, and editor validation. Editor drafts are separate from loaded entries.
+
+`VaultEntryService` handles loading and saving credential copies, encryption coordination, and timestamps. `PasswordGenerator` contains the character generation algorithm. Clipboard, vault entry, unlock, and navigation services are injected; notification and persistence timing use `TimeProvider`. UI service interfaces live in `Services/Interfaces`, and enums live in `Enums`, each in its own file.
+
+The root `.editorconfig` defines indentation, braces, and line breaks. Run `dotnet format whitespace PWManager.sln --no-restore` after restoring dependencies to apply the formatting rules.
+
+## Theme
+
+| Role | Color |
+|---|---|
+| Canvas | `#090A0B` |
+| Surface | `#111315` |
+| Raised surface | `#1B1F21` |
+| Separator | `#2A3033` |
+| Primary text | `#E8ECEB` |
+| Secondary text | `#A6B1AD` |
+| Primary action | `#0F766E` |
+| Primary action hover/pressed | `#0D655F` |
+| Selected surface | `#102B28` |
+| Focus/accent text | `#7DD3C0` |
+| Success | `#34D399` |
+| Error/destructive action | `#FB7185` |
+
+The neutral black palette uses near-black backgrounds, charcoal panels and fields, and subtle neutral borders. Deep teal highlights primary actions and selection; muted mint marks keyboard focus and small accents. Colors, control styles, and modal overlays are shared resources. White text on the primary teal button has approximately 5.47:1 contrast; normal text targets at least 4.5:1. This release provides an English dark interface.
+
+![Unlock your vault](docs/screenshots/unlock.png)

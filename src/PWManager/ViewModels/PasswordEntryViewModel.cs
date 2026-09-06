@@ -1,32 +1,39 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using PWManager.Domain.Model;
 using System;
+using CommunityToolkit.Mvvm.ComponentModel;
+using PWManager.Domain.Model;
 
 namespace PWManager.ViewModels;
 
 public partial class PasswordEntryViewModel : ViewModelBase
 {
-    [ObservableProperty] private Guid _id;
-    [ObservableProperty] private string _site = string.Empty;
-    [ObservableProperty] private string _login = string.Empty;
-    [ObservableProperty] private string _password = string.Empty;
-    [ObservableProperty] private DateTime _creationDate;
-    [ObservableProperty] private DateTime _lastUpdated;
-    [ObservableProperty] private bool _isPasswordVisible;
-    [ObservableProperty] private string _maskedPassword = "••••••••••••";
-    [ObservableProperty] private bool _isDeletePending;
+    [ObservableProperty]
+    private Guid _id;
 
-    public string DisplayPassword => IsPasswordVisible ? Password : "••••••••••••";
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(Initial))]
+    private string _site = string.Empty;
 
-    partial void OnIsPasswordVisibleChanged(bool value)
-    {
-        OnPropertyChanged(nameof(DisplayPassword));
-    }
+    [ObservableProperty]
+    private string _login = string.Empty;
 
-    partial void OnPasswordChanged(string value)
-    {
-        OnPropertyChanged(nameof(DisplayPassword));
-    }
+    [ObservableProperty]
+    private string _password = string.Empty;
+
+    [ObservableProperty]
+    private DateTime _creationDate;
+
+    [ObservableProperty]
+    private DateTime _lastUpdated;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(PasswordMask), nameof(VisibilityLabel))]
+    private bool _isPasswordVisible;
+
+    public char PasswordMask => IsPasswordVisible ? '\0' : '•';
+
+    public string VisibilityLabel => IsPasswordVisible ? "Hide password" : "Show password";
+
+    public string Initial => string.IsNullOrWhiteSpace(Site) ? "?" : Site.Trim()[..1].ToUpperInvariant();
 
     public static PasswordEntryViewModel FromModel(User user) => new()
     {

@@ -1,10 +1,11 @@
-﻿using System.Security.Cryptography;
+using System.Security.Cryptography;
 
 namespace PWManager.Infra.Services
 {
     public static class EncryptorService
     {
-        public static string EncryptorPassword { get; set; }
+        public static string EncryptorPassword
+        { get; set; }
 
         public static string Encrypt(string text)
         {

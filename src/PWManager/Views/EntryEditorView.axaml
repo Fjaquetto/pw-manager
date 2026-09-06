@@ -1,0 +1,49 @@
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:PWManager.ViewModels" xmlns:conv="using:Avalonia.Data.Converters" xmlns:material="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             x:Class="PWManager.Views.EntryEditorView" x:DataType="vm:MainViewModel">
+  <Grid RowDefinitions="*,Auto" RowSpacing="20">
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+      <StackPanel Spacing="24">
+        <StackPanel Spacing="8">
+          <TextBlock Text="{Binding Editor.Title}" Classes="heading"/>
+          <TextBlock Text="Keep the details you need, all in one place." Classes="secondary" TextWrapping="Wrap"/>
+        </StackPanel>
+        <StackPanel Spacing="8">
+          <TextBlock x:Name="EditorSiteLabel" Text="Site" FontWeight="Medium"/>
+          <TextBox x:Name="EditorSite" Text="{Binding Editor.Site}" PlaceholderText="e.g. github.com or Work account"
+                   AutomationProperties.LabeledBy="{Binding #EditorSiteLabel}"/>
+          <TextBlock Text="{Binding Editor.SiteError}" Classes="error" IsVisible="{Binding Editor.SiteError, Converter={x:Static conv:StringConverters.IsNotNullOrEmpty}}"/>
+        </StackPanel>
+        <StackPanel Spacing="8">
+          <TextBlock x:Name="EditorLoginLabel" Text="Login" FontWeight="Medium"/>
+          <TextBox Text="{Binding Editor.Login}" PlaceholderText="e.g. name@example.com"
+                   AutomationProperties.LabeledBy="{Binding #EditorLoginLabel}"/>
+          <TextBlock Text="{Binding Editor.LoginError}" Classes="error" IsVisible="{Binding Editor.LoginError, Converter={x:Static conv:StringConverters.IsNotNullOrEmpty}}"/>
+        </StackPanel>
+        <StackPanel Spacing="8">
+          <TextBlock x:Name="EditorPasswordLabel" Text="Password" FontWeight="Medium"/>
+          <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+            <TextBox x:Name="EditorPassword" Text="{Binding Editor.Password}" PasswordChar="{Binding Editor.PasswordMask}"
+                     Classes="secret" PlaceholderText="Enter a password" AutomationProperties.LabeledBy="{Binding #EditorPasswordLabel}"/>
+            <Button Grid.Column="1" Classes="ghost icon" Command="{Binding Editor.TogglePasswordVisibilityCommand}"
+                    AutomationProperties.Name="{Binding Editor.VisibilityLabel}" ToolTip.Tip="{Binding Editor.VisibilityLabel}">
+              <Grid><material:MaterialIcon Kind="EyeOutline" Width="18" Height="18" IsVisible="{Binding !Editor.IsPasswordVisible}"/><material:MaterialIcon Kind="EyeOffOutline" Width="18" Height="18" IsVisible="{Binding Editor.IsPasswordVisible}"/></Grid>
+            </Button>
+          </Grid>
+          <TextBlock Text="{Binding Editor.PasswordError}" Classes="error" IsVisible="{Binding Editor.PasswordError, Converter={x:Static conv:StringConverters.IsNotNullOrEmpty}}"/>
+          <Button Classes="ghost" Command="{Binding OpenEditorGeneratorCommand}" HorizontalAlignment="Left" Padding="0,8">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <material:MaterialIcon Kind="AutoFix" Width="18" Height="18" Foreground="{StaticResource FocusBrush}"/>
+              <TextBlock Text="Generate a password" Foreground="{StaticResource FocusBrush}"/>
+            </StackPanel>
+          </Button>
+        </StackPanel>
+      </StackPanel>
+    </ScrollViewer>
+    <Grid Grid.Row="1" ColumnDefinitions="Auto,*,Auto">
+      <Button Content="Cancel" Classes="ghost" Command="{Binding CancelEditingCommand}"/>
+      <Button Grid.Column="2" Content="{Binding SaveLabel}" Classes="primary" Command="{Binding SaveEntryCommand}" IsVisible="{Binding !EntryMissing}"/>
+      <Button Grid.Column="2" Content="Save as new entry" Classes="primary" Command="{Binding SaveAsNewCommand}" IsVisible="{Binding EntryMissing}"/>
+    </Grid>
+  </Grid>
+</UserControl>

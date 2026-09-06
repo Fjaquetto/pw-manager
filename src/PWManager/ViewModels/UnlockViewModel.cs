@@ -1,85 +1,88 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using PWManager.Services;
-using PWManager.Domain.DataContracts.InfraService;
-using PWManager.Infra.Services;
-using System.Security.Cryptography;
+using System;
 using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using PWManager.Enums;
+using PWManager.Services;
+using PWManager.Services.Interfaces;
 
 namespace PWManager.ViewModels;
 
-public partial class UnlockViewModel : ViewModelBase
+public partial class UnlockViewModel(IUnlockService unlockService, INavigationService navigation) : ViewModelBase
 {
-    private readonly NavigationService _navigationService;
+    [ObservableProperty]
+    private string _password = string.Empty;
 
-    [ObservableProperty] private string _password = string.Empty;
-    [ObservableProperty] private bool _isPasswordVisible;
-    [ObservableProperty] private string _errorMessage = string.Empty;
-    [ObservableProperty] private bool _hasError;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(PasswordMask), nameof(VisibilityLabel))]
+    private bool _isPasswordVisible;
 
-    public UnlockViewModel(NavigationService navigationService)
-    {
-        _navigationService = navigationService;
-    }
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasError))]
+    private string _errorMessage = string.Empty;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ButtonLabel), nameof(IsIdle))]
+    [NotifyCanExecuteChangedFor(nameof(UnlockCommand))]
+    private bool _isBusy;
+
+    public char PasswordMask => IsPasswordVisible ? '\0' : '•';
+
+    public string VisibilityLabel => IsPasswordVisible ? "Hide password" : "Show password";
+
+    public bool HasError => ErrorMessage.Length > 0;
+
+    public bool IsIdle => !IsBusy;
+
+    public string ButtonLabel => IsBusy ? "Unlocking…" : "Unlock vault";
+
+    partial void OnPasswordChanged(string value) => ErrorMessage = string.Empty;
 
     [RelayCommand]
-    private void TogglePasswordVisibility()
-    {
-        IsPasswordVisible = !IsPasswordVisible;
-    }
+    private void TogglePasswordVisibility() => IsPasswordVisible = !IsPasswordVisible;
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(IsIdle))]
     private async Task UnlockAsync()
     {
-        if (string.IsNullOrEmpty(Password))
+        if (IsBusy)
         {
-            ErrorMessage = "Please enter your master password.";
-            HasError = true;
             return;
         }
 
-        EncryptorService.EncryptorPassword = Password;
+        if (string.IsNullOrEmpty(Password))
+        {
+            ErrorMessage = "Enter your master password.";
+            return;
+        }
+
+        IsBusy = true;
+        var error = string.Empty;
 
         try
         {
-            using var scope = App.Services.CreateScope();
-            var userApp = scope.ServiceProvider.GetRequiredService<PWManager.Application.DataContracts.IUserApplication>();
-            var encryptorService = scope.ServiceProvider.GetRequiredService<IUserEncryptorService>();
+            var result = await unlockService.UnlockAsync(Password);
 
-            var users = await userApp.GetAllUsersAsync();
-            foreach (var user in users)
+            if (result == UnlockResult.Success)
             {
-                encryptorService.DecryptUser(new PWManager.Domain.Model.User
-                {
-                    Id = user.Id,
-                    Site = user.Site,
-                    Login = user.Login,
-                    Password = user.Password,
-                    CreationDate = user.CreationDate,
-                    LastUpdated = user.LastUpdated
-                });
-                break;
+                navigation.ShowMain();
             }
-
-            HasError = false;
-            ErrorMessage = string.Empty;
-            _navigationService.ShowMain();
+            else
+            {
+                error = result == UnlockResult.InvalidPassword
+                    ? "Incorrect master password. Please try again."
+                    : "Unable to open your vault. Please try again.";
+            }
         }
-        catch (CryptographicException)
+        catch (Exception)
         {
-            EncryptorService.EncryptorPassword = string.Empty;
-            ErrorMessage = "Incorrect master password. Please try again.";
-            HasError = true;
-        }
-        catch
-        {
-            EncryptorService.EncryptorPassword = string.Empty;
-            ErrorMessage = "Unable to unlock. Please try again.";
-            HasError = true;
+            error = "Unable to open your vault. Please try again.";
         }
         finally
         {
             Password = string.Empty;
+            IsPasswordVisible = false;
+            ErrorMessage = error;
+            IsBusy = false;
         }
     }
 }

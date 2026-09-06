@@ -21,7 +21,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: '10.0.x'
       
       - name: Get latest tag
         id: get_latest_tag
@@ -108,18 +108,13 @@ jobs:
         if: steps.version_bump.outputs.should_release == 'true'
         run: dotnet restore
 
-      - name: Run unit tests
+      - name: Build solution
         if: steps.version_bump.outputs.should_release == 'true'
-        run: dotnet test src/PWManager.UnitTests/PWManager.UnitTests.csproj --no-restore --verbosity normal
-      
-      - name: Run unit tests
+        run: dotnet build PWManager.sln -c Release --no-restore
+
+      - name: Run unit and UI tests
         if: steps.version_bump.outputs.should_release == 'true'
-        run: dotnet test src/PWManager.UnitTests/PWManager.UnitTests.csproj --no-restore --verbosity normal
-      
-      - name: Run unit tests
-        if: steps.version_bump.outputs.should_release == 'true'
-        run: dotnet test src/PWManager.UnitTests/PWManager.UnitTests.csproj --no-restore --verbosity normal
-      
+        run: dotnet test PWManager.sln -c Release --no-build --no-restore --verbosity normal
       - name: Publish application
         if: steps.version_bump.outputs.should_release == 'true'
         run: |
@@ -238,4 +233,3 @@ jobs:
           echo "Release v${{ steps.version_bump.outputs.new_version }} created successfully!"
           echo "Archive: ${{ steps.create_archive.outputs.archive_name }}"
           echo "Bump type: ${{ steps.version_bump.outputs.bump_type }}"
-

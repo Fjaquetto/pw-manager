@@ -1,4 +1,4 @@
-﻿using PWManager.Domain.DataContracts.Repository;
+using PWManager.Domain.DataContracts.Repository;
 using PWManager.Domain.Model;
 using PWManager.Infra.Context.SQLite;
 using System.Security.Cryptography.X509Certificates;

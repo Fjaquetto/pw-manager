@@ -1,0 +1,72 @@
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:PWManager.ViewModels" xmlns:material="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             x:Class="PWManager.Views.EntryListView" x:DataType="vm:MainViewModel">
+  <Grid RowDefinitions="Auto,Auto,Auto,*" RowSpacing="16">
+    <Grid ColumnDefinitions="*,Auto">
+      <TextBlock Text="Your vault" FontSize="20" FontWeight="SemiBold" VerticalAlignment="Center"/>
+      <TextBlock Grid.Column="1" Text="{Binding CountLabel}" Classes="caption" VerticalAlignment="Center"/>
+    </Grid>
+    <Grid Grid.Row="1" ColumnDefinitions="Auto,*" ColumnSpacing="8" IsEnabled="{Binding CanInteract}">
+      <Button Classes="ghost" Command="{Binding ToggleFiltersCommand}" Content="{Binding FilterLabel}" Padding="10,8"/>
+      <ComboBox Grid.Column="1" ItemsSource="{Binding SortOptions}" SelectedIndex="{Binding SortIndex}"
+                HorizontalAlignment="Stretch" AutomationProperties.Name="Sort entries"/>
+    </Grid>
+    <Border Grid.Row="2" Classes="panel" Padding="12" IsVisible="{Binding FiltersExpanded}" IsEnabled="{Binding CanInteract}">
+      <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="12" RowSpacing="8">
+        <StackPanel Spacing="8">
+          <TextBlock x:Name="SiteFilterLabel" Text="Site" Classes="caption"/>
+          <TextBox Text="{Binding FilterSite}" PlaceholderText="Filter by site" AutomationProperties.LabeledBy="{Binding #SiteFilterLabel}"/>
+        </StackPanel>
+        <StackPanel Grid.Column="1" Spacing="8">
+          <TextBlock x:Name="LoginFilterLabel" Text="Login" Classes="caption"/>
+          <TextBox Text="{Binding FilterLogin}" PlaceholderText="Filter by login" AutomationProperties.LabeledBy="{Binding #LoginFilterLabel}"/>
+        </StackPanel>
+        <Button Grid.Row="1" Grid.ColumnSpan="2" Command="{Binding ClearFiltersCommand}" Content="Clear filters" Classes="ghost" HorizontalAlignment="Left"/>
+      </Grid>
+    </Border>
+    <Grid Grid.Row="3">
+      <ListBox x:Name="EntriesList" Classes="entries" ItemsSource="{Binding Entries}"
+               SelectedItem="{Binding ListSelection}" IsEnabled="{Binding CanSelect}" IsVisible="{Binding ShowEntries}"
+               ScrollViewer.HorizontalScrollBarVisibility="Disabled" AutomationProperties.Name="Password entries">
+        <ListBox.ItemTemplate>
+          <DataTemplate x:DataType="vm:PasswordEntryViewModel">
+            <Grid ColumnDefinitions="40,*,40" ColumnSpacing="12">
+              <Border Width="40" Height="40" CornerRadius="10" Background="{StaticResource RaisedBrush}" VerticalAlignment="Center">
+                <TextBlock Text="{Binding Initial}" Foreground="{StaticResource FocusBrush}" FontSize="17" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+              </Border>
+              <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center">
+                <TextBlock Text="{Binding Site}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Site}"/>
+                <TextBlock Text="{Binding Login}" Classes="caption" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Login}"/>
+              </StackPanel>
+              <Button Grid.Column="2" Classes="ghost icon"
+                      Command="{Binding $parent[UserControl].((vm:MainViewModel)DataContext).CopyPasswordCommand}"
+                      CommandParameter="{Binding}" ToolTip.Tip="Copy password" AutomationProperties.Name="Copy password">
+                <material:MaterialIcon Kind="ContentCopy" Width="17" Height="17"/>
+              </Button>
+            </Grid>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+      <StackPanel IsVisible="{Binding IsLoading}" VerticalAlignment="Center" Spacing="12" Margin="24">
+        <ProgressBar IsIndeterminate="True" Height="4"/>
+        <TextBlock Text="Loading your entries…" Classes="secondary" HorizontalAlignment="Center"/>
+      </StackPanel>
+      <StackPanel IsVisible="{Binding IsVaultEmpty}" VerticalAlignment="Center" Spacing="12" Margin="20">
+        <material:MaterialIcon Kind="KeyOutline" Width="36" Height="36" Foreground="{StaticResource FocusBrush}" HorizontalAlignment="Center"/>
+        <TextBlock Text="A fresh start" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+        <TextBlock Text="Add your first entry to keep it close and secure." TextWrapping="Wrap" TextAlignment="Center" Classes="secondary"/>
+        <Button Content="New entry" Command="{Binding NewEntryCommand}" HorizontalAlignment="Center"/>
+      </StackPanel>
+      <StackPanel IsVisible="{Binding NoResults}" VerticalAlignment="Center" Spacing="12" Margin="20">
+        <TextBlock Text="No matching entries" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+        <TextBlock Text="Try another search or clear your filters." TextWrapping="Wrap" TextAlignment="Center" Classes="secondary"/>
+        <Button Content="Clear filters" Command="{Binding ClearFiltersCommand}" HorizontalAlignment="Center"/>
+      </StackPanel>
+      <StackPanel IsVisible="{Binding HasLoadError}" VerticalAlignment="Center" Spacing="12" Margin="20">
+        <TextBlock Text="Couldn't load your vault" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+        <TextBlock Text="Please try opening your entries again." TextWrapping="Wrap" TextAlignment="Center" Classes="secondary"/>
+        <Button Content="Retry" Command="{Binding RetryCommand}" HorizontalAlignment="Center"/>
+      </StackPanel>
+    </Grid>
+  </Grid>
+</UserControl>

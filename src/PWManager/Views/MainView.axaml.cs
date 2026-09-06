@@ -1,101 +1,123 @@
-﻿using Avalonia.Controls;
-using Avalonia.Input;
-using Avalonia.Interactivity;
-using PWManager.ViewModels;
 using System;
-using System.Threading.Tasks;
+using System.Linq;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Threading;
+using Avalonia.VisualTree;
+using PWManager.ViewModels;
 
 namespace PWManager.Views;
 
 public partial class MainView : Window
 {
-    private bool _newPasswordVisible;
-    private bool _generatorPasswordVisible;
+    private MainViewModel? _viewModel;
+    private bool _closeApproved;
 
     public MainView()
     {
         InitializeComponent();
+        DataContextChanged += (_, _) =>
+        {
+            if (_viewModel is not null)
+            {
+                _viewModel.FocusRequested -= FocusControl;
+                _viewModel.CloseRequested -= ApproveClose;
+            }
+
+            _viewModel = DataContext as MainViewModel;
+
+            if (_viewModel is not null)
+            {
+                _viewModel.FocusRequested += FocusControl;
+                _viewModel.CloseRequested += ApproveClose;
+            }
+
+            UpdateLayoutMode();
+        };
+        SizeChanged += (_, _) => UpdateLayoutMode();
+        AddHandler(KeyDownEvent, HandleKeyDown, Avalonia.Interactivity.RoutingStrategies.Tunnel);
     }
 
     protected override async void OnOpened(EventArgs e)
     {
         base.OnOpened(e);
-        if (DataContext is MainViewModel vm)
+        var screen = Screens.ScreenFromWindow(this);
+
+        if (screen is not null)
         {
-            await vm.LoadEntriesAsync();
+            Width = Math.Min(Width, screen.WorkingArea.Width / screen.Scaling);
+            Height = Math.Min(Height, screen.WorkingArea.Height / screen.Scaling - 40);
+        }
+
+        if (_viewModel is not null)
+        {
+            await _viewModel.LoadEntriesAsync();
         }
     }
 
-    private void ToggleNewPassword_Click(object? sender, RoutedEventArgs e)
+    private void UpdateLayoutMode()
     {
-        _newPasswordVisible = !_newPasswordVisible;
-        var box = this.FindControl<TextBox>("NewPasswordBox");
-        if (box != null)
-            box.PasswordChar = _newPasswordVisible ? '\0' : '•';
-    }
-
-    private void ToggleGeneratedPassword_Click(object? sender, RoutedEventArgs e)
-    {
-        _generatorPasswordVisible = !_generatorPasswordVisible;
-        var box = this.FindControl<TextBox>("GeneratorPasswordBox");
-        if (box != null)
-            box.PasswordChar = _generatorPasswordVisible ? '\0' : '•';
-    }
-
-    private void ToggleEntryPassword_Click(object? sender, RoutedEventArgs e)
-    {
-        if (sender is Button btn && btn.DataContext is PasswordEntryViewModel entry)
+        if (_viewModel is null)
         {
-            entry.IsPasswordVisible = !entry.IsPasswordVisible;
+            return;
+        }
+
+        _viewModel.IsCompact = Bounds.Width > 0 && Bounds.Width < 1000;
+        var workspace = this.FindControl<Grid>("Workspace")!;
+        workspace.ColumnDefinitions = new(_viewModel.IsCompact ? "*" : "360,24,*");
+        Grid.SetColumn(this.FindControl<Border>("PaneRegion")!, _viewModel.IsCompact ? 0 : 2);
+    }
+
+    private void HandleKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.F && e.KeyModifiers == KeyModifiers.Control && _viewModel?.CanInteract == true)
+        {
+            FocusControl("SearchBox");
+            e.Handled = true;
         }
     }
 
-    private void DeleteEntry_Click(object? sender, RoutedEventArgs e)
+    private void FocusControl(string name) => Dispatcher.UIThread.Post(() =>
     {
-        if (sender is Button btn && btn.DataContext is PasswordEntryViewModel entry
-            && DataContext is MainViewModel vm)
+        var control = this.GetVisualDescendants().OfType<Control>().FirstOrDefault(c => c.Name == name);
+
+        if (control?.IsEffectivelyVisible == true && control.IsEffectivelyEnabled)
         {
-            foreach (var item in vm.Entries)
-                item.IsDeletePending = false;
-            entry.IsDeletePending = true;
+            control.Focus();
+
+            if (control is TextBox textBox && name == "SearchBox")
+            {
+                textBox.SelectAll();
+            }
         }
+    }, DispatcherPriority.Loaded);
+
+    private void ApproveClose()
+    {
+        _closeApproved = true;
+        Close();
     }
 
-    private void ConfirmDelete_Click(object? sender, RoutedEventArgs e)
+    protected override void OnClosing(WindowClosingEventArgs e)
     {
-        if (sender is Button btn && btn.DataContext is PasswordEntryViewModel entry
-            && DataContext is MainViewModel vm)
+        if (!_closeApproved && _viewModel is not null && !_viewModel.RequestClose())
         {
-            vm.DeleteEntryCommand.Execute(entry);
+            e.Cancel = true;
         }
+
+        base.OnClosing(e);
     }
 
-    private async void CopyLogin_Tapped(object? sender, RoutedEventArgs e)
+    protected override void OnClosed(EventArgs e)
     {
-        if (sender is TextBlock tb && tb.DataContext is PasswordEntryViewModel entry
-            && DataContext is MainViewModel vm)
-            await vm.CopyTextAsync(entry.Login, "Login");
-    }
-
-    private async void CopyPassword_Tapped(object? sender, RoutedEventArgs e)
-    {
-        if (sender is TextBlock tb && tb.DataContext is PasswordEntryViewModel entry
-            && DataContext is MainViewModel vm)
-            await vm.CopyTextAsync(entry.Password, "Password");
-    }
-
-    private void EditEntry_Click(object? sender, RoutedEventArgs e)
-    {
-        if (sender is Button btn && btn.DataContext is PasswordEntryViewModel entry
-            && DataContext is MainViewModel vm)
+        if (_viewModel is not null)
         {
-            vm.EditEntryCommand.Execute(entry);
+            _viewModel.FocusRequested -= FocusControl;
+            _viewModel.CloseRequested -= ApproveClose;
+            _viewModel.Dispose();
         }
-    }
 
-    private void Header_PointerPressed(object? sender, PointerPressedEventArgs e)
-    {
-        if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
-            BeginMoveDrag(e);
+        base.OnClosed(e);
     }
 }
