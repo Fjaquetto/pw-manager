@@ -1,454 +1,117 @@
-﻿<Window xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="using:PWManager.ViewModels"
+<Window xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:PWManager.ViewModels" xmlns:views="using:PWManager.Views"
         xmlns:material="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
-        x:Class="PWManager.Views.MainView"
-        x:DataType="vm:MainViewModel"
-        Title=""
-        Width="1100"
-        Height="720"
-        MinWidth="900"
-        MinHeight="600"
-        WindowStartupLocation="CenterScreen"
-        ExtendClientAreaToDecorationsHint="True"
-        Background="{StaticResource AppBgBrush}">
-
-  <Grid RowDefinitions="Auto,*,Auto">
-
-    <!-- ===== HEADER ===== -->
-    <Border Grid.Row="0"
-            Background="{StaticResource HeaderBgBrush}"
-            BorderBrush="{StaticResource CardBorderBrush}" BorderThickness="0,0,0,1"
-            Padding="16,10,200,10"
-            PointerPressed="Header_PointerPressed">
-      <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto">
-
-        <!-- Logo + Title -->
-        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-          <Border Width="32" Height="32" CornerRadius="8"
-                  Background="{StaticResource SidebarSelectedBrush}"
-                  BorderBrush="{StaticResource AccentBlueBrush}" BorderThickness="1">
-            <material:MaterialIcon Kind="Shield" Width="16" Height="16" Foreground="{StaticResource AccentBlueBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-          </Border>
-          <TextBlock Text="PWManager" FontSize="16" FontWeight="Bold"
-                     Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
-        </StackPanel>
-
-        <!-- Status -->
-        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6"
-                    VerticalAlignment="Center" Margin="20,0">
-          <material:MaterialIcon Kind="Lock" Width="12" Height="12" Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center"/>
-          <TextBlock Text="Local Encrypted Storage" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center"/>
-          <Ellipse Width="7" Height="7" Fill="{StaticResource GreenDotBrush}" VerticalAlignment="Center"/>
-        </StackPanel>
-
-        <!-- Search -->
-        <Border Grid.Column="3"
-                Background="{StaticResource InputBgBrush}"
-                BorderBrush="{StaticResource InputBorderBrush}" BorderThickness="1"
-                CornerRadius="8" Padding="10,0" Width="240" VerticalAlignment="Center">
-          <Grid ColumnDefinitions="Auto,*">
-            <material:MaterialIcon Grid.Column="0" Kind="Magnify" Width="13" Height="13" Foreground="{StaticResource TextMutedBrush}"
-                       VerticalAlignment="Center" Margin="0,0,6,0"/>
-            <TextBox Grid.Column="1" Text="{Binding SearchGlobal}" Watermark="Search entries..."
-                     BorderThickness="0" Background="Transparent"
-                     Foreground="{StaticResource TextPrimaryBrush}" Padding="0,8" FontSize="12"/>
-          </Grid>
-        </Border>
-      </Grid>
-    </Border>
-
-    <!-- ===== MAIN CONTENT ===== -->
-    <Grid Grid.Row="1" ColumnDefinitions="60,*">
-
-      <!-- Sidebar -->
-      <Border Grid.Column="0"
-              Background="{StaticResource SidebarBgBrush}"
-              BorderBrush="{StaticResource CardBorderBrush}" BorderThickness="0,0,1,0"
-              Padding="8,12">
-        <StackPanel Spacing="4">
-          <Border CornerRadius="8" Background="{StaticResource SidebarSelectedBrush}" Width="42" Height="42"
-                  HorizontalAlignment="Center" ToolTip.Tip="Home">
-            <material:MaterialIcon Kind="Home" Width="22" Height="22" Foreground="{StaticResource AccentBlueBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-          </Border>
-        </StackPanel>
-      </Border>
-
-      <!-- Right content -->
-      <Grid Grid.Column="1" RowDefinitions="Auto,Auto,*">
-      <Border Grid.Row="0" Padding="16,12,16,4">
-        <StackPanel Spacing="12">
-
-          <!-- ===== ADD NEW ENTRY CARD ===== -->
-          <Border Classes="card">
-            <StackPanel Spacing="12">
-              <!-- Normal mode title -->
-              <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding !IsEditingMode}">
-                <material:MaterialIcon Kind="PlusCircle" Width="18" Height="18" Foreground="{StaticResource AccentBlueBrush}" VerticalAlignment="Center"/>
-                <TextBlock Text="Add New Entry" FontSize="15" FontWeight="SemiBold"
-                           Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
-              </StackPanel>
-              <!-- Edit mode title -->
-              <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding IsEditingMode}">
-                <material:MaterialIcon Kind="Pencil" Width="18" Height="18" Foreground="{StaticResource AccentBlueBrush}" VerticalAlignment="Center"/>
-                <TextBlock Text="Editing Entry" FontSize="15" FontWeight="SemiBold"
-                           Foreground="{StaticResource AccentBlueBrush}" VerticalAlignment="Center"/>
-                <Border Background="{StaticResource SidebarSelectedBrush}" CornerRadius="4" Padding="8,3"
-                        BorderBrush="{StaticResource AccentBlueBrush}" BorderThickness="1">
-                  <TextBlock Text="{Binding EditingLabel}" FontSize="12"
-                             Foreground="{StaticResource AccentBlueBrush}" VerticalAlignment="Center"/>
-                </Border>
-              </StackPanel>
-
-              <!-- Fields Row -->
-              <Grid ColumnDefinitions="*,*,*,Auto" ColumnSpacing="12">
-                <!-- Site -->
-                <StackPanel Grid.Column="0" Spacing="6">
-                  <TextBlock Text="Site" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}"/>
-                  <Border Background="{StaticResource InputBgBrush}" BorderBrush="{StaticResource InputBorderBrush}" BorderThickness="1" CornerRadius="8" Padding="10,0">
-                    <Grid ColumnDefinitions="Auto,*">
-                      <material:MaterialIcon Grid.Column="0" Kind="Web" Width="13" Height="13" Foreground="{StaticResource TextMutedBrush}"
-                                 VerticalAlignment="Center" Margin="0,0,6,0"/>
-                      <TextBox Grid.Column="1" Text="{Binding NewSite}" Watermark="e.g. example.com"
-                               BorderThickness="0" Background="Transparent"
-                               Foreground="{StaticResource TextPrimaryBrush}" Padding="0,8" FontSize="13"/>
-                    </Grid>
-                  </Border>
-                </StackPanel>
-
-                <!-- Login -->
-                <StackPanel Grid.Column="1" Spacing="6">
-                  <TextBlock Text="Login" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}"/>
-                  <Border Background="{StaticResource InputBgBrush}" BorderBrush="{StaticResource InputBorderBrush}" BorderThickness="1" CornerRadius="8" Padding="10,0">
-                    <Grid ColumnDefinitions="Auto,*">
-                      <material:MaterialIcon Grid.Column="0" Kind="Account" Width="13" Height="13" Foreground="{StaticResource TextMutedBrush}"
-                                 VerticalAlignment="Center" Margin="0,0,6,0"/>
-                      <TextBox Grid.Column="1" Text="{Binding NewLogin}" Watermark="e.g. user@example.com"
-                               BorderThickness="0" Background="Transparent"
-                               Foreground="{StaticResource TextPrimaryBrush}" Padding="0,8" FontSize="13"/>
-                    </Grid>
-                  </Border>
-                </StackPanel>
-
-                <!-- Password -->
-                <StackPanel Grid.Column="2" Spacing="6">
-                  <TextBlock Text="Password" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}"/>
-                  <Border Background="{StaticResource InputBgBrush}" BorderBrush="{StaticResource InputBorderBrush}" BorderThickness="1" CornerRadius="8" Padding="10,0">
-                    <Grid ColumnDefinitions="Auto,*,Auto">
-                      <material:MaterialIcon Grid.Column="0" Kind="Lock" Width="13" Height="13" Foreground="{StaticResource TextMutedBrush}"
-                                 VerticalAlignment="Center" Margin="0,0,6,0"/>
-                      <TextBox Grid.Column="1"
-                               Name="NewPasswordBox"
-                               Text="{Binding NewPassword}"
-                               PasswordChar="•"
-                               Watermark="Enter password"
-                               BorderThickness="0" Background="Transparent"
-                               Foreground="{StaticResource TextPrimaryBrush}" Padding="0,8" FontSize="13"/>
-                      <Button Grid.Column="2" Classes="icon"
-                              Click="ToggleNewPassword_Click">
-                        <material:MaterialIcon Kind="Eye" Width="14" Height="14" Foreground="{StaticResource TextSecondaryBrush}"/>
-                      </Button>
-                    </Grid>
-                  </Border>
-                </StackPanel>
-
-                <!-- Use Generated Password Button -->
-                <Button Grid.Column="3" Classes="secondary"
-                        Command="{Binding UseGeneratedPasswordCommand}"
-                        VerticalAlignment="Bottom" Height="40"
-                        ToolTip.Tip="Fill from Password Generator above">
-                  <StackPanel Orientation="Horizontal" Spacing="6">
-                    <material:MaterialIcon Kind="Flash" Width="13" Height="13"/>
-                    <TextBlock Text="Use Generated" FontSize="12"/>
-                  </StackPanel>
-                </Button>
-              </Grid>
-
-              <!-- Action Buttons Row -->
-              <StackPanel Spacing="6">
-                <TextBlock IsVisible="{Binding EntryStatusIsSuccess}"
-                           Text="{Binding EntryStatusMessage}"
-                           FontSize="12" HorizontalAlignment="Center"
-                           Foreground="{StaticResource SuccessBrush}"/>
-                <TextBlock IsVisible="{Binding EntryStatusIsError}"
-                           Text="{Binding EntryStatusMessage}"
-                           FontSize="12" HorizontalAlignment="Center"
-                           Foreground="{StaticResource DangerBrush}"/>
-                <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
-                  <Button Classes="secondary" Command="{Binding ClearEntryCommand}" Width="100">
-                    <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
-                      <material:MaterialIcon Kind="Delete" Width="13" Height="13" IsVisible="{Binding !IsEditingMode}"/>
-                      <material:MaterialIcon Kind="Close" Width="13" Height="13" IsVisible="{Binding IsEditingMode}"/>
-                      <TextBlock Text="{Binding ClearButtonText}"/>
-                    </StackPanel>
-                  </Button>
-                  <Button Classes="primary" Command="{Binding SaveEntryCommand}" Width="130">
-                    <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
-                      <material:MaterialIcon Kind="ContentSave" Width="13" Height="13"/>
-                      <TextBlock Text="{Binding SaveButtonText}" FontWeight="SemiBold"/>
-                    </StackPanel>
-                  </Button>
-                </StackPanel>
-              </StackPanel>
+        x:Class="PWManager.Views.MainView" x:DataType="vm:MainViewModel" Classes.compact="{Binding IsCompact}"
+        Title="PWManager" Width="1180" Height="780" MinWidth="760" MinHeight="480"
+        WindowStartupLocation="CenterScreen" WindowDecorations="Full">
+  <Window.KeyBindings>
+    <KeyBinding Gesture="Ctrl+N" Command="{Binding NewEntryCommand}"/>
+    <KeyBinding Gesture="Ctrl+S" Command="{Binding SaveEntryCommand}"/>
+    <KeyBinding Gesture="Escape" Command="{Binding EscapeCommand}"/>
+  </Window.KeyBindings>
+  <Grid RowDefinitions="*,Auto">
+    <Grid RowDefinitions="Auto,*,Auto" IsEnabled="{Binding !HasModal}">
+      <Border BorderBrush="{StaticResource LineBrush}" BorderThickness="0,0,0,1" Padding="24,20" Background="{StaticResource SurfaceBrush}">
+        <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="16" IsEnabled="{Binding CanInteract}">
+          <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center" Margin="0,0,16,0">
+            <Border Width="40" Height="40" CornerRadius="12" Background="{StaticResource AccentSurfaceBrush}">
+              <material:MaterialIcon Kind="ShieldKey" Width="23" Height="23" Foreground="{StaticResource FocusBrush}"/>
+            </Border>
+            <StackPanel Spacing="3" VerticalAlignment="Center">
+              <TextBlock Text="PWManager" FontSize="16" FontWeight="SemiBold"/>
+              <TextBlock Text="LOCAL VAULT" Classes="caption" FontSize="10" LetterSpacing="1.4"/>
             </StackPanel>
-          </Border>
-
-          <!-- ===== PASSWORD GENERATOR CARD ===== -->
-          <Border Classes="card">
-            <StackPanel Spacing="12">
-              <StackPanel Orientation="Horizontal" Spacing="8">
-                <material:MaterialIcon Kind="Key" Width="16" Height="16" Foreground="{StaticResource AccentBlueBrush}" VerticalAlignment="Center"/>
-                <TextBlock Text="Password Generator" FontSize="15" FontWeight="SemiBold"
-                           Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
-              </StackPanel>
-
-              <!-- Generated password + Generate + Copy + Strength -->
-              <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto" ColumnSpacing="10">
-                <!-- Generated Password Field -->
-                <Border Grid.Column="0" Background="{StaticResource InputBgBrush}"
-                        BorderBrush="{StaticResource InputBorderBrush}"
-                        BorderThickness="1" CornerRadius="8" Padding="10,0">
-                  <Grid ColumnDefinitions="*,Auto">
-                    <TextBox Grid.Column="0"
-                             Name="GeneratorPasswordBox"
-                             Text="{Binding Generator.GeneratedPassword}"
-                             PasswordChar="•"
-                             BorderThickness="0" Background="Transparent"
-                             Foreground="{StaticResource TextPrimaryBrush}"
-                             Padding="0,8" FontSize="13" IsReadOnly="True"
-                             FontFamily="Consolas, Courier New, monospace"/>
-                    <Button Grid.Column="1" Classes="icon" Click="ToggleGeneratedPassword_Click">
-                      <material:MaterialIcon Kind="Eye" Width="14" Height="14" Foreground="{StaticResource TextSecondaryBrush}"/>
-                    </Button>
-                  </Grid>
-                </Border>
-
-                <!-- Generate Button -->
-                <Button Grid.Column="1" Classes="primary"
-                        Command="{Binding Generator.GenerateCommand}"
-                        Height="38">
-                  <StackPanel Orientation="Horizontal" Spacing="6">
-                    <material:MaterialIcon Kind="Refresh" Width="14" Height="14"/>
-                    <TextBlock Text="Generate" FontWeight="SemiBold" FontSize="12"/>
-                  </StackPanel>
-                </Button>
-
-                <!-- Copy Button -->
-                <Button Grid.Column="2" Classes="secondary"
-                        Command="{Binding Generator.CopyCommand}"
-                        Height="38">
-                  <StackPanel Orientation="Horizontal" Spacing="6">
-                    <material:MaterialIcon Kind="ContentCopy" Width="14" Height="14"/>
-                    <TextBlock Text="Copy" FontSize="12"/>
-                  </StackPanel>
-                </Button>
-
-                <!-- Strength Indicator -->
-                <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="6"
-                            VerticalAlignment="Center" Margin="10,0,0,0">
-                  <TextBlock Text="Strength" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}"
-                             VerticalAlignment="Center"/>
-                  <StackPanel Orientation="Horizontal" Spacing="3">
-                    <Border Width="24" Height="6" CornerRadius="3"
-                            Background="{Binding Generator.StrengthBrush}"
-                            Opacity="{Binding Generator.Bar1Opacity}"/>
-                    <Border Width="24" Height="6" CornerRadius="3"
-                            Background="{Binding Generator.StrengthBrush}"
-                            Opacity="{Binding Generator.Bar2Opacity}"/>
-                    <Border Width="24" Height="6" CornerRadius="3"
-                            Background="{Binding Generator.StrengthBrush}"
-                            Opacity="{Binding Generator.Bar3Opacity}"/>
-                    <Border Width="24" Height="6" CornerRadius="3"
-                            Background="{Binding Generator.StrengthBrush}"
-                            Opacity="{Binding Generator.Bar4Opacity}"/>
-                    <Border Width="24" Height="6" CornerRadius="3"
-                            Background="{Binding Generator.StrengthBrush}"
-                            Opacity="{Binding Generator.Bar5Opacity}"/>
-                  </StackPanel>
-                  <TextBlock Text="{Binding Generator.StrengthLabel}" FontSize="12" FontWeight="SemiBold"
-                             Foreground="{Binding Generator.StrengthBrush}" VerticalAlignment="Center"/>
-                </StackPanel>
-
-                <!-- Use in Entry -->
-                <Button Grid.Column="4" Classes="secondary"
-                        Command="{Binding UseGeneratedPasswordCommand}"
-                        Height="38" ToolTip.Tip="Use in new entry">
-                  <StackPanel Orientation="Horizontal" Spacing="4">
-                    <material:MaterialIcon Kind="ArrowRight" Width="12" Height="12"/>
-                    <TextBlock Text="Use" FontSize="12"/>
-                  </StackPanel>
-                </Button>
-              </Grid>
-
-              <!-- Length + Checkboxes -->
-              <Grid ColumnDefinitions="Auto,Auto,*,Auto,Auto,Auto,Auto" ColumnSpacing="16">
-                <TextBlock Grid.Column="0" Text="Length" FontSize="12"
-                           Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center"/>
-                <Border Grid.Column="1" Background="{StaticResource SidebarSelectedBrush}" CornerRadius="4" Padding="8,4"
-                        VerticalAlignment="Center">
-                  <TextBlock Text="{Binding Generator.Length}" FontSize="13" FontWeight="SemiBold"
-                             Foreground="{StaticResource TextPrimaryBrush}"/>
-                </Border>
-                <Slider Grid.Column="2" Minimum="8" Maximum="48"
-                        Value="{Binding Generator.Length}"
-                        VerticalAlignment="Center"/>
-                <CheckBox Grid.Column="3" Content="Uppercase" IsChecked="{Binding Generator.UseUppercase}"/>
-                <CheckBox Grid.Column="4" Content="Lowercase" IsChecked="{Binding Generator.UseLowercase}"/>
-                <CheckBox Grid.Column="5" Content="Numbers" IsChecked="{Binding Generator.UseNumbers}"/>
-                <CheckBox Grid.Column="6" Content="Symbols" IsChecked="{Binding Generator.UseSymbols}"/>
-              </Grid>
-            </StackPanel>
-          </Border>
-
-          <!-- ===== COMPACT FILTER STRIP ===== -->
-
-        </StackPanel>
-      </Border>
-
-      <!-- ===== FILTER STRIP (always visible, pinned above grid) ===== -->
-      <Grid Grid.Row="1" ColumnDefinitions="*,*,Auto" ColumnSpacing="10" Margin="16,4,16,4">
-        <!-- Site Filter -->
-        <Border Grid.Column="0" Background="{StaticResource InputBgBrush}"
-                BorderBrush="{StaticResource InputBorderBrush}" BorderThickness="1"
-                CornerRadius="8" Padding="10,0">
-          <Grid ColumnDefinitions="Auto,*">
-            <material:MaterialIcon Grid.Column="0" Kind="Magnify" Width="13" Height="13" Foreground="{StaticResource TextMutedBrush}"
-                       VerticalAlignment="Center" Margin="0,0,6,0"/>
-            <TextBox Grid.Column="1" Text="{Binding FilterSite}" Watermark="Filter by site..."
-                     BorderThickness="0" Background="Transparent"
-                     Foreground="{StaticResource TextPrimaryBrush}" Padding="0,8" FontSize="13"/>
-          </Grid>
-        </Border>
-
-        <!-- Login Filter -->
-        <Border Grid.Column="1" Background="{StaticResource InputBgBrush}"
-                BorderBrush="{StaticResource InputBorderBrush}" BorderThickness="1"
-                CornerRadius="8" Padding="10,0">
-          <Grid ColumnDefinitions="Auto,*">
-            <material:MaterialIcon Grid.Column="0" Kind="Account" Width="13" Height="13" Foreground="{StaticResource TextMutedBrush}"
-                       VerticalAlignment="Center" Margin="0,0,6,0"/>
-            <TextBox Grid.Column="1" Text="{Binding FilterLogin}" Watermark="Filter by login..."
-                     BorderThickness="0" Background="Transparent"
-                     Foreground="{StaticResource TextPrimaryBrush}" Padding="0,8" FontSize="13"/>
-          </Grid>
-        </Border>
-
-        <!-- Clear Filters -->
-        <Button Grid.Column="2" Classes="secondary"
-                Command="{Binding ClearFiltersCommand}"
-                Height="40">
-          <StackPanel Orientation="Horizontal" Spacing="6">
-            <material:MaterialIcon Kind="FilterOff" Width="14" Height="14"/>
-            <TextBlock Text="Clear Filters" FontSize="12"/>
           </StackPanel>
-        </Button>
-      </Grid>
-
-      <!-- ===== DATA GRID fills remaining height ===== -->
-      <Border Grid.Row="2" CornerRadius="12"
-              BorderBrush="{StaticResource CardBorderBrush}" BorderThickness="1"
-              Background="{StaticResource CardBgBrush}"
-              ClipToBounds="True"
-              Margin="16,4,16,12">
-        <DataGrid Name="EntriesGrid"
-                  ItemsSource="{Binding Entries}"
-                  AutoGenerateColumns="False">
-          <DataGrid.Columns>
-            <DataGridTextColumn Header="Site" Binding="{Binding Site}" Width="180"/>
-            <DataGridTemplateColumn Header="Login" Width="200">
-              <DataGridTemplateColumn.CellTemplate>
-                <DataTemplate x:DataType="vm:PasswordEntryViewModel">
-                  <TextBlock Text="{Binding Login}"
-                             VerticalAlignment="Center" Padding="12,0"
-                             Cursor="Hand" ToolTip.Tip="Click to copy"
-                             Tapped="CopyLogin_Tapped"/>
-                </DataTemplate>
-              </DataGridTemplateColumn.CellTemplate>
-            </DataGridTemplateColumn>
-            <DataGridTemplateColumn Header="Password" Width="160">
-              <DataGridTemplateColumn.CellTemplate>
-                <DataTemplate x:DataType="vm:PasswordEntryViewModel">
-                  <TextBlock Text="{Binding DisplayPassword}"
-                             VerticalAlignment="Center" Padding="12,0"
-                             FontFamily="Consolas, Courier New, monospace"
-                             Cursor="Hand" ToolTip.Tip="Click to copy"
-                             Tapped="CopyPassword_Tapped"/>
-                </DataTemplate>
-              </DataGridTemplateColumn.CellTemplate>
-            </DataGridTemplateColumn>
-            <DataGridTextColumn Header="Creation Date" Binding="{Binding CreationDate, StringFormat='MMM d, yyyy HH:mm'}" Width="160"/>
-            <DataGridTextColumn Header="Last Updated" Binding="{Binding LastUpdated, StringFormat='MMM d, yyyy HH:mm'}" Width="160"/>
-            <DataGridTemplateColumn Header="" Width="120">
-              <DataGridTemplateColumn.CellTemplate>
-                <DataTemplate x:DataType="vm:PasswordEntryViewModel">
-                  <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="2">
-                    <Button Classes="icon" Click="ToggleEntryPassword_Click"
-                            ToolTip.Tip="Show/hide password">
-                      <material:MaterialIcon Kind="Eye" Width="14" Height="14" Foreground="{StaticResource TextSecondaryBrush}"/>
-                    </Button>
-                    <Button Classes="icon" Click="EditEntry_Click"
-                            ToolTip.Tip="Edit entry">
-                      <material:MaterialIcon Kind="Pencil" Width="14" Height="14" Foreground="{StaticResource TextSecondaryBrush}"/>
-                    </Button>
-                    <Button Classes="icon" Click="DeleteEntry_Click"
-                            IsVisible="{Binding !IsDeletePending}"
-                            ToolTip.Tip="Delete entry">
-                      <material:MaterialIcon Kind="Delete" Width="14" Height="14" Foreground="{StaticResource TextSecondaryBrush}"/>
-                    </Button>
-                    <Button Classes="icon" Click="ConfirmDelete_Click"
-                            IsVisible="{Binding IsDeletePending}"
-                            ToolTip.Tip="Confirm delete">
-                      <material:MaterialIcon Kind="Check" Width="14" Height="14" Foreground="{StaticResource DangerBrush}"/>
-                    </Button>
-                  </StackPanel>
-                </DataTemplate>
-              </DataGridTemplateColumn.CellTemplate>
-            </DataGridTemplateColumn>
-          </DataGrid.Columns>
-        </DataGrid>
+          <TextBox x:Name="SearchBox" Grid.Column="1" Text="{Binding SearchGlobal}"
+                   PlaceholderText="Search entries…"
+                   AutomationProperties.Name="Search entries" AutomationProperties.AcceleratorKey="Ctrl+F"
+                   VerticalAlignment="Center"/>
+          <Button x:Name="OpenGenerator" Grid.Column="2" Classes="ghost" Content="Generator" Command="{Binding OpenGeneratorCommand}"/>
+          <Button Grid.Column="3" Classes="primary" Content="+  New entry" Command="{Binding NewEntryCommand}"
+                  AutomationProperties.AcceleratorKey="Ctrl+N"/>
+        </Grid>
       </Border>
+      <Grid x:Name="Workspace" Grid.Row="1" ColumnDefinitions="360,24,*">
+        <views:EntryListView x:Name="ListRegion" Grid.Column="0" IsVisible="{Binding ShowList}"/>
+        <Border x:Name="PaneRegion" Grid.Column="2" Classes="panel" IsVisible="{Binding ShowPane}">
+          <Grid RowDefinitions="Auto,*" RowSpacing="12">
+            <Button x:Name="BackButton" Grid.Row="0" Classes="ghost" Content="←  Back to entries" Command="{Binding BackToEntriesCommand}"
+                    HorizontalAlignment="Left" IsVisible="{Binding IsCompact}" Padding="0,4" IsEnabled="{Binding CanInteract}"/>
+            <Grid Grid.Row="1" IsEnabled="{Binding CanInteract}">
+              <views:EntryDetailsView IsVisible="{Binding ShowDetails}"/>
+              <views:EntryEditorView IsVisible="{Binding IsEditorOpen}"/>
+              <StackPanel IsVisible="{Binding ShowWelcome}" VerticalAlignment="Center" HorizontalAlignment="Center"
+                          MaxWidth="320" Spacing="16">
+                <Border Width="72" Height="72" CornerRadius="24" Background="{StaticResource AccentSurfaceBrush}" HorizontalAlignment="Center">
+                  <material:MaterialIcon Kind="ShieldKeyOutline" Width="34" Height="34" Foreground="{StaticResource FocusBrush}"/>
+                </Border>
+                <TextBlock Text="Everything in its place" Classes="heading" TextAlignment="Center" TextWrapping="Wrap"/>
+                <TextBlock Text="Select an entry to see its details, or add a password to your vault."
+                           Classes="secondary" TextWrapping="Wrap" TextAlignment="Center" LineHeight="22"/>
+                <Button Content="Create an entry" Command="{Binding NewEntryCommand}" HorizontalAlignment="Center" Margin="0,8,0,0"/>
+              </StackPanel>
+            </Grid>
+          </Grid>
+        </Border>
       </Grid>
+      <Border Grid.Row="2" IsVisible="{Binding SavedEntryHidden}" Background="{StaticResource RaisedBrush}" Padding="24,8">
+        <Grid ColumnDefinitions="*,Auto">
+          <TextBlock Text="The selected entry is hidden by your filters." Classes="secondary" VerticalAlignment="Center" TextWrapping="Wrap"/>
+          <Button Grid.Column="1" Content="Clear filters" Classes="ghost" Command="{Binding ClearFiltersCommand}"/>
+        </Grid>
+      </Border>
     </Grid>
 
-    <!-- ===== COPY TOAST NOTIFICATION ===== -->
-    <Border Grid.Row="1"
-            ZIndex="100"
-            IsVisible="{Binding ShowCopyToast}"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Bottom"
-            Margin="0,0,0,16"
-            Background="{StaticResource AppBg2Brush}"
-            BorderBrush="{StaticResource AccentBlueBrush}"
-            BorderThickness="1"
-            CornerRadius="10"
-            Padding="16,10">
-      <StackPanel Orientation="Horizontal" Spacing="10">
-        <material:MaterialIcon Kind="CheckCircle" Width="16" Height="16"
-                               Foreground="{StaticResource AccentBlueBrush}"
-                               VerticalAlignment="Center"/>
-        <TextBlock Text="{Binding CopyToastMessage}" FontSize="13"
-                   Foreground="{StaticResource TextPrimaryBrush}"
-                   VerticalAlignment="Center"/>
-      </StackPanel>
+    <Border x:Name="GeneratorLayer" Background="#B30B1020" IsVisible="{Binding IsGeneratorOpen}" Padding="24"
+            KeyboardNavigation.TabNavigation="Cycle">
+      <Border Classes="dialog" Width="540" MaxHeight="650" HorizontalAlignment="Center" VerticalAlignment="Center">
+        <views:PasswordGeneratorView/>
+      </Border>
     </Border>
-
-    <!-- ===== FOOTER ===== -->
-    <Border Grid.Row="2"
-            Background="{StaticResource HeaderBgBrush}"
-            BorderBrush="{StaticResource CardBorderBrush}" BorderThickness="0,1,0,0"
-            Padding="20,10">
-      <Grid ColumnDefinitions="*,Auto">
-        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-          <material:MaterialIcon Kind="Lock" Width="12" Height="12" Foreground="{StaticResource TextMutedBrush}"/>
-          <TextBlock Text="Your data is encrypted and stored locally on this device."
-                     FontSize="12" Foreground="{StaticResource TextMutedBrush}"/>
+    <Border x:Name="DeleteLayer" Background="#B30B1020" IsVisible="{Binding IsDeletePending}" Padding="24"
+            KeyboardNavigation.TabNavigation="Cycle">
+      <Border Classes="dialog" Width="440" HorizontalAlignment="Center" VerticalAlignment="Center">
+        <StackPanel Spacing="16" IsEnabled="{Binding !IsBusy}">
+          <TextBlock Text="Delete this entry?" Classes="heading"/>
+          <TextBlock Text="{Binding SelectedEntry.Site}" FontWeight="SemiBold" TextWrapping="Wrap"/>
+          <TextBlock Text="{Binding SelectedEntry.Login}" Classes="secondary" TextWrapping="Wrap"/>
+          <TextBlock Text="This permanently removes the entry from your vault." Classes="secondary" TextWrapping="Wrap"/>
+          <StackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Right" Margin="0,8,0,0">
+            <Button x:Name="CancelDelete" Content="Cancel" Command="{Binding CancelDeleteCommand}"/>
+            <Button Content="Delete entry" Classes="danger" Command="{Binding ConfirmDeleteCommand}"/>
+          </StackPanel>
         </StackPanel>
-        <TextBlock Grid.Column="1"
-                   Text="{Binding EntryCount, StringFormat='{}{0} entries'}"
-                   FontSize="12" Foreground="{StaticResource TextSecondaryBrush}"
-                   VerticalAlignment="Center"/>
+      </Border>
+    </Border>
+    <Border x:Name="DiscardLayer" Background="#B30B1020" IsVisible="{Binding IsDiscardPending}" Padding="24"
+            KeyboardNavigation.TabNavigation="Cycle">
+      <Border Classes="dialog" Width="440" HorizontalAlignment="Center" VerticalAlignment="Center">
+        <StackPanel Spacing="16">
+          <TextBlock Text="Discard your changes?" Classes="heading"/>
+          <TextBlock Text="Your changes haven't been saved. You can keep editing or discard them."
+                     Classes="secondary" TextWrapping="Wrap"/>
+          <StackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Right" Margin="0,8,0,0">
+            <Button x:Name="KeepEditing" Content="Keep editing" Command="{Binding KeepEditingCommand}"/>
+            <Button Content="Discard changes" Classes="danger" Command="{Binding DiscardChangesCommand}"/>
+          </StackPanel>
+        </StackPanel>
+      </Border>
+    </Border>
+    <Border Grid.Row="1" IsVisible="{Binding Notification.IsVisible}" Background="{StaticResource RaisedBrush}"
+            BorderBrush="{StaticResource LineBrush}" BorderThickness="1" CornerRadius="12"
+            HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="24,0,24,16" Padding="16,8" MaxWidth="650">
+      <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+        <material:MaterialIcon Kind="CheckCircleOutline" Width="20" Height="20" Foreground="{StaticResource SuccessBrush}"
+                               IsVisible="{Binding !Notification.IsError}"/>
+        <material:MaterialIcon Kind="AlertCircleOutline" Width="20" Height="20" Foreground="{StaticResource DangerBrush}"
+                               IsVisible="{Binding Notification.IsError}"/>
+        <TextBlock Grid.Column="1" Text="{Binding Notification.Message}" TextWrapping="Wrap" VerticalAlignment="Center"
+                   AutomationProperties.LiveSetting="Polite"/>
+        <Button Grid.Column="2" Classes="ghost icon" Command="{Binding Notification.DismissCommand}"
+                AutomationProperties.Name="Dismiss notification">
+          <material:MaterialIcon Kind="Close" Width="16" Height="16"/>
+        </Button>
       </Grid>
     </Border>
-
   </Grid>
 </Window>

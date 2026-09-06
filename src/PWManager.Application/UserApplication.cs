@@ -1,4 +1,4 @@
-﻿using PWManager.Application.DataContracts;
+using PWManager.Application.DataContracts;
 using PWManager.Domain.DataContracts.Repository;
 using PWManager.Domain.Model;
 

@@ -1,4 +1,4 @@
-﻿namespace PWManager.ViewModels;
+namespace PWManager.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {

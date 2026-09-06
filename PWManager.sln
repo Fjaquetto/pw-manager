@@ -1,7 +1,7 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
-VisualStudioVersion = 18.5.11723.231 stable
+VisualStudioVersion = 18.5.11723.231
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "0 - Presentation", "0 - Presentation", "{5EDA42A1-140C-46DA-B2C0-D8D504790FBA}"
 EndProject
@@ -22,6 +22,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "4 - UnitTests", "4 - UnitTests", "{BC2DA1FE-8FF6-83D8-D910-721E4A223DFD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PWManager.UnitTests", "src\PWManager.UnitTests\PWManager.UnitTests.csproj", "{6CEF061D-3D7D-46EB-927D-65AF1F1CD6DA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PWManager.UITests", "src\PWManager.UITests\PWManager.UITests.csproj", "{BEEFA6E8-E19C-4434-AE38-72DE854BE2AB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -93,6 +95,18 @@ Global
 		{6CEF061D-3D7D-46EB-927D-65AF1F1CD6DA}.Release|x64.Build.0 = Release|Any CPU
 		{6CEF061D-3D7D-46EB-927D-65AF1F1CD6DA}.Release|x86.ActiveCfg = Release|Any CPU
 		{6CEF061D-3D7D-46EB-927D-65AF1F1CD6DA}.Release|x86.Build.0 = Release|Any CPU
+		{BEEFA6E8-E19C-4434-AE38-72DE854BE2AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BEEFA6E8-E19C-4434-AE38-72DE854BE2AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BEEFA6E8-E19C-4434-AE38-72DE854BE2AB}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{BEEFA6E8-E19C-4434-AE38-72DE854BE2AB}.Debug|x64.Build.0 = Debug|Any CPU
+		{BEEFA6E8-E19C-4434-AE38-72DE854BE2AB}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{BEEFA6E8-E19C-4434-AE38-72DE854BE2AB}.Debug|x86.Build.0 = Debug|Any CPU
+		{BEEFA6E8-E19C-4434-AE38-72DE854BE2AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BEEFA6E8-E19C-4434-AE38-72DE854BE2AB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BEEFA6E8-E19C-4434-AE38-72DE854BE2AB}.Release|x64.ActiveCfg = Release|Any CPU
+		{BEEFA6E8-E19C-4434-AE38-72DE854BE2AB}.Release|x64.Build.0 = Release|Any CPU
+		{BEEFA6E8-E19C-4434-AE38-72DE854BE2AB}.Release|x86.ActiveCfg = Release|Any CPU
+		{BEEFA6E8-E19C-4434-AE38-72DE854BE2AB}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -103,6 +117,7 @@ Global
 		{AB6D8175-9431-455C-8D94-1B8ADED28E49} = {27CF2402-5BE7-4C93-BBBD-30AC2DC14A46}
 		{18E64EFA-F4BB-426B-AD3F-A0E763A7B365} = {5EDA42A1-140C-46DA-B2C0-D8D504790FBA}
 		{6CEF061D-3D7D-46EB-927D-65AF1F1CD6DA} = {BC2DA1FE-8FF6-83D8-D910-721E4A223DFD}
+		{BEEFA6E8-E19C-4434-AE38-72DE854BE2AB} = {BC2DA1FE-8FF6-83D8-D910-721E4A223DFD}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {036D472C-54C7-4476-BFEF-7E32B60A895F}

@@ -1,18 +1,22 @@
-﻿using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Input.Platform;
 using System.Threading.Tasks;
+using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Input.Platform;
+using PWManager.Services.Interfaces;
 
 namespace PWManager.Services;
 
-public class ClipboardService
+public class ClipboardService : IClipboardService
 {
-    public async Task SetTextAsync(string text)
+    public async Task<bool> SetTextAsync(string text)
     {
-        if (global::Avalonia.Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        if (global::Avalonia.Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop
+            || desktop.MainWindow?.Clipboard is not { } clipboard)
         {
-            var clipboard = desktop.MainWindow?.Clipboard as IClipboard;
-            if (clipboard != null)
-                await clipboard.SetTextAsync(text);
+            return false;
         }
+
+        await clipboard.SetTextAsync(text);
+
+        return true;
     }
 }
