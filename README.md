@@ -6,7 +6,7 @@ A personal desktop password manager built with .NET 10 and Avalonia UI. Keep cre
 
 ## Features
 
-- Dark navy and violet theme, with readable text, visible keyboard focus, and labeled actions.
+- Neutral black and teal theme, with readable text, visible keyboard focus, and labeled actions.
 - Search across site and login, plus optional site/login filters.
 - Sort by site, login, creation date, or last update, in either direction.
 - Virtualized entry list with quick password copy and a separate details pane.
@@ -154,17 +154,19 @@ The root `.editorconfig` defines indentation, braces, and line breaks. Run `dotn
 
 | Role | Color |
 |---|---|
-| Canvas | `#0B1020` |
-| Surface | `#111827` |
-| Raised surface | `#172033` |
-| Separator | `#2B3750` |
-| Primary text | `#F3F4F6` |
-| Secondary text | `#A7B0C4` |
-| Primary action | `#7C3AED` |
-| Focus/accent text | `#A78BFA` |
+| Canvas | `#090A0B` |
+| Surface | `#111315` |
+| Raised surface | `#1B1F21` |
+| Separator | `#2A3033` |
+| Primary text | `#E8ECEB` |
+| Secondary text | `#A6B1AD` |
+| Primary action | `#0F766E` |
+| Primary action hover/pressed | `#0D655F` |
+| Selected surface | `#102B28` |
+| Focus/accent text | `#7DD3C0` |
 | Success | `#34D399` |
 | Error/destructive action | `#FB7185` |
 
-Colors and control styles are shared resources. Text contrast targets at least 4.5:1 for normal text. This release provides an English dark interface.
+The neutral black palette uses near-black backgrounds, charcoal panels and fields, and subtle neutral borders. Deep teal highlights primary actions and selection; muted mint marks keyboard focus and small accents. Colors, control styles, and modal overlays are shared resources. White text on the primary teal button has approximately 5.47:1 contrast; normal text targets at least 4.5:1. This release provides an English dark interface.
 
 ![Unlock your vault](docs/screenshots/unlock.png)

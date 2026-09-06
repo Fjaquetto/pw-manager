@@ -62,13 +62,13 @@
       </Border>
     </Grid>
 
-    <Border x:Name="GeneratorLayer" Background="#B30B1020" IsVisible="{Binding IsGeneratorOpen}" Padding="24"
+    <Border x:Name="GeneratorLayer" Background="{StaticResource ModalOverlayBrush}" IsVisible="{Binding IsGeneratorOpen}" Padding="24"
             KeyboardNavigation.TabNavigation="Cycle">
       <Border Classes="dialog" Width="540" MaxHeight="650" HorizontalAlignment="Center" VerticalAlignment="Center">
         <views:PasswordGeneratorView/>
       </Border>
     </Border>
-    <Border x:Name="DeleteLayer" Background="#B30B1020" IsVisible="{Binding IsDeletePending}" Padding="24"
+    <Border x:Name="DeleteLayer" Background="{StaticResource ModalOverlayBrush}" IsVisible="{Binding IsDeletePending}" Padding="24"
             KeyboardNavigation.TabNavigation="Cycle">
       <Border Classes="dialog" Width="440" HorizontalAlignment="Center" VerticalAlignment="Center">
         <StackPanel Spacing="16" IsEnabled="{Binding !IsBusy}">
@@ -83,7 +83,7 @@
         </StackPanel>
       </Border>
     </Border>
-    <Border x:Name="DiscardLayer" Background="#B30B1020" IsVisible="{Binding IsDiscardPending}" Padding="24"
+    <Border x:Name="DiscardLayer" Background="{StaticResource ModalOverlayBrush}" IsVisible="{Binding IsDiscardPending}" Padding="24"
             KeyboardNavigation.TabNavigation="Cycle">
       <Border Classes="dialog" Width="440" HorizontalAlignment="Center" VerticalAlignment="Center">
         <StackPanel Spacing="16">

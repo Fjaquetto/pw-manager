@@ -11,7 +11,7 @@
   <Application.Styles>
     <FluentTheme>
       <FluentTheme.Palettes>
-        <ColorPaletteResources x:Key="Dark" Accent="#7C3AED"/>
+        <ColorPaletteResources x:Key="Dark" Accent="#0F766E"/>
       </FluentTheme.Palettes>
     </FluentTheme>
     <StyleInclude Source="avares://PWManager/Styles/Controls.axaml"/>
