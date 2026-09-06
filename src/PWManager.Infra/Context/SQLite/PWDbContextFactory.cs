@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PWManager.Infra.Config;
@@ -15,24 +15,22 @@ namespace PWManager.Infra.Context.SQLite
         {
             _dbPath = dbPath;
         }
-
-        // Constructor for design-time factory (used by migrations)
         public PWDbContextFactory()
         {
             var services = new ServiceCollection();
-            
+
             var configuration = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .Build();
-                
+
             services.Configure<DatabaseConfig>(options => configuration.GetSection("DatabaseConfig").Bind(options));
             services.AddSingleton<DatabaseConfigurator>();
-            
+
             var serviceProvider = services.BuildServiceProvider();
-            
+
             var databaseConfigurator = serviceProvider.GetRequiredService<DatabaseConfigurator>();
-            
+
             _dbPath = databaseConfigurator.GetDatabaseFilePath();
         }
 
@@ -40,8 +38,6 @@ namespace PWManager.Infra.Context.SQLite
         {
             return new PWDbContext(_dbPath);
         }
-
-        // Implementation for IDesignTimeDbContextFactory
         public PWDbContext CreateDbContext(string[] args)
         {
             return CreateDbContext();

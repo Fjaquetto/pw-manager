@@ -1,4 +1,4 @@
-﻿using PWManager.Domain.Model;
+using PWManager.Domain.Model;
 
 namespace PWManager.Domain.DataContracts.Repository
 {

@@ -1,12 +1,13 @@
-﻿using Avalonia.Controls.ApplicationLifetimes;
+using System.Linq;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Threading;
+using PWManager.Services.Interfaces;
 using PWManager.ViewModels;
 using PWManager.Views;
-using System.Linq;
 
 namespace PWManager.Services;
 
-public class NavigationService
+public class NavigationService : INavigationService
 {
     public void ShowMain()
     {
@@ -14,14 +15,19 @@ public class NavigationService
         {
             if (global::Avalonia.Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                var mainVm = App.Services.GetRequiredService<MainViewModel>();
-                var mainView = new MainView { DataContext = mainVm };
+                var mainViewModel = App.Services.GetRequiredService<MainViewModel>();
+                var mainView = new MainView
+                {
+                    DataContext = mainViewModel
+                };
                 desktop.MainWindow = mainView;
                 mainView.Show();
+                var unlockWindows = desktop.Windows.OfType<UnlockView>().ToList();
 
-                var toClose = desktop.Windows.OfType<UnlockView>().ToList();
-                foreach (var w in toClose)
-                    w.Close();
+                foreach (var unlockWindow in unlockWindows)
+                {
+                    unlockWindow.Close();
+                }
             }
         });
     }

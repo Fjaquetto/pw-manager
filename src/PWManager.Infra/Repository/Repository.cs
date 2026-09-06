@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using PWManager.Domain.DataContracts.Repository;
 using PWManager.Infra.Context.SQLite;
 using System.Linq.Expressions;

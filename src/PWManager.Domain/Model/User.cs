@@ -1,8 +1,10 @@
-﻿namespace PWManager.Domain.Model
+namespace PWManager.Domain.Model
 {
     public class User
     {
-        public User() { }
+        public User()
+        {
+        }
         public User(string site, string login, string password, Guid? id = null)
         {
             Id = id ?? Guid.NewGuid();
@@ -13,11 +15,17 @@
             LastUpdated = DateTime.Now;
         }
 
-        public Guid Id { get; set; }
-        public string Site { get; set; }
-        public string Login { get; set; }
-        public string Password { get; set; }
-        public DateTime CreationDate { get; set; }
-        public DateTime LastUpdated { get; set; }
+        public Guid Id
+        { get; set; }
+        public string Site
+        { get; set; }
+        public string Login
+        { get; set; }
+        public string Password
+        { get; set; }
+        public DateTime CreationDate
+        { get; set; }
+        public DateTime LastUpdated
+        { get; set; }
     }
 }
