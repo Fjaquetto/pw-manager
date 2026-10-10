@@ -6,11 +6,23 @@ namespace PWManager.Infra.Config;
 
 public class DatabaseConfigurator(IOptions<DatabaseConfig> databaseConfigOptions)
 {
+    public static Environment.SpecialFolder ResolveDataFolder(bool isWindows)
+    {
+        return isWindows
+            ? Environment.SpecialFolder.ApplicationData
+            : Environment.SpecialFolder.LocalApplicationData;
+    }
+
     public string GetDatabaseFilePath()
     {
-        var applicationDataFolder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        var dataFolder = Environment.GetFolderPath(ResolveDataFolder(OperatingSystem.IsWindows()));
+        return GetDatabaseFilePath(dataFolder);
+    }
+
+    public string GetDatabaseFilePath(string dataFolder)
+    {
         var databaseConfig = databaseConfigOptions.Value;
-        var applicationFolder = Path.Combine(applicationDataFolder, databaseConfig.AppFolder);
+        var applicationFolder = Path.Combine(dataFolder, databaseConfig.AppFolder);
         Directory.CreateDirectory(applicationFolder);
         return Path.Combine(applicationFolder, databaseConfig.DbFile);
     }

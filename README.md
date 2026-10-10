@@ -63,16 +63,17 @@ Success notifications disappear after three seconds. Errors remain until correct
 
 ## Requirements
 
-- **Development:** .NET 10 SDK.
-- **Framework-dependent execution:** .NET 10 Runtime and the native dependencies required by Avalonia on your OS.
+- **Development:** .NET 10 SDK on Windows or Linux.
+- **Framework-dependent execution:** .NET 10 Runtime and the native dependencies required by Avalonia on your OS (on Linux, X11 or Wayland plus fontconfig and FreeType).
 - **Published Windows release:** the self-contained win-x64 package includes the runtime; a separate .NET installation is unnecessary.
-- Windows is the build/test target used by the included workflows. Avalonia also supports other desktop platforms, whose native window and clipboard integration should be verified on the target OS.
+- **Published Linux release:** the self-contained linux-x64 package includes the runtime; the target system must provide the usual desktop libraries (X11 or Wayland, fontconfig, FreeType).
+- CI builds and tests the whole solution on both Windows and Linux.
 
 ## Build and run
 
-From the repository root:
+From the repository root (the commands work in PowerShell and in a Linux shell):
 
-```powershell
+```bash
 dotnet restore PWManager.sln
 dotnet build PWManager.sln -c Debug --no-restore
 dotnet build PWManager.sln -c Release --no-restore
@@ -81,21 +82,27 @@ dotnet run --project src/PWManager/PWManager.csproj -c Release --no-build
 
 To execute the compiled assembly directly:
 
-```powershell
+```bash
 dotnet src/PWManager/bin/Release/net10.0/PWManager.dll
 ```
 
 To produce a self-contained Windows package locally:
 
-```powershell
+```bash
 dotnet publish src/PWManager/PWManager.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish
 ```
 
-Run `publish/PWManager.exe` and keep the generated `appsettings.json` alongside it.
+To produce a self-contained Linux package locally:
+
+```bash
+dotnet publish src/PWManager/PWManager.csproj -c Release -r linux-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish
+```
+
+Run `publish/PWManager.exe` on Windows or `./publish/PWManager` on Linux, and keep the generated `appsettings.json` alongside the executable.
 
 ## Tests
 
-```powershell
+```bash
 dotnet test PWManager.sln -c Release --no-build --no-restore
 ```
 
@@ -108,15 +115,14 @@ The UI test application skips production startup, so it never opens the personal
 
 To regenerate screenshots from the actual Avalonia controls with sample data:
 
-```powershell
-$env:PWMANAGER_SCREENSHOTS = "$PWD/artifacts/screenshots"
-dotnet test src/PWManager.UITests/PWManager.UITests.csproj -c Release --no-build --no-restore
-Remove-Item Env:PWMANAGER_SCREENSHOTS
+```bash
+PWMANAGER_SCREENSHOTS="$PWD/artifacts/screenshots" \
+  dotnet test src/PWManager.UITests/PWManager.UITests.csproj -c Release --no-build --no-restore
 ```
 
 The images in this README are headless renders of the production Avalonia views using fictitious entries. Native title bars are supplied by the OS and are not included in these renders.
 
-Pull requests run restore, Debug/Release builds, and all tests. The existing main-branch release workflow builds and tests the entire solution before packaging.
+Pull requests run restore, Debug/Release builds, and all tests on Windows and Linux. The existing main-branch release workflow builds and tests the entire solution, then publishes self-contained single-file packages for win-x64 and linux-x64 and attaches both archives (`.zip` and `.tar.gz`) to the GitHub release.
 
 ### Existing build notices
 
@@ -124,7 +130,7 @@ The redesign removes the deprecated Avalonia properties from the active views. T
 
 ## Storage and security behavior
 
-- By default, the database is `%AppData%\PWManager\pwmanager.db` on Windows. Other platforms use .NET's application-data location.
+- By default, the database is `%AppData%\PWManager\pwmanager.db` on Windows and `~/.local/share/PWManager/pwmanager.db` (the XDG data location) on Linux.
 - `DatabaseConfig.AppFolder` and `DatabaseConfig.DbFile` in `appsettings.json` control the location.
 - Site, login, and password fields are encrypted before they are written. This does **not** mean the entire SQLite file is encrypted; IDs and timestamps remain database metadata.
 - The application uses AES-256 and the existing PBKDF2 key derivation.
