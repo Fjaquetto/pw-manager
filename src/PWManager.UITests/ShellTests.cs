@@ -177,8 +177,6 @@ public class ShellTests
             PumpUntil(() => Math.Abs(window.Width - expected.Width) < 0.5 && Math.Abs(window.Height - expected.Height) < 0.5);
             Dispatcher.UIThread.RunJobs();
 
-            // The transition may not leave the top-left corner where it was: the
-            // window grows around the screen center and ends up centered.
             Assert.NotEqual(startPosition, window.Position);
             Assert.Equal(expected.X, window.Position.X);
             Assert.Equal(expected.Y, window.Position.Y);
