@@ -44,6 +44,18 @@ public class ShellTests
         Assert.True(condition(), "Condition was not reached while pumping the dispatcher.");
     }
 
+    private static (double Width, double Height, int X, int Y) ExpectedVaultGeometry(Window window)
+    {
+        var screen = window.Screens.ScreenFromWindow(window)!;
+        var scaling = screen.Scaling > 0 ? screen.Scaling : 1;
+        var width = Math.Min(1180, screen.WorkingArea.Width / scaling);
+        var height = Math.Min(780, screen.WorkingArea.Height / scaling - 40);
+        var x = screen.WorkingArea.X + (screen.WorkingArea.Width - width * scaling) / 2;
+        var y = screen.WorkingArea.Y + (screen.WorkingArea.Height - height * scaling) / 2;
+
+        return (width, height, (int)Math.Round(x), (int)Math.Round(y));
+    }
+
     [AvaloniaFact]
     public void Shell_StartsLocked_FocusesPasswordAndNeverCreatesTheVault()
     {
@@ -112,11 +124,13 @@ public class ShellTests
         try
         {
             var shell = (ShellViewModel)window.DataContext!;
+            var expected = ExpectedVaultGeometry(window);
 
             window.KeyTextInput("master");
             window.KeyPress(Key.Enter, RawInputModifiers.None, PhysicalKey.Enter, null);
             window.KeyRelease(Key.Enter, RawInputModifiers.None, PhysicalKey.Enter, null);
             PumpUntil(() => shell.IsUnlocked);
+            PumpUntil(() => Math.Abs(window.Width - expected.Width) < 0.5 && Math.Abs(window.Height - expected.Height) < 0.5);
             Dispatcher.UIThread.RunJobs();
 
             Assert.Equal(1, Created);
@@ -125,8 +139,10 @@ public class ShellTests
             Assert.False(Find<ContentControl>(window, "UnlockHost").IsEffectivelyVisible);
             Assert.True(Find<ContentControl>(window, "VaultHost").IsEffectivelyVisible);
             Assert.True(window.GetVisualDescendants().OfType<VaultPanel>().Single().IsEffectivelyVisible);
-            Assert.True(window.Width >= 1000);
-            Assert.True(window.Height >= 600);
+            Assert.Equal(expected.Width, window.Width, 3);
+            Assert.Equal(expected.Height, window.Height, 3);
+            Assert.Equal(expected.X, window.Position.X);
+            Assert.Equal(expected.Y, window.Position.Y);
             Assert.True(Find<TextBox>(window, "SearchBox").IsFocused);
 
             window.KeyPress(Key.F, RawInputModifiers.Control, PhysicalKey.F, null);
@@ -134,6 +150,38 @@ public class ShellTests
             Dispatcher.UIThread.RunJobs();
 
             Assert.True(Find<TextBox>(window, "SearchBox").IsFocused);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
+    public void Shell_UnlockTransition_EndsCenteredInsteadOfAnchoredToTheTopLeft()
+    {
+        Created = 0;
+        var window = Open(new UnlockStub { Result = UnlockResult.Success });
+
+        try
+        {
+            var shell = (ShellViewModel)window.DataContext!;
+            var expected = ExpectedVaultGeometry(window);
+            var startPosition = window.Position;
+
+            window.KeyTextInput("master");
+            window.KeyPress(Key.Enter, RawInputModifiers.None, PhysicalKey.Enter, null);
+            window.KeyRelease(Key.Enter, RawInputModifiers.None, PhysicalKey.Enter, null);
+
+            PumpUntil(() => shell.IsUnlocked);
+            PumpUntil(() => Math.Abs(window.Width - expected.Width) < 0.5 && Math.Abs(window.Height - expected.Height) < 0.5);
+            Dispatcher.UIThread.RunJobs();
+
+            Assert.NotEqual(startPosition, window.Position);
+            Assert.Equal(expected.X, window.Position.X);
+            Assert.Equal(expected.Y, window.Position.Y);
+            Assert.Equal(expected.X + expected.Width / 2, window.Position.X + window.Width / 2, 1);
+            Assert.Equal(expected.Y + expected.Height / 2, window.Position.Y + window.Height / 2, 1);
         }
         finally
         {
