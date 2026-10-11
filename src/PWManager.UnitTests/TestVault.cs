@@ -3,6 +3,7 @@ using Moq;
 using PWManager.Application.DataContracts;
 using PWManager.Domain.DataContracts.InfraService;
 using PWManager.Domain.Model;
+using PWManager.Infra.Config;
 using PWManager.Services;
 using PWManager.Services.Interfaces;
 using PWManager.ViewModels;
@@ -10,8 +11,7 @@ using PWManager.ViewModels;
 namespace PWManager.UnitTests;
 
 internal sealed class TestVault
-{
-    public Mock<IUserApplication> Application { get; } = new();
+{    public Mock<IUserApplication> Application { get; } = new();
 
     public Mock<IUserEncryptorService> Encryptor { get; } = new();
 
@@ -39,8 +39,10 @@ internal sealed class TestVault
         Encryptor.Setup(e => e.EncryptUser(It.IsAny<User>())).Returns((User u) => u);
         Encryptor.Setup(e => e.DecryptUser(It.IsAny<User>())).Returns((User u) => u);
         Clipboard.Setup(c => c.SetTextAsync(It.IsAny<string>())).ReturnsAsync(true);
-        ViewModel = new(new VaultEntryService(Application.Object, Encryptor.Object, Time), Clipboard.Object, Time);
+        ViewModel = new(new VaultEntryService(Application.Object, Encryptor.Object, Time), Clipboard.Object, Time, Mock.Of<IThemeService>(), new ColorThemeStore(UnusedThemeDirectory));
     }
+
+    private static string UnusedThemeDirectory => Path.Combine(Path.GetTempPath(), "pwmanager-tests-no-themes");
 
     public void Fill(string site = "Personal account", string login = "name@example.com", string password = "  exact secret  ")
     {

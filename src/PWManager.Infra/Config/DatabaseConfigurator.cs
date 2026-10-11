@@ -15,15 +15,24 @@ public class DatabaseConfigurator(IOptions<DatabaseConfig> databaseConfigOptions
 
     public string GetDatabaseFilePath()
     {
-        var dataFolder = Environment.GetFolderPath(ResolveDataFolder(OperatingSystem.IsWindows()));
-        return GetDatabaseFilePath(dataFolder);
+        return Path.Combine(GetApplicationFolder(), databaseConfigOptions.Value.DbFile);
     }
 
     public string GetDatabaseFilePath(string dataFolder)
     {
-        var databaseConfig = databaseConfigOptions.Value;
-        var applicationFolder = Path.Combine(dataFolder, databaseConfig.AppFolder);
+        return Path.Combine(GetApplicationFolder(dataFolder), databaseConfigOptions.Value.DbFile);
+    }
+
+    public string GetApplicationFolder()
+    {
+        var dataFolder = Environment.GetFolderPath(ResolveDataFolder(OperatingSystem.IsWindows()));
+        return GetApplicationFolder(dataFolder);
+    }
+
+    public string GetApplicationFolder(string dataFolder)
+    {
+        var applicationFolder = Path.Combine(dataFolder, databaseConfigOptions.Value.AppFolder);
         Directory.CreateDirectory(applicationFolder);
-        return Path.Combine(applicationFolder, databaseConfig.DbFile);
+        return applicationFolder;
     }
 }

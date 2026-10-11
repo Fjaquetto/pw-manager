@@ -1,0 +1,266 @@
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:PWManager.ViewModels" xmlns:conv="using:PWManager.Converters"
+             xmlns:material="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             x:Class="PWManager.Views.ThemeSettingsView" x:DataType="vm:ThemeSettingsViewModel">
+  <Grid RowDefinitions="Auto,*,Auto" RowSpacing="20">
+    <Grid ColumnDefinitions="*,Auto">
+      <StackPanel Spacing="8">
+        <TextBlock Text="Appearance" Classes="heading"/>
+        <TextBlock Text="Choose the colors of the app and save them as profiles. Changes preview instantly." Classes="secondary" TextWrapping="Wrap"/>
+      </StackPanel>
+      <Button Grid.Column="1" Classes="ghost icon" Command="{Binding CancelCommand}" AutomationProperties.Name="Close appearance">
+        <material:MaterialIcon Kind="Close" Width="20" Height="20"/>
+      </Button>
+    </Grid>
+
+    <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled">
+      <StackPanel Spacing="20">
+        <StackPanel Spacing="8">
+          <TextBlock Text="PROFILES" Classes="section"/>
+          <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+            <ComboBox x:Name="ProfileSelector" ItemsSource="{Binding Profiles}" SelectedItem="{Binding SelectedProfile}"
+                      HorizontalAlignment="Stretch" AutomationProperties.Name="Color profile"/>
+            <Button Grid.Column="1" Content="Delete" Classes="ghost danger" Command="{Binding DeleteProfileCommand}"
+                    IsEnabled="{Binding CanDeleteProfile}"/>
+          </Grid>
+          <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+            <TextBox Text="{Binding ProfileName}" PlaceholderText="Profile name" AutomationProperties.Name="Profile name"/>
+          </Grid>
+          <TextBlock Text="Save and close stores the name above (Default is built in and stays untouched)." Classes="caption" TextWrapping="Wrap"/>
+        </StackPanel>
+
+        <CheckBox Content="Derive hover, selection, focus and overlay from the base colors"
+                  IsChecked="{Binding AutoDerive}" AutomationProperties.Name="Derive related shades automatically"/>
+
+        <StackPanel Spacing="12">
+          <TextBlock Text="BACKGROUND AND SURFACES" Classes="section"/>
+          <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+            <TextBlock x:Name="CanvasLabel" Text="Background" VerticalAlignment="Center" FontWeight="Medium"/>
+            <ColorPicker Grid.Column="1" Width="64" IsAlphaVisible="False"
+                         Color="{Binding CanvasColor, Mode=TwoWay, Converter={x:Static conv:HexColorConverter.Instance}}" Tag="CanvasColor"
+                         AutomationProperties.LabeledBy="{Binding #CanvasLabel}"/>
+            <Button Grid.Column="2" Classes="ghost icon" Width="34" MinHeight="34" Padding="6"
+                    Command="{Binding ResetTokenCommand}" CommandParameter="CanvasColor"
+                    ToolTip.Tip="Reset to default" AutomationProperties.Name="Reset background">
+              <material:MaterialIcon Kind="Restore" Width="16" Height="16"/>
+            </Button>
+          </Grid>
+          <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+            <TextBlock x:Name="SurfaceLabel" Text="Panels" VerticalAlignment="Center" FontWeight="Medium"/>
+            <ColorPicker Grid.Column="1" Width="64" IsAlphaVisible="False"
+                         Color="{Binding SurfaceColor, Mode=TwoWay, Converter={x:Static conv:HexColorConverter.Instance}}" Tag="SurfaceColor"
+                         AutomationProperties.LabeledBy="{Binding #SurfaceLabel}"/>
+            <Button Grid.Column="2" Classes="ghost icon" Width="34" MinHeight="34" Padding="6"
+                    Command="{Binding ResetTokenCommand}" CommandParameter="SurfaceColor"
+                    ToolTip.Tip="Reset to default" AutomationProperties.Name="Reset panels">
+              <material:MaterialIcon Kind="Restore" Width="16" Height="16"/>
+            </Button>
+          </Grid>
+          <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+            <TextBlock x:Name="RaisedLabel" Text="Raised surfaces" VerticalAlignment="Center" FontWeight="Medium"/>
+            <ColorPicker Grid.Column="1" Width="64" IsAlphaVisible="False"
+                         Color="{Binding RaisedColor, Mode=TwoWay, Converter={x:Static conv:HexColorConverter.Instance}}" Tag="RaisedColor"
+                         AutomationProperties.LabeledBy="{Binding #RaisedLabel}"/>
+            <Button Grid.Column="2" Classes="ghost icon" Width="34" MinHeight="34" Padding="6"
+                    Command="{Binding ResetTokenCommand}" CommandParameter="RaisedColor"
+                    ToolTip.Tip="Reset to default" AutomationProperties.Name="Reset raised surfaces">
+              <material:MaterialIcon Kind="Restore" Width="16" Height="16"/>
+            </Button>
+          </Grid>
+          <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+            <TextBlock x:Name="FieldLabel" Text="Input fields" VerticalAlignment="Center" FontWeight="Medium"/>
+            <ColorPicker Grid.Column="1" Width="64" IsAlphaVisible="False"
+                         Color="{Binding FieldColor, Mode=TwoWay, Converter={x:Static conv:HexColorConverter.Instance}}" Tag="FieldColor"
+                         AutomationProperties.LabeledBy="{Binding #FieldLabel}"/>
+            <Button Grid.Column="2" Classes="ghost icon" Width="34" MinHeight="34" Padding="6"
+                    Command="{Binding ResetTokenCommand}" CommandParameter="FieldColor"
+                    ToolTip.Tip="Reset to default" AutomationProperties.Name="Reset input fields">
+              <material:MaterialIcon Kind="Restore" Width="16" Height="16"/>
+            </Button>
+          </Grid>
+          <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+            <TextBlock x:Name="LineLabel" Text="Borders and separators" VerticalAlignment="Center" FontWeight="Medium"/>
+            <ColorPicker Grid.Column="1" Width="64" IsAlphaVisible="False"
+                         Color="{Binding LineColor, Mode=TwoWay, Converter={x:Static conv:HexColorConverter.Instance}}" Tag="LineColor"
+                         AutomationProperties.LabeledBy="{Binding #LineLabel}"/>
+            <Button Grid.Column="2" Classes="ghost icon" Width="34" MinHeight="34" Padding="6"
+                    Command="{Binding ResetTokenCommand}" CommandParameter="LineColor"
+                    ToolTip.Tip="Reset to default" AutomationProperties.Name="Reset borders">
+              <material:MaterialIcon Kind="Restore" Width="16" Height="16"/>
+            </Button>
+          </Grid>
+        </StackPanel>
+
+        <StackPanel Spacing="12">
+          <TextBlock Text="TEXT" Classes="section"/>
+          <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+            <TextBlock x:Name="TextLabel" Text="Body text" VerticalAlignment="Center" FontWeight="Medium"/>
+            <ColorPicker Grid.Column="1" Width="64" IsAlphaVisible="False"
+                         Color="{Binding TextColor, Mode=TwoWay, Converter={x:Static conv:HexColorConverter.Instance}}" Tag="TextColor"
+                         AutomationProperties.LabeledBy="{Binding #TextLabel}"/>
+            <Button Grid.Column="2" Classes="ghost icon" Width="34" MinHeight="34" Padding="6"
+                    Command="{Binding ResetTokenCommand}" CommandParameter="TextColor"
+                    ToolTip.Tip="Reset to default" AutomationProperties.Name="Reset body text">
+              <material:MaterialIcon Kind="Restore" Width="16" Height="16"/>
+            </Button>
+          </Grid>
+          <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+            <TextBlock x:Name="SecondaryTextLabel" Text="Secondary text" VerticalAlignment="Center" FontWeight="Medium"/>
+            <ColorPicker Grid.Column="1" Width="64" IsAlphaVisible="False"
+                         Color="{Binding SecondaryTextColor, Mode=TwoWay, Converter={x:Static conv:HexColorConverter.Instance}}" Tag="SecondaryTextColor"
+                         AutomationProperties.LabeledBy="{Binding #SecondaryTextLabel}"/>
+            <Button Grid.Column="2" Classes="ghost icon" Width="34" MinHeight="34" Padding="6"
+                    Command="{Binding ResetTokenCommand}" CommandParameter="SecondaryTextColor"
+                    ToolTip.Tip="Reset to default" AutomationProperties.Name="Reset secondary text">
+              <material:MaterialIcon Kind="Restore" Width="16" Height="16"/>
+            </Button>
+          </Grid>
+          <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+            <TextBlock x:Name="TitleLabel" Text="Titles" VerticalAlignment="Center" FontWeight="Medium"/>
+            <ColorPicker Grid.Column="1" Width="64" IsAlphaVisible="False"
+                         Color="{Binding TitleColor, Mode=TwoWay, Converter={x:Static conv:HexColorConverter.Instance}}" Tag="TitleColor"
+                         AutomationProperties.LabeledBy="{Binding #TitleLabel}"/>
+            <Button Grid.Column="2" Classes="ghost icon" Width="34" MinHeight="34" Padding="6"
+                    Command="{Binding ResetTokenCommand}" CommandParameter="TitleColor"
+                    ToolTip.Tip="Reset to default" AutomationProperties.Name="Reset titles">
+              <material:MaterialIcon Kind="Restore" Width="16" Height="16"/>
+            </Button>
+          </Grid>
+          <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+            <TextBlock x:Name="ButtonTextLabel" Text="Primary button text" VerticalAlignment="Center" FontWeight="Medium"/>
+            <ColorPicker Grid.Column="1" Width="64" IsAlphaVisible="False"
+                         Color="{Binding ButtonTextColor, Mode=TwoWay, Converter={x:Static conv:HexColorConverter.Instance}}" Tag="ButtonTextColor"
+                         AutomationProperties.LabeledBy="{Binding #ButtonTextLabel}"/>
+            <Button Grid.Column="2" Classes="ghost icon" Width="34" MinHeight="34" Padding="6"
+                    Command="{Binding ResetTokenCommand}" CommandParameter="ButtonTextColor"
+                    ToolTip.Tip="Reset to default" AutomationProperties.Name="Reset primary button text">
+              <material:MaterialIcon Kind="Restore" Width="16" Height="16"/>
+            </Button>
+          </Grid>
+        </StackPanel>
+
+        <StackPanel Spacing="12">
+          <TextBlock Text="PRIMARY ACTION" Classes="section"/>
+          <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+            <TextBlock x:Name="AccentLabel" Text="Primary action" VerticalAlignment="Center" FontWeight="Medium"/>
+            <ColorPicker Grid.Column="1" Width="64" IsAlphaVisible="False"
+                         Color="{Binding AccentColor, Mode=TwoWay, Converter={x:Static conv:HexColorConverter.Instance}}" Tag="AccentColor"
+                         AutomationProperties.LabeledBy="{Binding #AccentLabel}"/>
+            <Button Grid.Column="2" Classes="ghost icon" Width="34" MinHeight="34" Padding="6"
+                    Command="{Binding ResetTokenCommand}" CommandParameter="AccentColor"
+                    ToolTip.Tip="Reset to default" AutomationProperties.Name="Reset primary action">
+              <material:MaterialIcon Kind="Restore" Width="16" Height="16"/>
+            </Button>
+          </Grid>
+          <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+            <TextBlock x:Name="AccentHoverLabel" Text="Primary action hover" VerticalAlignment="Center" FontWeight="Medium"/>
+            <ColorPicker Grid.Column="1" Width="64" IsAlphaVisible="False"
+                         Color="{Binding AccentHoverColor, Mode=TwoWay, Converter={x:Static conv:HexColorConverter.Instance}}" Tag="AccentHoverColor"
+                         AutomationProperties.LabeledBy="{Binding #AccentHoverLabel}"/>
+            <Button Grid.Column="2" Classes="ghost icon" Width="34" MinHeight="34" Padding="6"
+                    Command="{Binding ResetTokenCommand}" CommandParameter="AccentHoverColor"
+                    ToolTip.Tip="Reset to default" AutomationProperties.Name="Reset primary action hover">
+              <material:MaterialIcon Kind="Restore" Width="16" Height="16"/>
+            </Button>
+          </Grid>
+          <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+            <TextBlock x:Name="FocusLabel" Text="Focus and accents" VerticalAlignment="Center" FontWeight="Medium"/>
+            <ColorPicker Grid.Column="1" Width="64" IsAlphaVisible="False"
+                         Color="{Binding FocusColor, Mode=TwoWay, Converter={x:Static conv:HexColorConverter.Instance}}" Tag="FocusColor"
+                         AutomationProperties.LabeledBy="{Binding #FocusLabel}"/>
+            <Button Grid.Column="2" Classes="ghost icon" Width="34" MinHeight="34" Padding="6"
+                    Command="{Binding ResetTokenCommand}" CommandParameter="FocusColor"
+                    ToolTip.Tip="Reset to default" AutomationProperties.Name="Reset focus and accents">
+              <material:MaterialIcon Kind="Restore" Width="16" Height="16"/>
+            </Button>
+          </Grid>
+          <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+            <TextBlock x:Name="SelectionLabel" Text="Selected surface" VerticalAlignment="Center" FontWeight="Medium"/>
+            <ColorPicker Grid.Column="1" Width="64" IsAlphaVisible="False"
+                         Color="{Binding SelectionColor, Mode=TwoWay, Converter={x:Static conv:HexColorConverter.Instance}}" Tag="SelectionColor"
+                         AutomationProperties.LabeledBy="{Binding #SelectionLabel}"/>
+            <Button Grid.Column="2" Classes="ghost icon" Width="34" MinHeight="34" Padding="6"
+                    Command="{Binding ResetTokenCommand}" CommandParameter="SelectionColor"
+                    ToolTip.Tip="Reset to default" AutomationProperties.Name="Reset selected surface">
+              <material:MaterialIcon Kind="Restore" Width="16" Height="16"/>
+            </Button>
+          </Grid>
+        </StackPanel>
+
+        <StackPanel Spacing="12">
+          <TextBlock Text="STATUS" Classes="section"/>
+          <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+            <TextBlock x:Name="SuccessLabel" Text="Success" VerticalAlignment="Center" FontWeight="Medium"/>
+            <ColorPicker Grid.Column="1" Width="64" IsAlphaVisible="False"
+                         Color="{Binding SuccessColor, Mode=TwoWay, Converter={x:Static conv:HexColorConverter.Instance}}" Tag="SuccessColor"
+                         AutomationProperties.LabeledBy="{Binding #SuccessLabel}"/>
+            <Button Grid.Column="2" Classes="ghost icon" Width="34" MinHeight="34" Padding="6"
+                    Command="{Binding ResetTokenCommand}" CommandParameter="SuccessColor"
+                    ToolTip.Tip="Reset to default" AutomationProperties.Name="Reset success color">
+              <material:MaterialIcon Kind="Restore" Width="16" Height="16"/>
+            </Button>
+          </Grid>
+          <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+            <TextBlock x:Name="DangerLabel" Text="Error and destructive" VerticalAlignment="Center" FontWeight="Medium"/>
+            <ColorPicker Grid.Column="1" Width="64" IsAlphaVisible="False"
+                         Color="{Binding DangerColor, Mode=TwoWay, Converter={x:Static conv:HexColorConverter.Instance}}" Tag="DangerColor"
+                         AutomationProperties.LabeledBy="{Binding #DangerLabel}"/>
+            <Button Grid.Column="2" Classes="ghost icon" Width="34" MinHeight="34" Padding="6"
+                    Command="{Binding ResetTokenCommand}" CommandParameter="DangerColor"
+                    ToolTip.Tip="Reset to default" AutomationProperties.Name="Reset error color">
+              <material:MaterialIcon Kind="Restore" Width="16" Height="16"/>
+            </Button>
+          </Grid>
+          <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+            <TextBlock x:Name="WarningLabel" Text="Warning" VerticalAlignment="Center" FontWeight="Medium"/>
+            <ColorPicker Grid.Column="1" Width="64" IsAlphaVisible="False"
+                         Color="{Binding WarningColor, Mode=TwoWay, Converter={x:Static conv:HexColorConverter.Instance}}" Tag="WarningColor"
+                         AutomationProperties.LabeledBy="{Binding #WarningLabel}"/>
+            <Button Grid.Column="2" Classes="ghost icon" Width="34" MinHeight="34" Padding="6"
+                    Command="{Binding ResetTokenCommand}" CommandParameter="WarningColor"
+                    ToolTip.Tip="Reset to default" AutomationProperties.Name="Reset warning color">
+              <material:MaterialIcon Kind="Restore" Width="16" Height="16"/>
+            </Button>
+          </Grid>
+        </StackPanel>
+
+        <StackPanel Spacing="12">
+          <TextBlock Text="MODAL OVERLAY" Classes="section"/>
+          <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+            <TextBlock x:Name="OverlayLabel" Text="Overlay" VerticalAlignment="Center" FontWeight="Medium"/>
+            <ColorPicker Grid.Column="1" Width="64" IsAlphaVisible="True"
+                         Color="{Binding OverlayColor, Mode=TwoWay, Converter={x:Static conv:HexColorConverter.Instance}}" Tag="OverlayColor"
+                         AutomationProperties.LabeledBy="{Binding #OverlayLabel}"/>
+            <Button Grid.Column="2" Classes="ghost icon" Width="34" MinHeight="34" Padding="6"
+                    Command="{Binding ResetTokenCommand}" CommandParameter="OverlayColor"
+                    ToolTip.Tip="Reset to default" AutomationProperties.Name="Reset overlay">
+              <material:MaterialIcon Kind="Restore" Width="16" Height="16"/>
+            </Button>
+          </Grid>
+        </StackPanel>
+
+        <StackPanel Spacing="8" IsVisible="{Binding HasWarnings}">
+          <TextBlock Text="CONTRAST CHECK" Classes="section"/>
+          <ItemsControl ItemsSource="{Binding ContrastWarnings}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="x:String">
+                <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,0,0,4">
+                  <material:MaterialIcon Kind="AlertOutline" Width="16" Height="16" Foreground="{StaticResource WarningBrush}" VerticalAlignment="Center"/>
+                  <TextBlock Text="{Binding}" Classes="caption" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                </StackPanel>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+
+        <TextBlock Text="{Binding ValidationMessage}" Classes="error" IsVisible="{Binding HasValidationMessage}" AutomationProperties.LiveSetting="Polite"/>
+      </StackPanel>
+    </ScrollViewer>
+
+    <Grid Grid.Row="2" ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="12">
+      <Button Content="Restore default colors" Classes="ghost" Command="{Binding RestoreDefaultColorsCommand}"/>
+      <Button Grid.Column="2" Content="Cancel" Command="{Binding CancelCommand}"/>
+      <Button Grid.Column="3" Content="Save and close" Classes="primary" Command="{Binding ApplyCommand}"/>
+    </Grid>
+  </Grid>
+</UserControl>

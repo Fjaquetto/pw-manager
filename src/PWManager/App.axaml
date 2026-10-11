@@ -14,6 +14,7 @@
         <ColorPaletteResources x:Key="Dark" Accent="#0F766E"/>
       </FluentTheme.Palettes>
     </FluentTheme>
+    <StyleInclude Source="avares://Avalonia.Controls.ColorPicker/Themes/Fluent/Fluent.xaml"/>
     <StyleInclude Source="avares://PWManager/Styles/Controls.axaml"/>
     <material:MaterialIconStyles/>
   </Application.Styles>

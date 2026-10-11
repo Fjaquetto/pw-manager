@@ -12,7 +12,7 @@
   <Grid RowDefinitions="*,Auto">
     <Grid RowDefinitions="Auto,*,Auto" IsEnabled="{Binding !HasModal}">
       <Border BorderBrush="{StaticResource LineBrush}" BorderThickness="0,0,0,1" Padding="24,20" Background="{StaticResource SurfaceBrush}">
-        <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="16" IsEnabled="{Binding CanInteract}">
+        <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto" ColumnSpacing="16" IsEnabled="{Binding CanInteract}">
           <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center" Margin="0,0,16,0">
             <Border Width="40" Height="40" CornerRadius="12" Background="{StaticResource AccentSurfaceBrush}">
               <material:MaterialIcon Kind="ShieldKey" Width="23" Height="23" Foreground="{StaticResource FocusBrush}"/>
@@ -26,8 +26,12 @@
                    PlaceholderText="Search entries…"
                    AutomationProperties.Name="Search entries" AutomationProperties.AcceleratorKey="Ctrl+F"
                    VerticalAlignment="Center"/>
-          <Button x:Name="OpenGenerator" Grid.Column="2" Classes="ghost" Content="Generator" Command="{Binding OpenGeneratorCommand}"/>
-          <Button Grid.Column="3" Classes="primary" Content="+  New entry" Command="{Binding NewEntryCommand}"
+          <Button x:Name="OpenThemeSettings" Grid.Column="2" Classes="ghost icon" Command="{Binding OpenThemeSettingsCommand}"
+                  AutomationProperties.Name="Appearance" ToolTip.Tip="Appearance">
+            <material:MaterialIcon Kind="PaletteOutline" Width="18" Height="18"/>
+          </Button>
+          <Button x:Name="OpenGenerator" Grid.Column="3" Classes="ghost" Content="Generator" Command="{Binding OpenGeneratorCommand}"/>
+          <Button Grid.Column="4" Classes="primary" Content="+  New entry" Command="{Binding NewEntryCommand}"
                   AutomationProperties.AcceleratorKey="Ctrl+N"/>
         </Grid>
       </Border>
@@ -66,6 +70,12 @@
             KeyboardNavigation.TabNavigation="Cycle">
       <Border Classes="dialog" Width="540" MaxHeight="650" HorizontalAlignment="Center" VerticalAlignment="Center">
         <views:PasswordGeneratorView/>
+      </Border>
+    </Border>
+    <Border x:Name="ThemeLayer" Background="{StaticResource ModalOverlayBrush}" IsVisible="{Binding IsThemeSettingsOpen}" Padding="24"
+            KeyboardNavigation.TabNavigation="Cycle">
+      <Border Classes="dialog" Width="640" MaxHeight="680" HorizontalAlignment="Center" VerticalAlignment="Center">
+        <views:ThemeSettingsView DataContext="{Binding ThemeSettings}"/>
       </Border>
     </Border>
     <Border x:Name="DeleteLayer" Background="{StaticResource ModalOverlayBrush}" IsVisible="{Binding IsDeletePending}" Padding="24"

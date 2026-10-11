@@ -7,6 +7,7 @@ A personal desktop password manager built with .NET 10 and Avalonia UI. Keep cre
 ## Features
 
 - Neutral black and teal theme, with readable text, visible keyboard focus, and labeled actions.
+- Appearance settings: choose colors for background, surfaces, text, titles, buttons, fields, and status, preview changes live, and save them as profiles. Profiles are JSON files stored outside the vault database, and the built-in Default profile matches the original palette.
 - Search across site and login, plus optional site/login filters.
 - Sort by site, login, creation date, or last update, in either direction.
 - Virtualized entry list with quick password copy and a separate details pane.
@@ -108,8 +109,8 @@ dotnet test PWManager.sln -c Release --no-build --no-restore
 
 Build the Release solution first. The solution contains:
 
-- **PWManager.UnitTests:** xUnit 2 application tests, generator and vault service tests, ViewModel/interaction tests, fake-time notification tests, and a temporary SQLite persistence cycle.
-- **PWManager.UITests:** xUnit 3 with Avalonia.Headless.XUnit 12.0.2. Exercises production views and styles with fake credentials and services, including compiled bindings, copy actions, keyboard focus, dialogs, responsive layout, virtualization with 1000 entries, and 100%/150%/200% rendering scales.
+- **PWManager.UnitTests:** xUnit 2 application tests, generator and vault service tests, ViewModel/interaction tests, fake-time notification tests, a temporary SQLite persistence cycle, and appearance tests covering color parsing, WCAG contrast, shade derivation, anti-corruption of stored profiles, and the appearance ViewModel flows.
+- **PWManager.UITests:** xUnit 3 with Avalonia.Headless.XUnit 12.0.2. Exercises production views and styles with fake credentials and services, including compiled bindings, copy actions, keyboard focus, dialogs, responsive layout, virtualization with 1000 entries, 100%/150%/200% rendering scales, and live appearance previews against the shared brushes and the Fluent accent palette.
 
 The UI test application skips production startup, so it never opens the personal vault. Persistence tests create an isolated temporary SQLite database and remove it afterward. Tests do not use the system clipboard.
 
@@ -174,5 +175,20 @@ The root `.editorconfig` defines indentation, braces, and line breaks. Run `dotn
 | Error/destructive action | `#FB7185` |
 
 The neutral black palette uses near-black backgrounds, charcoal panels and fields, and subtle neutral borders. Deep teal highlights primary actions and selection; muted mint marks keyboard focus and small accents. Colors, control styles, and modal overlays are shared resources. White text on the primary teal button has approximately 5.47:1 contrast; normal text targets at least 4.5:1. This release provides an English dark interface.
+
+### Appearance profiles
+
+Choose **Appearance** (palette icon) in the header to customize the colors. The dialog edits semantic roles rather than individual controls:
+
+- Background, panels, raised surfaces, input fields, and borders.
+- Body text, secondary text, titles, and the primary button text.
+- Primary action, its hover shade, focus/accent, and the selected surface.
+- Success, error, and warning colors, plus the modal overlay (with an alpha channel).
+
+Changes preview live across the application; **Cancel** (or Esc) restores the palette that was active before the dialog opened. With "Derive related shades" enabled, hover, selection, focus, and overlay are calculated from the primary action and background colors; editing them directly switches to manual mode. A contrast check lists WCAG warnings for unreadable pairs without blocking saving, and every row can be reset to its default value.
+
+**Save and close** persists the current colors under the name in the profile box; selecting an existing profile and renaming it renames the file. The built-in **Default** profile cannot be overwritten or deleted and always restores the original palette.
+
+Profiles are stored as JSON files in a `themes` folder next to the database (`%AppData%\PWManager\themes` on Windows, `~/.local/share/PWManager/themes` on Linux), and the active profile name is remembered in `themes/active.json`. Nothing about appearance is written to the vault database.
 
 ![Unlock your vault](docs/screenshots/unlock.png)

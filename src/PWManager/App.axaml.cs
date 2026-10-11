@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
@@ -41,6 +42,11 @@ public partial class App : AvaloniaApp
         serviceCollection.AddSingleton<IPWDbContextFactory>(provider =>
             new PWDbContextFactory(provider.GetRequiredService<DatabaseConfigurator>().GetDatabaseFilePath()));
         serviceCollection.AddScoped(sp => sp.GetRequiredService<IPWDbContextFactory>().CreateDbContext());
+        serviceCollection.AddSingleton<ColorThemeStore>(provider => new ColorThemeStore(
+            Path.Combine(
+                provider.GetRequiredService<DatabaseConfigurator>().GetApplicationFolder(),
+                ColorThemeStore.ThemesFolderName)));
+        serviceCollection.AddSingleton<IThemeService, ThemeService>();
         serviceCollection.AddScoped(typeof(IRepository<>), typeof(Repository<>));
         serviceCollection.AddScoped<IUserRepository, UserRepository>();
         serviceCollection.AddScoped<IUserApplication, PWManager.Application.UserApplication>();
@@ -58,6 +64,9 @@ public partial class App : AvaloniaApp
             var context = scope.ServiceProvider.GetRequiredService<PWDbContext>();
             context.Database.EnsureCreated();
         }
+
+        Services.GetRequiredService<IThemeService>()
+            .Apply(Services.GetRequiredService<ColorThemeStore>().LoadActiveScheme());
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {

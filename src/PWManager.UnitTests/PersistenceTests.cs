@@ -6,6 +6,7 @@ using PWManager.Application.DataContracts;
 using PWManager.Domain.DataContracts.InfraService;
 using PWManager.Domain.Model;
 using PWManager.Enums;
+using PWManager.Infra.Config;
 using PWManager.Infra.Context.SQLite;
 using PWManager.Infra.Repository;
 using PWManager.Infra.Services;
@@ -36,7 +37,7 @@ public class PersistenceTests
                 await context.Database.EnsureCreatedAsync();
                 var application = new UserApplication(new UserRepository(context));
                 var vaultService = new VaultEntryService(application, new UserEncryptorService(), TimeProvider.System);
-                using var viewModel = new MainViewModel(vaultService, Mock.Of<IClipboardService>(), TimeProvider.System);
+                using var viewModel = new MainViewModel(vaultService, Mock.Of<IClipboardService>(), TimeProvider.System, Mock.Of<IThemeService>(), new ColorThemeStore(Path.Combine(directory, "themes")));
 
                 await viewModel.LoadEntriesAsync();
                 viewModel.NewEntryCommand.Execute(null);
@@ -66,7 +67,7 @@ public class PersistenceTests
             {
                 var application = new UserApplication(new UserRepository(context));
                 var vaultService = new VaultEntryService(application, new UserEncryptorService(), TimeProvider.System);
-                using var viewModel = new MainViewModel(vaultService, Mock.Of<IClipboardService>(), TimeProvider.System);
+                using var viewModel = new MainViewModel(vaultService, Mock.Of<IClipboardService>(), TimeProvider.System, Mock.Of<IThemeService>(), new ColorThemeStore(Path.Combine(directory, "themes")));
 
                 await viewModel.LoadEntriesAsync();
                 var restored = Assert.Single(viewModel.Entries);
