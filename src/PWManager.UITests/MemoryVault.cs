@@ -1,6 +1,7 @@
 using PWManager.Application.DataContracts;
 using PWManager.Domain.DataContracts.InfraService;
 using PWManager.Domain.Model;
+using PWManager.Infra.Config;
 using PWManager.Services;
 using PWManager.Services.Interfaces;
 using PWManager.ViewModels;
@@ -51,7 +52,9 @@ internal sealed class MemoryVault : IUserApplication, IUserEncryptorService, ICl
         return Task.FromResult(true);
     }
 
-    public MainViewModel CreateViewModel() => new(new VaultEntryService(this, this, TimeProvider.System), this, TimeProvider.System);
+    public MainViewModel CreateViewModel() => new(new VaultEntryService(this, this, TimeProvider.System), this, TimeProvider.System, new ThemeService(), new ColorThemeStore(ThemeDirectory));
+
+    private static string ThemeDirectory => Path.Combine(Path.GetTempPath(), "pwmanager-ui-themes-unused");
 
     public static MemoryVault Sample(int count = 7)
     {

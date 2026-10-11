@@ -7,6 +7,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PWManager.Domain.Model;
 using PWManager.Enums;
+using PWManager.Infra.Config;
 using PWManager.Services.Interfaces;
 
 namespace PWManager.ViewModels;
@@ -52,6 +53,9 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     private bool _isGeneratorOpen;
 
     [ObservableProperty]
+    private bool _isThemeSettingsOpen;
+
+    [ObservableProperty]
     private bool _isDeletePending;
 
     [ObservableProperty]
@@ -74,6 +78,8 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     public EntryEditorViewModel Editor { get; } = new();
 
     public PasswordGeneratorViewModel Generator { get; } = new();
+
+    public ThemeSettingsViewModel ThemeSettings { get; }
 
     public NotificationViewModel Notification
     { get; }
@@ -138,7 +144,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
 
     public string CountLabel => HasFilters ? $"{Entries.Count} of {EntryCount} entries" : $"{EntryCount} entries";
 
-    public bool HasModal => IsGeneratorOpen || IsDeletePending || IsDiscardPending;
+    public bool HasModal => IsGeneratorOpen || IsDeletePending || IsDiscardPending || IsThemeSettingsOpen;
 
     public bool CanInteract => !IsBusy && !HasModal;
 
@@ -168,11 +174,14 @@ public partial class MainViewModel : ViewModelBase, IDisposable
 
     public event Action? CloseRequested;
 
-    public MainViewModel(IVaultEntryService vaultEntries, IClipboardService clipboard, TimeProvider timeProvider)
+    public MainViewModel(IVaultEntryService vaultEntries, IClipboardService clipboard, TimeProvider timeProvider, IThemeService themeService, ColorThemeStore themeStore)
     {
         _vaultEntries = vaultEntries;
         _clipboard = clipboard;
         Notification = new NotificationViewModel(timeProvider);
+        ThemeSettings = new ThemeSettingsViewModel(themeService, themeStore);
+        ThemeSettings.CloseRequested += CloseThemeSettings;
+        ThemeSettings.Saved += () => Notification.Show("Appearance saved.");
     }
 
     private void RefreshState()
@@ -214,6 +223,8 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     partial void OnIsEditorOpenChanged(bool value) => RefreshState();
 
     partial void OnIsGeneratorOpenChanged(bool value) => RefreshState();
+
+    partial void OnIsThemeSettingsOpenChanged(bool value) => RefreshState();
 
     partial void OnIsDeletePendingChanged(bool value) => RefreshState();
 
@@ -457,6 +468,11 @@ public partial class MainViewModel : ViewModelBase, IDisposable
             CloseGenerator();
         }
 
+        if (IsThemeSettingsOpen)
+        {
+            ThemeSettings.CancelCommand.Execute(null);
+        }
+
         if (IsDeletePending)
         {
             CancelDelete();
@@ -693,6 +709,29 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     }
 
     [RelayCommand]
+    private void OpenThemeSettings()
+    {
+        if (!CanInteract)
+        {
+            return;
+        }
+
+        MaskPasswords();
+        Notification.DismissCommand.Execute(null);
+        ThemeSettings.Open();
+        IsThemeSettingsOpen = true;
+        RefreshState();
+        FocusRequested?.Invoke("ProfileSelector");
+    }
+
+    private void CloseThemeSettings()
+    {
+        IsThemeSettingsOpen = false;
+        RefreshState();
+        FocusRequested?.Invoke(IsEditorOpen ? "EditorSite" : "OpenThemeSettings");
+    }
+
+    [RelayCommand]
     private void UseGeneratedPassword()
     {
         if (!IsGeneratorOpen || IsBusy)
@@ -732,7 +771,11 @@ public partial class MainViewModel : ViewModelBase, IDisposable
             return;
         }
 
-        if (IsGeneratorOpen)
+        if (IsThemeSettingsOpen)
+        {
+            ThemeSettings.CancelCommand.Execute(null);
+        }
+        else if (IsGeneratorOpen)
         {
             CloseGenerator();
         }

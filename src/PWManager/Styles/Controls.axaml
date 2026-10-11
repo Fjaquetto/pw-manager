@@ -19,6 +19,7 @@
     <Setter Property="FontSize" Value="24"/>
     <Setter Property="FontWeight" Value="SemiBold"/>
     <Setter Property="LetterSpacing" Value="-0.5"/>
+    <Setter Property="Foreground" Value="{StaticResource TitleBrush}"/>
   </Style>
   <Style Selector="TextBlock.section">
     <Setter Property="FontSize" Value="12"/>
@@ -50,17 +51,17 @@
   </Style>
   <Style Selector="Button.primary">
     <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
-    <Setter Property="Foreground" Value="White"/>
+    <Setter Property="Foreground" Value="{StaticResource PrimaryButtonTextBrush}"/>
     <Setter Property="BorderThickness" Value="0"/>
     <Setter Property="FontWeight" Value="SemiBold"/>
   </Style>
   <Style Selector="Button.primary:pointerover /template/ ContentPresenter">
     <Setter Property="Background" Value="{StaticResource AccentHoverBrush}"/>
-    <Setter Property="Foreground" Value="White"/>
+    <Setter Property="Foreground" Value="{StaticResource PrimaryButtonTextBrush}"/>
   </Style>
   <Style Selector="Button.primary:pressed /template/ ContentPresenter">
     <Setter Property="Background" Value="{StaticResource AccentHoverBrush}"/>
-    <Setter Property="Foreground" Value="White"/>
+    <Setter Property="Foreground" Value="{StaticResource PrimaryButtonTextBrush}"/>
   </Style>
   <Style Selector="Button.ghost">
     <Setter Property="Background" Value="Transparent"/>
@@ -86,7 +87,7 @@
     <Setter Property="MinHeight" Value="44"/>
     <Setter Property="Padding" Value="12,10"/>
     <Setter Property="CornerRadius" Value="{StaticResource ControlRadius}"/>
-    <Setter Property="Background" Value="{StaticResource CanvasBrush}"/>
+    <Setter Property="Background" Value="{StaticResource FieldBrush}"/>
     <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
     <Setter Property="BorderBrush" Value="{StaticResource LineBrush}"/>
     <Setter Property="CaretBrush" Value="{StaticResource FocusBrush}"/>
@@ -95,7 +96,7 @@
   </Style>
   <Style Selector="TextBox:focus /template/ Border#PART_BorderElement">
     <Setter Property="BorderBrush" Value="{StaticResource FocusBrush}"/>
-    <Setter Property="Background" Value="{StaticResource CanvasBrush}"/>
+    <Setter Property="Background" Value="{StaticResource FieldBrush}"/>
   </Style>
   <Style Selector="TextBox:not(:disabled) /template/ TextBlock#PART_Placeholder">
     <Setter Property="Opacity" Value="1"/>
@@ -106,10 +107,10 @@
   <Style Selector="Grid#Workspace">
     <Setter Property="Margin" Value="24"/>
   </Style>
-  <Style Selector="Window.compact Border#PaneRegion">
+  <Style Selector="UserControl.compact Border#PaneRegion">
     <Setter Property="Padding" Value="16"/>
   </Style>
-  <Style Selector="Window.compact Grid#Workspace">
+  <Style Selector="UserControl.compact Grid#Workspace">
     <Setter Property="Margin" Value="16"/>
   </Style>
   <Style Selector="Grid#DetailLayout">
@@ -118,13 +119,13 @@
   <Style Selector="StackPanel#DetailFields">
     <Setter Property="Spacing" Value="20"/>
   </Style>
-  <Style Selector="Window.compact Grid#DetailLayout">
+  <Style Selector="UserControl.compact Grid#DetailLayout">
     <Setter Property="RowSpacing" Value="12"/>
   </Style>
-  <Style Selector="Window.compact StackPanel#DetailFields">
+  <Style Selector="UserControl.compact StackPanel#DetailFields">
     <Setter Property="Spacing" Value="12"/>
   </Style>
-  <Style Selector="Window.compact Button#BackButton">
+  <Style Selector="UserControl.compact Button#BackButton">
     <Setter Property="MinHeight" Value="32"/>
   </Style>
   <Style Selector="Button.ghost:disabled /template/ ContentPresenter">

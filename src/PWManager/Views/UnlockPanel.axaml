@@ -1,9 +1,7 @@
-<Window xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="using:PWManager.ViewModels"
-        xmlns:material="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
-        x:Class="PWManager.Views.UnlockView" x:DataType="vm:UnlockViewModel"
-        Title="PWManager" Width="480" Height="560" MinWidth="420" MinHeight="460"
-        WindowStartupLocation="CenterScreen" WindowDecorations="Full">
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:PWManager.ViewModels"
+             xmlns:material="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             x:Class="PWManager.Views.UnlockPanel" x:DataType="vm:UnlockViewModel">
   <ScrollViewer HorizontalScrollBarVisibility="Disabled">
     <Grid Margin="36" RowDefinitions="Auto,*">
       <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,0,0,40">
@@ -31,6 +29,10 @@
           </Button>
         </Grid>
         <TextBlock Text="{Binding ErrorMessage}" Classes="error" IsVisible="{Binding HasError}" AutomationProperties.LiveSetting="Polite"/>
+        <StackPanel Spacing="8" IsVisible="{Binding ShowProgress}" Margin="0,4,0,0">
+          <ProgressBar IsIndeterminate="True" Height="4" AutomationProperties.Name="Unlocking"/>
+          <TextBlock Text="Unlocking your vault…" Classes="caption" HorizontalAlignment="Center" AutomationProperties.LiveSetting="Polite"/>
+        </StackPanel>
         <Button Classes="primary" Command="{Binding UnlockCommand}" Content="{Binding ButtonLabel}"
                 HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="0,8,0,0" MinHeight="46"/>
         <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center" Margin="0,20,0,0">
@@ -40,4 +42,4 @@
       </StackPanel>
     </Grid>
   </ScrollViewer>
-</Window>
+</UserControl>

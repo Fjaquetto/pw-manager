@@ -1,0 +1,36 @@
+<Window xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:PWManager.ViewModels" xmlns:views="using:PWManager.Views"
+        x:Class="PWManager.Views.ShellWindow" x:DataType="vm:ShellViewModel"
+        Title="PWManager" Width="480" Height="560" MinWidth="420" MinHeight="460"
+        WindowStartupLocation="CenterScreen" WindowDecorations="Full">
+  <Window.Styles>
+    <Style Selector="ContentControl#VaultHost">
+      <Setter Property="Opacity" Value="0"/>
+    </Style>
+    <Style Selector="ContentControl#VaultHost.unlocked">
+      <Setter Property="Opacity" Value="1"/>
+    </Style>
+  </Window.Styles>
+  <Panel>
+    <ContentControl x:Name="UnlockHost" Content="{Binding Unlock}" IsVisible="{Binding ShowUnlock}">
+      <ContentControl.ContentTemplate>
+        <DataTemplate DataType="vm:UnlockViewModel">
+          <views:UnlockPanel/>
+        </DataTemplate>
+      </ContentControl.ContentTemplate>
+    </ContentControl>
+    <ContentControl x:Name="VaultHost" Content="{Binding Vault}" IsVisible="{Binding IsUnlocked}"
+                    Classes.unlocked="{Binding IsUnlocked}">
+      <ContentControl.Transitions>
+        <Transitions>
+          <DoubleTransition Property="Opacity" Duration="0:0:0.15"/>
+        </Transitions>
+      </ContentControl.Transitions>
+      <ContentControl.ContentTemplate>
+        <DataTemplate DataType="vm:MainViewModel">
+          <views:VaultPanel/>
+        </DataTemplate>
+      </ContentControl.ContentTemplate>
+    </ContentControl>
+  </Panel>
+</Window>
