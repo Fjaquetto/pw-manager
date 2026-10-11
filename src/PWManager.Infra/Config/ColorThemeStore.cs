@@ -130,7 +130,7 @@ public sealed class ColorThemeStore
     {
         var normalized = string.IsNullOrEmpty(name) || ColorProfile.IsDefaultName(name) ? null : name.Trim();
 
-        if (normalized is not null && !ColorProfile.IsValidName(normalized))
+        if (normalized is not null && !ColorProfile.IsWellFormedName(normalized))
         {
             throw new ArgumentException($"'{name}' is not a valid profile name.", nameof(name));
         }
@@ -142,8 +142,9 @@ public sealed class ColorThemeStore
     }
 
     /// <summary>
-    /// The scheme of the active profile; falls back to the built-in default
-    /// when there is no active profile or its file is missing or corrupt.
+    /// The scheme of the active profile; resolves the built-in presets, falls
+    /// back to the built-in default when there is no active profile or its
+    /// file is missing or corrupt.
     /// </summary>
     public ColorScheme LoadActiveScheme()
     {
@@ -152,6 +153,13 @@ public sealed class ColorThemeStore
         if (activeName is null)
         {
             return ColorScheme.Default;
+        }
+
+        var preset = ColorSchemePresets.Find(activeName);
+
+        if (preset is not null)
+        {
+            return preset.Colors;
         }
 
         var profile = LoadProfiles()

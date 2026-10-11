@@ -57,6 +57,96 @@ public class ThemeSettingsViewModelTests : IDisposable
     }
 
     [Fact]
+    public void Open_ListsTheBuiltInPresetsBeforeUserProfiles()
+    {
+        Store.Save(new ColorProfile { Name = "Graphite", Colors = ColorScheme.Default });
+        var viewModel = CreateViewModel();
+
+        viewModel.Open();
+
+        var expected = new[] { "Default" }
+            .Concat(ColorSchemePresets.All.Select(preset => preset.Name))
+            .Append("Graphite");
+
+        Assert.Equal(expected, viewModel.Profiles);
+    }
+
+    [Fact]
+    public void SelectingAPreset_PreviewsItsColorsAndProtectsIt()
+    {
+        var preset = ColorSchemePresets.VioletNebula;
+        var viewModel = CreateViewModel();
+        viewModel.Open();
+
+        viewModel.SelectedProfile = preset.Name;
+
+        Assert.Equal(preset.Colors.Accent, viewModel.AccentColor);
+        Assert.Equal(preset.Colors.Canvas, viewModel.CanvasColor);
+        Assert.Equal(preset.Name, viewModel.ProfileName);
+        Assert.False(viewModel.CanDeleteProfile);
+        ThemeService.Verify(service => service.Apply(It.Is<ColorScheme>(scheme => scheme.Equals(preset.Colors))), Times.AtLeastOnce);
+    }
+
+    [Fact]
+    public void Apply_OnUntouchedPreset_ActivatesIt()
+    {
+        var preset = ColorSchemePresets.Ember;
+        var saved = false;
+        var closed = false;
+        var viewModel = CreateViewModel();
+        viewModel.Saved += () => saved = true;
+        viewModel.CloseRequested += () => closed = true;
+        viewModel.Open();
+        viewModel.SelectedProfile = preset.Name;
+
+        viewModel.ApplyCommand.Execute(null);
+
+        Assert.True(saved);
+        Assert.True(closed);
+        Assert.False(viewModel.HasValidationMessage);
+        Assert.Equal(preset.Name, Store.GetActiveProfileName());
+        Assert.Equal(preset.Colors, Store.LoadActiveScheme());
+        Assert.Empty(Store.LoadProfiles());
+    }
+
+    [Fact]
+    public void Apply_OnModifiedPreset_AsksForAName()
+    {
+        var viewModel = CreateViewModel();
+        var closed = false;
+        viewModel.CloseRequested += () => closed = true;
+        viewModel.Open();
+        viewModel.SelectedProfile = "Midnight Ocean";
+        viewModel.AccentColor = "#DC2626";
+
+        viewModel.ApplyCommand.Execute(null);
+
+        Assert.False(closed);
+        Assert.True(viewModel.HasValidationMessage);
+        Assert.Contains("built in", viewModel.ValidationMessage);
+        Assert.Empty(Store.LoadProfiles());
+    }
+
+    [Fact]
+    public void Apply_ForkingAPreset_SavesAUserProfileAndKeepsThePreset()
+    {
+        var preset = ColorSchemePresets.MidnightOcean;
+        var viewModel = CreateViewModel();
+        viewModel.Open();
+        viewModel.SelectedProfile = preset.Name;
+        viewModel.AccentColor = "#DC2626";
+        viewModel.ProfileName = "Deep red";
+
+        viewModel.ApplyCommand.Execute(null);
+
+        var profile = Assert.Single(Store.LoadProfiles());
+        Assert.Equal("Deep red", profile.Name);
+        Assert.Equal("#DC2626", profile.Colors.Accent);
+        Assert.Equal("Deep red", Store.GetActiveProfileName());
+        Assert.Contains(preset.Name, viewModel.Profiles);
+    }
+
+    [Fact]
     public void EditingAccent_DerivesShadesAndPreviewsLive()
     {
         var viewModel = CreateViewModel();
@@ -174,12 +264,12 @@ public class ThemeSettingsViewModelTests : IDisposable
     [Fact]
     public void Apply_RejectsDuplicateNames()
     {
-        Store.Save(new ColorProfile { Name = "Forest", Colors = ColorScheme.Default });
+        Store.Save(new ColorProfile { Name = "Graphite", Colors = ColorScheme.Default });
         Store.Save(new ColorProfile { Name = "Ocean", Colors = ColorScheme.Default });
         var viewModel = CreateViewModel();
         viewModel.Open();
         viewModel.SelectedProfile = "Ocean";
-        viewModel.ProfileName = "Forest";
+        viewModel.ProfileName = "Graphite";
 
         viewModel.ApplyCommand.Execute(null);
 

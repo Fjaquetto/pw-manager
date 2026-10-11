@@ -80,6 +80,34 @@ public class ThemeSettingsTests
     }
 
     [AvaloniaFact]
+    public void BuiltInPresets_AreListedAndApplyLive()
+    {
+        var viewModel = OpenSettings(out _);
+        var window = OpenView(viewModel);
+
+        try
+        {
+            var expected = new[] { "Default" }
+                .Concat(ColorSchemePresets.All.Select(preset => preset.Name));
+            Assert.Equal(expected, viewModel.Profiles);
+
+            var preset = ColorSchemePresets.MidnightOcean;
+            viewModel.SelectedProfile = preset.Name;
+            Dispatcher.UIThread.RunJobs();
+
+            Assert.Equal(Color.Parse(preset.Colors.Accent), BrushColor("AccentBrush"));
+            Assert.Equal(Color.Parse(preset.Colors.Canvas), BrushColor("CanvasBrush"));
+            Assert.Equal(Color.Parse(preset.Colors.Title), BrushColor("TitleBrush"));
+            Assert.False(viewModel.CanDeleteProfile);
+        }
+        finally
+        {
+            window.Close();
+            RestoreDefaults();
+        }
+    }
+
+    [AvaloniaFact]
     public void LivePreview_UpdatesTheSharedBrushesAndCancelRestoresThem()
     {
         var viewModel = OpenSettings(out _);
@@ -181,17 +209,21 @@ public class ThemeSettingsTests
     }
 
     [AvaloniaFact]
-    public void MainView_AppearanceModal_OpensClosesAndKeepsFocusInside()
+    public void VaultPanel_AppearanceModal_OpensClosesAndKeepsFocusInside()
     {
-        var window = new MainView
+        var viewModel = MemoryVault.Sample(3).CreateViewModel();
+        viewModel.LoadEntriesAsync().GetAwaiter().GetResult();
+        var window = new Window
         {
-            DataContext = MemoryVault.Sample(3).CreateViewModel(),
+            Content = new VaultPanel
+            {
+                DataContext = viewModel
+            },
             Width = 1180,
             Height = 780
         };
         window.Show();
         Dispatcher.UIThread.RunJobs();
-        var viewModel = (MainViewModel)window.DataContext!;
 
         try
         {

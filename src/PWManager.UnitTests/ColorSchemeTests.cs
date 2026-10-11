@@ -171,4 +171,35 @@ public class ColorSchemeTests
         Assert.True(ColorProfile.IsValidName("Work dark"));
         Assert.True(ColorProfile.IsDefaultName(" default "));
     }
+
+    [Fact]
+    public void Presets_AreDistinctWellFormedAndReserved()
+    {
+        Assert.Equal(4, ColorSchemePresets.All.Count);
+        Assert.Equal(ColorSchemePresets.All.Count, ColorSchemePresets.All.Select(preset => preset.Name).Distinct().Count());
+
+        foreach (var preset in ColorSchemePresets.All)
+        {
+            Assert.True(preset.Colors.IsValid, $"Preset '{preset.Name}' has invalid tokens.");
+            Assert.True(ColorSchemePresets.IsPresetName(preset.Name));
+            Assert.True(ColorSchemePresets.IsPresetName(preset.Name.ToUpperInvariant()));
+            Assert.False(ColorProfile.IsDefaultName(preset.Name));
+            Assert.False(ColorProfile.IsValidName(preset.Name));
+            Assert.True(ColorProfile.IsWellFormedName(preset.Name));
+            Assert.True(ColorProfile.IsReservedName(preset.Name));
+        }
+
+        Assert.Null(ColorSchemePresets.Find("Missing"));
+    }
+
+    [Fact]
+    public void Presets_PassEveryContrastTarget()
+    {
+        foreach (var preset in ColorSchemePresets.All)
+        {
+            var warnings = ColorContrast.Audit(preset.Colors);
+
+            Assert.True(warnings.Count == 0, $"Preset '{preset.Name}' has contrast warnings: {string.Join("; ", warnings.Select(warning => warning.Message))}");
+        }
+    }
 }

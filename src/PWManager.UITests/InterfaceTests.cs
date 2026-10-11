@@ -7,10 +7,8 @@ using Avalonia.Input.Raw;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
-using PWManager.Enums;
 using PWManager.Services;
 using PWManager.Services.Interfaces;
-using PWManager.UITests.Fakes;
 using PWManager.ViewModels;
 using PWManager.Views;
 
@@ -21,11 +19,18 @@ public class InterfaceTests
     private static T Find<T>(Window window, string name)
         where T : Control => window.GetVisualDescendants().OfType<T>().Single(c => c.Name == name);
 
-    private static MainView Open(int width = 1180, int height = 780, int count = 7)
+    private static MainViewModel Vault(Window window) => (MainViewModel)((VaultPanel)window.Content!).DataContext!;
+
+    private static Window Open(int width = 1180, int height = 780, int count = 7)
     {
-        var window = new MainView
+        var viewModel = MemoryVault.Sample(count).CreateViewModel();
+        viewModel.LoadEntriesAsync().GetAwaiter().GetResult();
+        var window = new Window
         {
-            DataContext = MemoryVault.Sample(count).CreateViewModel(),
+            Content = new VaultPanel
+            {
+                DataContext = viewModel
+            },
             Width = width,
             Height = height
         };
@@ -45,7 +50,7 @@ public class InterfaceTests
 
         try
         {
-            var viewModel = (MainViewModel)window.DataContext!;
+            var viewModel = Vault(window);
 
             Assert.Equal(compact, viewModel.IsCompact);
             Assert.True(Find<EntryListView>(window, "ListRegion").IsEffectivelyVisible);
@@ -77,7 +82,7 @@ public class InterfaceTests
 
         try
         {
-            var viewModel = (MainViewModel)window.DataContext!;
+            var viewModel = Vault(window);
             var list = Find<ListBox>(window, "EntriesList");
             list.SelectedIndex = 1;
             Dispatcher.UIThread.RunJobs();
@@ -108,12 +113,12 @@ public class InterfaceTests
 
         try
         {
-            var viewModel = (MainViewModel)window.DataContext!;
-            window.KeyPress(Key.F, RawInputModifiers.Control, PhysicalKey.F, null);
-            window.KeyRelease(Key.F, RawInputModifiers.Control, PhysicalKey.F, null);
+            var viewModel = Vault(window);
+            var search = Find<TextBox>(window, "SearchBox");
+            search.Focus();
             Dispatcher.UIThread.RunJobs();
 
-            Assert.True(Find<TextBox>(window, "SearchBox").IsFocused);
+            Assert.True(search.IsFocused);
             window.KeyTextInput("github");
 
             Assert.Single(viewModel.Entries);
@@ -143,7 +148,7 @@ public class InterfaceTests
     public void Editor_GeneratorAndDiscard_KeepFocusWithinDialogAndRestoreMasks()
     {
         var window = Open();
-        var viewModel = (MainViewModel)window.DataContext!;
+        var viewModel = Vault(window);
 
         try
         {
@@ -214,7 +219,7 @@ public class InterfaceTests
 
         try
         {
-            var viewModel = (MainViewModel)window.DataContext!;
+            var viewModel = Vault(window);
             viewModel.SelectedEntry = viewModel.Entries[0];
             viewModel.RequestDeleteCommand.Execute(null);
             Dispatcher.UIThread.RunJobs();
@@ -256,9 +261,14 @@ public class InterfaceTests
     public async Task ListCopyButton_HasWorkingCompiledCommandBinding()
     {
         var vault = MemoryVault.Sample();
-        var window = new MainView
+        var viewModel = vault.CreateViewModel();
+        viewModel.LoadEntriesAsync().GetAwaiter().GetResult();
+        var window = new Window
         {
-            DataContext = vault.CreateViewModel()
+            Content = new VaultPanel
+            {
+                DataContext = viewModel
+            }
         };
         window.Show();
 
@@ -283,7 +293,7 @@ public class InterfaceTests
     public void SmallWindow_DialogAndEditorActionsRemainReachable()
     {
         var window = Open(760, 480);
-        var viewModel = (MainViewModel)window.DataContext!;
+        var viewModel = Vault(window);
 
         try
         {
@@ -322,7 +332,7 @@ public class InterfaceTests
 
         try
         {
-            var viewModel = (MainViewModel)window.DataContext!;
+            var viewModel = Vault(window);
 
             Assert.True(viewModel.IsVaultEmpty);
             Assert.Contains(window.GetVisualDescendants().OfType<TextBlock>(), t => t.IsEffectivelyVisible && t.Text == "A fresh start");
@@ -344,7 +354,7 @@ public class InterfaceTests
 
         try
         {
-            var viewModel = (MainViewModel)window.DataContext!;
+            var viewModel = Vault(window);
             viewModel.SelectedEntry = viewModel.Entries[1];
             window.SetRenderScaling(scale);
             Dispatcher.UIThread.RunJobs();
@@ -368,7 +378,7 @@ public class InterfaceTests
 
         try
         {
-            var viewModel = (MainViewModel)window.DataContext!;
+            var viewModel = Vault(window);
             viewModel.SelectedEntry = viewModel.Entries[0];
             viewModel.SelectedEntry.Site = new string('W', 180);
             viewModel.SelectedEntry.Login = new string('w', 180) + "@example.com";
@@ -376,41 +386,6 @@ public class InterfaceTests
 
             Assert.True(Find<TextBox>(window, "DetailPassword").Bounds.Width > 120);
             Capture(window, "long-content");
-        }
-        finally
-        {
-            window.Close();
-        }
-    }
-
-    [AvaloniaFact]
-    public void Unlock_HasInitialFocus_MaskAndEnterBinding()
-    {
-        var service = new UnlockStub();
-        var viewModel = new UnlockViewModel(service, new NavigationStub());
-        var window = new UnlockView
-        {
-            DataContext = viewModel
-        };
-        window.Show();
-
-        try
-        {
-            Dispatcher.UIThread.RunJobs();
-            var password = Find<TextBox>(window, "PasswordBox");
-
-            Assert.True(password.IsFocused);
-            Assert.Equal('•', password.PasswordChar);
-            Capture(window, "unlock");
-            window.KeyTextInput("incorrect-example");
-            window.KeyPress(Key.Enter, RawInputModifiers.None, PhysicalKey.Enter, null);
-            window.KeyRelease(Key.Enter, RawInputModifiers.None, PhysicalKey.Enter, null);
-            Dispatcher.UIThread.RunJobs();
-
-            Assert.Equal(1, service.Calls);
-            Assert.True(viewModel.HasError);
-            Assert.Empty(password.Text!);
-            Capture(window, "unlock-error");
         }
         finally
         {

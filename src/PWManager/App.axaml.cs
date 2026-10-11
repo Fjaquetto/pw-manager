@@ -51,13 +51,14 @@ public partial class App : AvaloniaApp
         serviceCollection.AddScoped<IUserRepository, UserRepository>();
         serviceCollection.AddScoped<IUserApplication, PWManager.Application.UserApplication>();
         serviceCollection.AddScoped<IUserEncryptorService, UserEncryptorService>();
-        serviceCollection.AddTransient<INavigationService, NavigationService>();
         serviceCollection.AddTransient<IClipboardService, ClipboardService>();
         serviceCollection.AddTransient<IUnlockService, UnlockService>();
         serviceCollection.AddTransient<IVaultEntryService, VaultEntryService>();
         serviceCollection.AddSingleton(TimeProvider.System);
         serviceCollection.AddTransient<UnlockViewModel>();
         serviceCollection.AddTransient<MainViewModel>();
+        serviceCollection.AddTransient<ShellViewModel>();
+        serviceCollection.AddSingleton<Func<MainViewModel>>(provider => provider.GetRequiredService<MainViewModel>);
         Services = serviceCollection.BuildServiceProvider();
         using (var scope = Services.GetRequiredService<IServiceScopeFactory>().CreateScope())
         {
@@ -70,12 +71,10 @@ public partial class App : AvaloniaApp
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            var unlockViewModel = Services.GetRequiredService<UnlockViewModel>();
-            var unlockView = new UnlockView
+            desktop.MainWindow = new ShellWindow
             {
-                DataContext = unlockViewModel
+                DataContext = Services.GetRequiredService<ShellViewModel>()
             };
-            desktop.MainWindow = unlockView;
         }
 
         base.OnFrameworkInitializationCompleted();

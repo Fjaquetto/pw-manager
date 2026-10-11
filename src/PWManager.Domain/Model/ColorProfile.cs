@@ -21,13 +21,22 @@ public sealed record ColorProfile
     public static bool IsDefaultName(string? name) =>
         string.Equals(name?.Trim(), DefaultProfileName, StringComparison.OrdinalIgnoreCase);
 
-    public static bool IsValidName(string? name)
+    /// <summary>
+    /// True for the built-in names: the Default palette and the shipped presets.
+    /// </summary>
+    public static bool IsReservedName(string? name) => IsDefaultName(name) || ColorSchemePresets.IsPresetName(name);
+
+    /// <summary>
+    /// A name that can be used as a file name for a user profile.
+    /// </summary>
+    public static bool IsWellFormedName(string? name)
     {
         var trimmed = name?.Trim();
 
         return !string.IsNullOrEmpty(trimmed)
             && trimmed.Length <= MaxNameLength
-            && !IsDefaultName(trimmed)
             && trimmed.IndexOfAny(Path.GetInvalidFileNameChars()) < 0;
     }
+
+    public static bool IsValidName(string? name) => IsWellFormedName(name) && !IsReservedName(name);
 }

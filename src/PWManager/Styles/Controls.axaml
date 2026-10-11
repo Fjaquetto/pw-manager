@@ -107,10 +107,10 @@
   <Style Selector="Grid#Workspace">
     <Setter Property="Margin" Value="24"/>
   </Style>
-  <Style Selector="Window.compact Border#PaneRegion">
+  <Style Selector="UserControl.compact Border#PaneRegion">
     <Setter Property="Padding" Value="16"/>
   </Style>
-  <Style Selector="Window.compact Grid#Workspace">
+  <Style Selector="UserControl.compact Grid#Workspace">
     <Setter Property="Margin" Value="16"/>
   </Style>
   <Style Selector="Grid#DetailLayout">
@@ -119,13 +119,13 @@
   <Style Selector="StackPanel#DetailFields">
     <Setter Property="Spacing" Value="20"/>
   </Style>
-  <Style Selector="Window.compact Grid#DetailLayout">
+  <Style Selector="UserControl.compact Grid#DetailLayout">
     <Setter Property="RowSpacing" Value="12"/>
   </Style>
-  <Style Selector="Window.compact StackPanel#DetailFields">
+  <Style Selector="UserControl.compact StackPanel#DetailFields">
     <Setter Property="Spacing" Value="12"/>
   </Style>
-  <Style Selector="Window.compact Button#BackButton">
+  <Style Selector="UserControl.compact Button#BackButton">
     <Setter Property="MinHeight" Value="32"/>
   </Style>
   <Style Selector="Button.ghost:disabled /template/ ContentPresenter">

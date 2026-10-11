@@ -1,14 +1,12 @@
-<Window xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="using:PWManager.ViewModels" xmlns:views="using:PWManager.Views"
-        xmlns:material="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
-        x:Class="PWManager.Views.MainView" x:DataType="vm:MainViewModel" Classes.compact="{Binding IsCompact}"
-        Title="PWManager" Width="1180" Height="780" MinWidth="760" MinHeight="480"
-        WindowStartupLocation="CenterScreen" WindowDecorations="Full">
-  <Window.KeyBindings>
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:PWManager.ViewModels" xmlns:views="using:PWManager.Views"
+             xmlns:material="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             x:Class="PWManager.Views.VaultPanel" x:DataType="vm:MainViewModel" Classes.compact="{Binding IsCompact}">
+  <UserControl.KeyBindings>
     <KeyBinding Gesture="Ctrl+N" Command="{Binding NewEntryCommand}"/>
     <KeyBinding Gesture="Ctrl+S" Command="{Binding SaveEntryCommand}"/>
     <KeyBinding Gesture="Escape" Command="{Binding EscapeCommand}"/>
-  </Window.KeyBindings>
+  </UserControl.KeyBindings>
   <Grid RowDefinitions="*,Auto">
     <Grid RowDefinitions="Auto,*,Auto" IsEnabled="{Binding !HasModal}">
       <Border BorderBrush="{StaticResource LineBrush}" BorderThickness="0,0,0,1" Padding="24,20" Background="{StaticResource SurfaceBrush}">
@@ -124,4 +122,4 @@
       </Grid>
     </Border>
   </Grid>
-</Window>
+</UserControl>

@@ -59,19 +59,35 @@ public class ColorThemeStoreTests : IDisposable
     {
         Assert.Throws<ArgumentException>(() => Store.Save(new ColorProfile { Name = "Default" }));
         Assert.Throws<ArgumentException>(() => Store.Save(new ColorProfile { Name = string.Empty }));
+
+        foreach (var preset in ColorSchemePresets.All)
+        {
+            Assert.Throws<ArgumentException>(() => Store.Save(new ColorProfile { Name = preset.Name }));
+        }
+    }
+
+    [Fact]
+    public void ActiveProfile_ResolvesTheBuiltInPresets()
+    {
+        var preset = ColorSchemePresets.All[0];
+        Store.SetActiveProfile(preset.Name);
+
+        Assert.Equal(preset.Name, Store.GetActiveProfileName());
+        Assert.Equal(preset.Colors, Store.LoadActiveScheme());
+        Assert.Empty(Store.LoadProfiles());
     }
 
     [Fact]
     public void Delete_RemovesOnlyTheRequestedProfile()
     {
         Store.Save(new ColorProfile { Name = "Ocean", Colors = ColorScheme.Default });
-        Store.Save(new ColorProfile { Name = "Forest", Colors = ColorScheme.Default });
+        Store.Save(new ColorProfile { Name = "Graphite", Colors = ColorScheme.Default });
 
         Assert.True(Store.Delete("ocean"));
 
         var remaining = Assert.Single(Store.LoadProfiles());
 
-        Assert.Equal("Forest", remaining.Name);
+        Assert.Equal("Graphite", remaining.Name);
         Assert.False(Store.Delete("Default"));
         Assert.False(Store.Delete("Missing"));
     }

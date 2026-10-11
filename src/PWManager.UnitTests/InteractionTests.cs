@@ -179,16 +179,17 @@ public class InteractionTests
     [InlineData(UnlockResult.InvalidPassword, false)]
     [InlineData(UnlockResult.Unavailable, false)]
     [InlineData(UnlockResult.Success, true)]
-    public async Task Unlock_MapsResult_AndClearsSensitiveFields(UnlockResult result, bool navigates)
+    public async Task Unlock_MapsResult_ClearsSensitiveFields_AndRaisesUnlockedOnlyOnSuccess(UnlockResult result, bool navigates)
     {
         var service = new Mock<IUnlockService>();
-        var navigation = new Mock<INavigationService>();
         service.Setup(s => s.UnlockAsync("master")).ReturnsAsync(result);
-        var viewModel = new UnlockViewModel(service.Object, navigation.Object)
+        var viewModel = new UnlockViewModel(service.Object)
         {
             Password = "master",
             IsPasswordVisible = true
         };
+        var unlocked = 0;
+        viewModel.Unlocked += () => unlocked++;
 
         await viewModel.UnlockCommand.ExecuteAsync(null);
 
@@ -196,14 +197,14 @@ public class InteractionTests
         Assert.Empty(viewModel.Password);
         Assert.False(viewModel.IsPasswordVisible);
         Assert.False(viewModel.IsBusy);
-        navigation.Verify(n => n.ShowMain(), navigates ? Times.Once : Times.Never);
+        Assert.Equal(navigates ? 1 : 0, unlocked);
     }
 
     [Fact]
     public async Task Unlock_EmptyInputDoesNotCallService()
     {
         var service = new Mock<IUnlockService>();
-        var viewModel = new UnlockViewModel(service.Object, Mock.Of<INavigationService>());
+        var viewModel = new UnlockViewModel(service.Object);
 
         await viewModel.UnlockCommand.ExecuteAsync(null);
 
@@ -217,13 +218,14 @@ public class InteractionTests
         var source = new TaskCompletionSource<UnlockResult>();
         var service = new Mock<IUnlockService>();
         service.Setup(s => s.UnlockAsync(It.IsAny<string>())).Returns(source.Task);
-        var viewModel = new UnlockViewModel(service.Object, Mock.Of<INavigationService>())
+        var viewModel = new UnlockViewModel(service.Object)
         {
             Password = "master"
         };
         var task = viewModel.UnlockCommand.ExecuteAsync(null);
 
         Assert.True(viewModel.IsBusy);
+        Assert.True(viewModel.ShowProgress);
         Assert.False(viewModel.UnlockCommand.CanExecute(null));
         Assert.Equal("Unlocking…", viewModel.ButtonLabel);
         source.SetResult(UnlockResult.Success);

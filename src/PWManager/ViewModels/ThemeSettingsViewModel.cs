@@ -101,7 +101,7 @@ public partial class ThemeSettingsViewModel : ViewModelBase
     [ObservableProperty]
     private string _overlayColor = ColorSchemeDefaults.Overlay;
 
-    public bool CanDeleteProfile => !ColorProfile.IsDefaultName(SelectedProfile);
+    public bool CanDeleteProfile => !ColorProfile.IsReservedName(SelectedProfile);
 
     public bool HasValidationMessage => ValidationMessage.Length > 0;
 
@@ -144,16 +144,18 @@ public partial class ThemeSettingsViewModel : ViewModelBase
             return;
         }
 
-        if (ColorProfile.IsDefaultName(name))
+        var builtInScheme = FindBuiltInScheme(name);
+
+        if (builtInScheme is not null)
         {
-            if (!scheme.MatchesDefaults())
+            if (!SameScheme(scheme, builtInScheme))
             {
-                ValidationMessage = "Default is built in and cannot be changed. Choose a name to save your colors as a profile.";
+                ValidationMessage = $"{name} is built in and cannot be changed. Choose a name to save your colors as a profile.";
                 return;
             }
 
-            _store.SetActiveProfile(null);
-            _themeService.Apply(ColorScheme.Default);
+            _store.SetActiveProfile(ColorProfile.IsDefaultName(name) ? null : name);
+            _themeService.Apply(builtInScheme);
             Saved?.Invoke();
             CloseRequested?.Invoke();
             return;
@@ -175,7 +177,8 @@ public partial class ThemeSettingsViewModel : ViewModelBase
             return;
         }
 
-        var isRenaming = !ColorProfile.IsDefaultName(SelectedProfile)
+        var selectedIsUserProfile = !ColorProfile.IsReservedName(SelectedProfile);
+        var isRenaming = selectedIsUserProfile
             && !string.Equals(name, SelectedProfile, StringComparison.OrdinalIgnoreCase);
 
         if (isRenaming)
@@ -200,7 +203,7 @@ public partial class ThemeSettingsViewModel : ViewModelBase
     [RelayCommand]
     private void DeleteProfile()
     {
-        if (ColorProfile.IsDefaultName(SelectedProfile))
+        if (ColorProfile.IsReservedName(SelectedProfile))
         {
             return;
         }
@@ -284,6 +287,11 @@ public partial class ThemeSettingsViewModel : ViewModelBase
         Profiles.Clear();
         Profiles.Add(ColorProfile.DefaultProfileName);
 
+        foreach (var preset in ColorSchemePresets.All)
+        {
+            Profiles.Add(preset.Name);
+        }
+
         foreach (var profile in _store.LoadProfiles())
         {
             Profiles.Add(profile.Name);
@@ -297,17 +305,14 @@ public partial class ThemeSettingsViewModel : ViewModelBase
             return;
         }
 
-        var scheme = ColorScheme.Default;
+        var scheme = FindBuiltInScheme(name);
 
-        if (!ColorProfile.IsDefaultName(name))
+        if (scheme is null)
         {
             var profile = _store.LoadProfiles()
                 .FirstOrDefault(candidate => string.Equals(candidate.Name, name, StringComparison.OrdinalIgnoreCase));
 
-            if (profile is not null)
-            {
-                scheme = profile.Colors;
-            }
+            scheme = profile?.Colors ?? ColorScheme.Default;
         }
 
         _suppressUpdates = true;
@@ -320,6 +325,20 @@ public partial class ThemeSettingsViewModel : ViewModelBase
         UpdateWarnings();
         _themeService.Apply(scheme);
     }
+
+    private static ColorScheme? FindBuiltInScheme(string name)
+    {
+        if (ColorProfile.IsDefaultName(name))
+        {
+            return ColorScheme.Default;
+        }
+
+        return ColorSchemePresets.Find(name)?.Colors;
+    }
+
+    private static bool SameScheme(ColorScheme first, ColorScheme second) => first
+        .Tokens()
+        .All(token => string.Equals(token.Value, second.GetToken(token.Key), StringComparison.OrdinalIgnoreCase));
 
     private void LoadScheme(ColorScheme scheme)
     {

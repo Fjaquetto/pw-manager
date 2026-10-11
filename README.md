@@ -25,6 +25,8 @@ The redesign does not migrate the database or change the encryption format.
 
 Enter your master password on **Unlock your vault**. For an empty vault, the application retains its existing behavior: the entered password is used to encrypt the entries you subsequently save.
 
+Unlocking happens in a single window: after the password is validated, the vault entries load behind one continuous progress indicator, the window expands once and the vault fades in. No vault content is created or displayed before authentication, and the password field is cleared as soon as the attempt completes.
+
 Search in the header, then select an entry to see its login, password, creation date, and last update. The copy icon in a list row copies its password directly. In the details pane, **Copy** is available beside both login and password.
 
 **Filters** expands the separate site and login fields. Global search matches site **or** login; the specific filters are combined with it using **and**. Matching is case-insensitive. **Clear filters** also clears global search.
@@ -109,8 +111,8 @@ dotnet test PWManager.sln -c Release --no-build --no-restore
 
 Build the Release solution first. The solution contains:
 
-- **PWManager.UnitTests:** xUnit 2 application tests, generator and vault service tests, ViewModel/interaction tests, fake-time notification tests, a temporary SQLite persistence cycle, and appearance tests covering color parsing, WCAG contrast, shade derivation, anti-corruption of stored profiles, and the appearance ViewModel flows.
-- **PWManager.UITests:** xUnit 3 with Avalonia.Headless.XUnit 12.0.2. Exercises production views and styles with fake credentials and services, including compiled bindings, copy actions, keyboard focus, dialogs, responsive layout, virtualization with 1000 entries, 100%/150%/200% rendering scales, and live appearance previews against the shared brushes and the Fluent accent palette.
+- **PWManager.UnitTests:** xUnit 2 application tests, generator and vault service tests, ViewModel/interaction tests, fake-time notification tests, a temporary SQLite persistence cycle, shell state-machine tests (nothing of the vault exists before a successful unlock, and it is loaded before being revealed), and appearance tests covering color parsing, WCAG contrast, shade derivation, anti-corruption of stored profiles, and the appearance ViewModel flows.
+- **PWManager.UITests:** xUnit 3 with Avalonia.Headless.XUnit 12.0.2. Exercises production views and styles with fake credentials and services, including compiled bindings, copy actions, keyboard focus, dialogs, responsive layout, virtualization with 1000 entries, 100%/150%/200% rendering scales, the single-window unlock-to-vault transition, and live appearance previews against the shared brushes and the Fluent accent palette.
 
 The UI test application skips production startup, so it never opens the personal vault. Persistence tests create an isolated temporary SQLite database and remove it afterward. Tests do not use the system clipboard.
 
@@ -151,7 +153,7 @@ The redesign removes the deprecated Avalonia properties from the active views. T
 | PWManager.UnitTests | Application, ViewModel, interaction, and persistence tests |
 | PWManager.UITests | Headless UI and rendering tests |
 
-The UI uses CommunityToolkit.Mvvm, compiled bindings, Inter, FluentTheme, and Material Icons. ViewModels coordinate screen state, navigation requests, filters, and editor validation. Editor drafts are separate from loaded entries.
+The UI uses CommunityToolkit.Mvvm, compiled bindings, Inter, FluentTheme, and Material Icons. ViewModels coordinate screen state, the shell transition, filters, and editor validation. Editor drafts are separate from loaded entries.
 
 `VaultEntryService` handles loading and saving credential copies, encryption coordination, and timestamps. `PasswordGenerator` contains the character generation algorithm. Clipboard, vault entry, unlock, and navigation services are injected; notification and persistence timing use `TimeProvider`. UI service interfaces live in `Services/Interfaces`, and enums live in `Enums`, each in its own file.
 
@@ -188,6 +190,17 @@ Choose **Appearance** (palette icon) in the header to customize the colors. The 
 Changes preview live across the application; **Cancel** (or Esc) restores the palette that was active before the dialog opened. With "Derive related shades" enabled, hover, selection, focus, and overlay are calculated from the primary action and background colors; editing them directly switches to manual mode. A contrast check lists WCAG warnings for unreadable pairs without blocking saving, and every row can be reset to its default value.
 
 **Save and close** persists the current colors under the name in the profile box; selecting an existing profile and renaming it renames the file. The built-in **Default** profile cannot be overwritten or deleted and always restores the original palette.
+
+Four presets ship with the application and always appear in the profile list:
+
+| Preset | Character |
+|---|---|
+| Midnight Ocean | Deep navy surfaces with a confident blue action color |
+| Violet Nebula | Dark plum surfaces with a violet accent |
+| Ember | Warm charcoal with a burnt-orange action color |
+| Forest | Deep green surfaces with a natural green accent |
+
+Like Default, presets cannot be edited or deleted in place: selecting one previews it live across the app, and typing a different name before **Save and close** creates your own copy. All presets are audited against the same WCAG contrast targets as the default palette.
 
 Profiles are stored as JSON files in a `themes` folder next to the database (`%AppData%\PWManager\themes` on Windows, `~/.local/share/PWManager/themes` on Linux), and the active profile name is remembered in `themes/active.json`. Nothing about appearance is written to the vault database.
 
