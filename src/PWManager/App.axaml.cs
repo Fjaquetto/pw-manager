@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
@@ -41,17 +42,23 @@ public partial class App : AvaloniaApp
         serviceCollection.AddSingleton<IPWDbContextFactory>(provider =>
             new PWDbContextFactory(provider.GetRequiredService<DatabaseConfigurator>().GetDatabaseFilePath()));
         serviceCollection.AddScoped(sp => sp.GetRequiredService<IPWDbContextFactory>().CreateDbContext());
+        serviceCollection.AddSingleton<ColorThemeStore>(provider => new ColorThemeStore(
+            Path.Combine(
+                provider.GetRequiredService<DatabaseConfigurator>().GetApplicationFolder(),
+                ColorThemeStore.ThemesFolderName)));
+        serviceCollection.AddSingleton<IThemeService, ThemeService>();
         serviceCollection.AddScoped(typeof(IRepository<>), typeof(Repository<>));
         serviceCollection.AddScoped<IUserRepository, UserRepository>();
         serviceCollection.AddScoped<IUserApplication, PWManager.Application.UserApplication>();
         serviceCollection.AddScoped<IUserEncryptorService, UserEncryptorService>();
-        serviceCollection.AddTransient<INavigationService, NavigationService>();
         serviceCollection.AddTransient<IClipboardService, ClipboardService>();
         serviceCollection.AddTransient<IUnlockService, UnlockService>();
         serviceCollection.AddTransient<IVaultEntryService, VaultEntryService>();
         serviceCollection.AddSingleton(TimeProvider.System);
         serviceCollection.AddTransient<UnlockViewModel>();
         serviceCollection.AddTransient<MainViewModel>();
+        serviceCollection.AddTransient<ShellViewModel>();
+        serviceCollection.AddSingleton<Func<MainViewModel>>(provider => provider.GetRequiredService<MainViewModel>);
         Services = serviceCollection.BuildServiceProvider();
         using (var scope = Services.GetRequiredService<IServiceScopeFactory>().CreateScope())
         {
@@ -59,14 +66,15 @@ public partial class App : AvaloniaApp
             context.Database.EnsureCreated();
         }
 
+        Services.GetRequiredService<IThemeService>()
+            .Apply(Services.GetRequiredService<ColorThemeStore>().LoadActiveScheme());
+
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            var unlockViewModel = Services.GetRequiredService<UnlockViewModel>();
-            var unlockView = new UnlockView
+            desktop.MainWindow = new ShellWindow
             {
-                DataContext = unlockViewModel
+                DataContext = Services.GetRequiredService<ShellViewModel>()
             };
-            desktop.MainWindow = unlockView;
         }
 
         base.OnFrameworkInitializationCompleted();

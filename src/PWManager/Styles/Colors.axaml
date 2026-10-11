@@ -2,9 +2,12 @@
   <SolidColorBrush x:Key="CanvasBrush" Color="#090A0B"/>
   <SolidColorBrush x:Key="SurfaceBrush" Color="#111315"/>
   <SolidColorBrush x:Key="RaisedBrush" Color="#1B1F21"/>
+  <SolidColorBrush x:Key="FieldBrush" Color="#090A0B"/>
   <SolidColorBrush x:Key="LineBrush" Color="#2A3033"/>
   <SolidColorBrush x:Key="TextBrush" Color="#E8ECEB"/>
   <SolidColorBrush x:Key="SecondaryTextBrush" Color="#A6B1AD"/>
+  <SolidColorBrush x:Key="TitleBrush" Color="#E8ECEB"/>
+  <SolidColorBrush x:Key="PrimaryButtonTextBrush" Color="#FFFFFF"/>
   <SolidColorBrush x:Key="AccentBrush" Color="#0F766E"/>
   <SolidColorBrush x:Key="AccentHoverBrush" Color="#0D655F"/>
   <SolidColorBrush x:Key="FocusBrush" Color="#7DD3C0"/>

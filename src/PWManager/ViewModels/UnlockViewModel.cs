@@ -3,12 +3,11 @@ using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PWManager.Enums;
-using PWManager.Services;
 using PWManager.Services.Interfaces;
 
 namespace PWManager.ViewModels;
 
-public partial class UnlockViewModel(IUnlockService unlockService, INavigationService navigation) : ViewModelBase
+public partial class UnlockViewModel(IUnlockService unlockService) : ViewModelBase
 {
     [ObservableProperty]
     private string _password = string.Empty;
@@ -22,9 +21,25 @@ public partial class UnlockViewModel(IUnlockService unlockService, INavigationSe
     private string _errorMessage = string.Empty;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ButtonLabel), nameof(IsIdle))]
+    [NotifyPropertyChangedFor(nameof(ButtonLabel), nameof(IsIdle), nameof(ShowProgress))]
     [NotifyCanExecuteChangedFor(nameof(UnlockCommand))]
     private bool _isBusy;
+
+    /// <summary>
+    /// True while the shell is opening the vault after a successful unlock.
+    /// Keeps the unlock form disabled and its progress indicator visible until
+    /// the vault is ready to be revealed.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsIdle), nameof(ShowProgress))]
+    [NotifyCanExecuteChangedFor(nameof(UnlockCommand))]
+    private bool _isOpeningVault;
+
+    /// <summary>
+    /// Raised after a successful unlock, once the password and visibility have
+    /// been reset.
+    /// </summary>
+    public event Action? Unlocked;
 
     public char PasswordMask => IsPasswordVisible ? '\0' : '•';
 
@@ -32,7 +47,9 @@ public partial class UnlockViewModel(IUnlockService unlockService, INavigationSe
 
     public bool HasError => ErrorMessage.Length > 0;
 
-    public bool IsIdle => !IsBusy;
+    public bool IsIdle => !IsBusy && !IsOpeningVault;
+
+    public bool ShowProgress => IsBusy || IsOpeningVault;
 
     public string ButtonLabel => IsBusy ? "Unlocking…" : "Unlock vault";
 
@@ -57,6 +74,7 @@ public partial class UnlockViewModel(IUnlockService unlockService, INavigationSe
 
         IsBusy = true;
         var error = string.Empty;
+        var unlocked = false;
 
         try
         {
@@ -64,7 +82,7 @@ public partial class UnlockViewModel(IUnlockService unlockService, INavigationSe
 
             if (result == UnlockResult.Success)
             {
-                navigation.ShowMain();
+                unlocked = true;
             }
             else
             {
@@ -83,6 +101,11 @@ public partial class UnlockViewModel(IUnlockService unlockService, INavigationSe
             IsPasswordVisible = false;
             ErrorMessage = error;
             IsBusy = false;
+        }
+
+        if (unlocked)
+        {
+            Unlocked?.Invoke();
         }
     }
 }
