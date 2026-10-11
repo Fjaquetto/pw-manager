@@ -8,9 +8,7 @@ public class DatabaseConfigurator(IOptions<DatabaseConfig> databaseConfigOptions
 {
     public static Environment.SpecialFolder ResolveDataFolder(bool isWindows)
     {
-        return isWindows
-            ? Environment.SpecialFolder.ApplicationData
-            : Environment.SpecialFolder.LocalApplicationData;
+        return Environment.SpecialFolder.LocalApplicationData;
     }
 
     public string GetDatabaseFilePath()

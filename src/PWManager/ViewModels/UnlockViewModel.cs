@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using PWManager.Domain.Model;
 using PWManager.Enums;
 using PWManager.Services.Interfaces;
 
@@ -9,8 +10,13 @@ namespace PWManager.ViewModels;
 
 public partial class UnlockViewModel(IUnlockService unlockService) : ViewModelBase
 {
+    public const int MinimumPasswordLength = 8;
+
     [ObservableProperty]
     private string _password = string.Empty;
+
+    [ObservableProperty]
+    private string _confirmPassword = string.Empty;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(PasswordMask), nameof(VisibilityLabel))]
@@ -35,11 +41,22 @@ public partial class UnlockViewModel(IUnlockService unlockService) : ViewModelBa
     [NotifyCanExecuteChangedFor(nameof(UnlockCommand))]
     private bool _isOpeningVault;
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsCreating), nameof(Heading), nameof(Description), nameof(ButtonLabel))]
+    [NotifyCanExecuteChangedFor(nameof(UnlockCommand))]
+    private VaultStatus _status = VaultStatus.Existing;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasNotice))]
+    private string _notice = string.Empty;
+
     /// <summary>
     /// Raised after a successful unlock, once the password and visibility have
     /// been reset.
     /// </summary>
     public event Action? Unlocked;
+
+    public bool IsCreating => Status == VaultStatus.New;
 
     public char PasswordMask => IsPasswordVisible ? '\0' : '•';
 
@@ -47,13 +64,40 @@ public partial class UnlockViewModel(IUnlockService unlockService) : ViewModelBa
 
     public bool HasError => ErrorMessage.Length > 0;
 
+    public bool HasNotice => Notice.Length > 0;
+
     public bool IsIdle => !IsBusy && !IsOpeningVault;
 
     public bool ShowProgress => IsBusy || IsOpeningVault;
 
-    public string ButtonLabel => IsBusy ? "Unlocking…" : "Unlock vault";
+    public string Heading => IsCreating ? "Create your vault" : "Unlock your vault";
+
+    public string Description => IsCreating
+        ? "Choose a master password to encrypt your vault. There is no recovery if you forget it."
+        : "Your passwords, right where you left them.";
+
+    public string ButtonLabel => IsBusy
+        ? (IsCreating ? "Creating…" : "Unlocking…")
+        : (IsCreating ? "Create vault" : "Unlock vault");
+
+    public void Configure(VaultStatus status) => Status = status;
+
+    /// <summary>
+    /// Clears the form (passwords, visibility and messages). Used when the
+    /// vault is locked again.
+    /// </summary>
+    public void Reset()
+    {
+        Password = string.Empty;
+        ConfirmPassword = string.Empty;
+        IsPasswordVisible = false;
+        ErrorMessage = string.Empty;
+        Notice = string.Empty;
+    }
 
     partial void OnPasswordChanged(string value) => ErrorMessage = string.Empty;
+
+    partial void OnConfirmPasswordChanged(string value) => ErrorMessage = string.Empty;
 
     [RelayCommand]
     private void TogglePasswordVisibility() => IsPasswordVisible = !IsPasswordVisible;
@@ -68,7 +112,19 @@ public partial class UnlockViewModel(IUnlockService unlockService) : ViewModelBa
 
         if (string.IsNullOrEmpty(Password))
         {
-            ErrorMessage = "Enter your master password.";
+            ErrorMessage = IsCreating ? "Choose a master password." : "Enter your master password.";
+            return;
+        }
+
+        if (IsCreating && Password.Length < MinimumPasswordLength)
+        {
+            ErrorMessage = $"Use at least {MinimumPasswordLength} characters.";
+            return;
+        }
+
+        if (IsCreating && Password != ConfirmPassword)
+        {
+            ErrorMessage = "The passwords do not match.";
             return;
         }
 
@@ -88,16 +144,21 @@ public partial class UnlockViewModel(IUnlockService unlockService) : ViewModelBa
             {
                 error = result == UnlockResult.InvalidPassword
                     ? "Incorrect master password. Please try again."
-                    : "Unable to open your vault. Please try again.";
+                    : IsCreating
+                        ? "Unable to create your vault. Please try again."
+                        : "Unable to open your vault. Please try again.";
             }
         }
         catch (Exception)
         {
-            error = "Unable to open your vault. Please try again.";
+            error = IsCreating
+                ? "Unable to create your vault. Please try again."
+                : "Unable to open your vault. Please try again.";
         }
         finally
         {
             Password = string.Empty;
+            ConfirmPassword = string.Empty;
             IsPasswordVisible = false;
             ErrorMessage = error;
             IsBusy = false;

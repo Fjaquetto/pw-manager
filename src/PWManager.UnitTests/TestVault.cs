@@ -11,13 +11,22 @@ using PWManager.ViewModels;
 namespace PWManager.UnitTests;
 
 internal sealed class TestVault
-{    public Mock<IUserApplication> Application { get; } = new();
+{
+    public Mock<IUserApplication> Application { get; } = new();
 
     public Mock<IUserEncryptorService> Encryptor { get; } = new();
 
     public Mock<IClipboardService> Clipboard { get; } = new();
 
+    public Mock<IVaultRekeyService> Rekey { get; } = new();
+
+    public Mock<IVaultBackupService> Backup { get; } = new();
+
+    public Mock<IFilePickerService> FilePicker { get; } = new();
+
     public FakeTimeProvider Time { get; } = new(new DateTimeOffset(2026, 9, 6, 12, 0, 0, TimeSpan.Zero));
+
+    public AppSettingsService Settings { get; }
 
     public List<User> Users { get; } = new();
 
@@ -39,7 +48,17 @@ internal sealed class TestVault
         Encryptor.Setup(e => e.EncryptUser(It.IsAny<User>())).Returns((User u) => u);
         Encryptor.Setup(e => e.DecryptUser(It.IsAny<User>())).Returns((User u) => u);
         Clipboard.Setup(c => c.SetTextAsync(It.IsAny<string>())).ReturnsAsync(true);
-        ViewModel = new(new VaultEntryService(Application.Object, Encryptor.Object, Time), Clipboard.Object, Time, Mock.Of<IThemeService>(), new ColorThemeStore(UnusedThemeDirectory));
+        Settings = new AppSettingsService(new AppSettingsStore(Path.Combine(Path.GetTempPath(), "pwmanager-tests-settings-" + Guid.NewGuid().ToString("N"))));
+        ViewModel = new(
+            new VaultEntryService(Application.Object, Encryptor.Object, Time),
+            Clipboard.Object,
+            Time,
+            Mock.Of<IThemeService>(),
+            new ColorThemeStore(UnusedThemeDirectory),
+            Settings,
+            Rekey.Object,
+            Backup.Object,
+            FilePicker.Object);
     }
 
     private static string UnusedThemeDirectory => Path.Combine(Path.GetTempPath(), "pwmanager-tests-no-themes");

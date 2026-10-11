@@ -5,4 +5,8 @@ namespace PWManager.Services.Interfaces;
 public interface IClipboardService
 {
     Task<bool> SetTextAsync(string text);
+
+    Task<string?> TryGetTextAsync();
+
+    Task ClearAsync();
 }

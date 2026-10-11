@@ -18,6 +18,9 @@ namespace PWManager.Infra.Context.SQLite
         public DbSet<User> User
         { get; set; }
 
+        public DbSet<VaultMetadata> VaultMetadata
+        { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<User>()
@@ -27,6 +30,14 @@ namespace PWManager.Infra.Context.SQLite
             modelBuilder.Entity<User>()
                 .Property(u => u.LastUpdated)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+            modelBuilder.Entity<VaultMetadata>()
+                .ToTable("VaultMetadata")
+                .HasKey(metadata => metadata.Id);
+
+            modelBuilder.Entity<VaultMetadata>()
+                .Property(metadata => metadata.Id)
+                .ValueGeneratedNever();
         }
     }
 }

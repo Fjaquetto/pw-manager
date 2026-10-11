@@ -8,6 +8,11 @@ A personal desktop password manager built with .NET 10 and Avalonia UI. Keep cre
 
 - Neutral black and teal theme, with readable text, visible keyboard focus, and labeled actions.
 - Appearance settings: choose colors for background, surfaces, text, titles, buttons, fields, and status, preview changes live, and save them as profiles. Profiles are JSON files stored outside the vault database, and the built-in Default profile matches the original palette.
+- Security settings: automatic lock after idle time (or when minimized), manual lock (button or Ctrl+L), clipboard clearing for copied passwords, and automatic hiding of revealed passwords.
+- Create-your-vault onboarding: a new vault asks for the master password twice and warns that there is no recovery.
+- Master password change: re-encrypts every entry with a fresh key in a single transaction.
+- Backup and restore from the Security dialog, using encrypted copies of the database (no plaintext export).
+- AES-256-GCM encryption with PBKDF2-SHA256 (600,000 iterations), authenticated per field and derived once per session; legacy vaults are migrated automatically on unlock.
 - Search across site and login, plus optional site/login filters.
 - Sort by site, login, creation date, or last update, in either direction.
 - Virtualized entry list with quick password copy and a separate details pane.
@@ -17,15 +22,14 @@ A personal desktop password manager built with .NET 10 and Avalonia UI. Keep cre
 - Password generator with a length slider and numeric input, uppercase/lowercase, numbers, symbols, and an estimated strength indicator.
 - Loading, empty-vault, no-results, and retry states, with consistent success and error messages.
 - Responsive layout: list and details side by side at widths of 1000 logical pixels or more; a single pane with **Back to entries** below that.
-- AES-256 encryption of credential fields before local persistence, using the existing PBKDF2 derivation and storage format.
 
-The redesign does not migrate the database or change the encryption format.
+Vaults created by earlier versions are migrated to the v2 crypto format automatically on the first successful unlock (a transient `pwmanager.db.migrating.bak` snapshot protects the operation).
 
 ## Using the vault
 
-Enter your master password on **Unlock your vault**. For an empty vault, the application retains its existing behavior: the entered password is used to encrypt the entries you subsequently save.
+On first use the app asks you to **create your vault**: choose a master password (at least 8 characters) and confirm it. There is no recovery — if you forget this password, your entries cannot be decrypted. Afterwards, **Unlock your vault** asks for the master password.
 
-Unlocking happens in a single window: after the password is validated, the vault entries load behind one continuous progress indicator, the window grows to the vault size with a short eased transition that keeps it centered on the screen, and the vault fades in. No vault content is created or displayed before authentication, and the password field is cleared as soon as the attempt completes.
+Unlocking happens in a single window: after the password is validated, the vault entries load behind one continuous progress indicator, the window grows to the vault size with a short eased transition that keeps it centered on the screen, and the vault fades in. No vault content is created or displayed before authentication, and the password field is cleared as soon as the attempt completes. Press **Ctrl+L** (or use the lock button) to lock the vault again at any time.
 
 Search in the header, then select an entry to see its login, password, creation date, and last update. The copy icon in a list row copies its password directly. In the details pane, **Copy** is available beside both login and password.
 
@@ -122,8 +126,8 @@ dotnet test PWManager.sln -c Release --no-build --no-restore
 
 Build the Release solution first. The solution contains:
 
-- **PWManager.UnitTests:** xUnit 2 application tests, generator and vault service tests, ViewModel/interaction tests, fake-time notification tests, a temporary SQLite persistence cycle, shell state-machine tests (nothing of the vault exists before a successful unlock, and it is loaded before being revealed), and appearance tests covering color parsing, WCAG contrast, shade derivation, anti-corruption of stored profiles, and the appearance ViewModel flows.
-- **PWManager.UITests:** xUnit 3 with Avalonia.Headless.XUnit 12.0.2. Exercises production views and styles with fake credentials and services, including compiled bindings, copy actions, keyboard focus, dialogs, responsive layout, virtualization with 1000 entries, 100%/150%/200% rendering scales, the single-window unlock-to-vault transition, and live appearance previews against the shared brushes and the Fluent accent palette.
+- **PWManager.UnitTests:** xUnit 2 application tests, generator and vault service tests, ViewModel/interaction tests, fake-time notification tests, a temporary SQLite persistence cycle, shell state-machine tests (nothing of the vault exists before a successful unlock, it is loaded before being revealed, and locking disposes it and zeroes the session key), crypto tests (AES-GCM tamper detection, PBKDF2 derivation, verifier), legacy-vault migration, master-password rekey, backup/restore, clipboard and auto-hide timing, settings storage, and appearance tests covering color parsing, WCAG contrast, shade derivation, anti-corruption of stored profiles, and the appearance ViewModel flows.
+- **PWManager.UITests:** xUnit 3 with Avalonia.Headless.XUnit 12.0.2. Exercises production views and styles with fake credentials and services, including compiled bindings, copy actions, keyboard focus, dialogs, responsive layout, virtualization with 1000 entries, 100%/150%/200% rendering scales, the single-window unlock-to-vault transition (including Ctrl+L locking and create-your-vault mode), and live appearance previews against the shared brushes and the Fluent accent palette.
 
 The UI test application skips production startup, so it never opens the personal vault. Persistence tests create an isolated temporary SQLite database and remove it afterward. Tests do not use the system clipboard.
 
@@ -144,13 +148,15 @@ The redesign removes the deprecated Avalonia properties from the active views. T
 
 ## Storage and security behavior
 
-- By default, the database is `%AppData%\PWManager\pwmanager.db` on Windows and `~/.local/share/PWManager/pwmanager.db` (the XDG data location) on Linux.
+- By default, the database is `%LocalAppData%\PWManager\pwmanager.db` on Windows and `~/.local/share/PWManager/pwmanager.db` (the XDG data location) on Linux. Windows installations from earlier versions are moved from the roaming AppData folder automatically.
 - `DatabaseConfig.AppFolder` and `DatabaseConfig.DbFile` in `appsettings.json` control the location.
-- Site, login, and password fields are encrypted before they are written. This does **not** mean the entire SQLite file is encrypted; IDs and timestamps remain database metadata.
-- The application uses AES-256 and the existing PBKDF2 key derivation.
-- Credentials are decrypted and held in memory during an unlocked session to support searching and use. Masking controls their visual display.
-- The master password is not persisted by the application; the existing encryption service retains it in memory for the unlocked session.
-- Copy actions place the selected content on the OS clipboard. This version does not automatically clear it.
+- Site, login, and password fields are encrypted before they are written with AES-256-GCM and a key derived with PBKDF2-SHA256 (600,000 iterations) and a per-vault salt stored in the `VaultMetadata` table. This does **not** mean the entire SQLite file is encrypted; IDs and timestamps remain database metadata.
+- Vaults written by earlier versions (PBKDF2-SHA1/1,000 iterations with AES-CBC) are detected and re-encrypted to the v2 format on the first successful unlock, inside a transaction and with a transient snapshot as a safety net.
+- The derived key lives in memory only while the vault is unlocked and is zeroed (`CryptographicOperations.ZeroMemory`) when the vault is locked; the master password itself is not retained.
+- Locking happens automatically after the configured idle time (default 15 minutes), when the window is minimized (optional), or manually via the **Lock** button or Ctrl+L. Locking disposes the decrypted entries and clears a pending clipboard secret.
+- Credentials are decrypted and held in memory during an unlocked session to support searching and use. Masking controls their visual display; revealed passwords are masked again when the window loses focus and after the configured timeout.
+- Copied passwords are cleared from the clipboard after the configured time (default 25 seconds) only if the clipboard still contains that password. Clipboard history managers on Linux cannot be told to exclude the content.
+- Backups are encrypted database copies created with `VACUUM INTO` (a single consistent file, no WAL side files). Restoring replaces the vault, keeps a `.before-restore` safety copy, and requires unlocking with the backup's master password.
 - The application does not synchronize or transmit vault entries to a remote service.
 
 ## Architecture
@@ -213,6 +219,18 @@ Four presets ship with the application and always appear in the profile list:
 
 Like Default, presets cannot be edited or deleted in place: selecting one previews it live across the app, and typing a different name before **Save and close** creates your own copy. All presets are audited against the same WCAG contrast targets as the default palette.
 
-Profiles are stored as JSON files in a `themes` folder next to the database (`%AppData%\PWManager\themes` on Windows, `~/.local/share/PWManager/themes` on Linux), and the active profile name is remembered in `themes/active.json`. Nothing about appearance is written to the vault database.
+Profiles are stored as JSON files in a `themes` folder next to the database (`%LocalAppData%\PWManager\themes` on Windows, `~/.local/share/PWManager/themes` on Linux), and the active profile name is remembered in `themes/active.json`. Nothing about appearance is written to the vault database.
+
+### Security settings
+
+Choose **Security** (shield icon) in the header:
+
+- **Session** — auto-lock after an idle timeout (default 15 minutes, 0 disables), optional locking when the window is minimized, and a reminder that revealed passwords are masked when the window loses focus. The lock button and Ctrl+L lock immediately.
+- **Clipboard** — copied passwords are cleared after the configured time (default 25 seconds, 0 disables) only if the clipboard still holds that password.
+- **Passwords** — revealed passwords are hidden again after the configured time (default 20 seconds, 0 disables).
+- **Master password** — change it by entering the current and new passwords; every entry is re-encrypted with a new key in a single transaction (a transient backup protects the operation).
+- **Backup** — save an encrypted copy of the vault (`VACUUM INTO`, one consistent file) or restore one. Restoring keeps a `.before-restore` safety copy of the current vault and locks the app so it is unlocked with the backup's master password.
+
+Preferences live in `settings.json` next to the database and are never written to the vault.
 
 ![Unlock your vault](docs/screenshots/unlock.png)

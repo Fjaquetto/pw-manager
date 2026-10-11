@@ -36,6 +36,9 @@ public partial class App : AvaloniaApp
             .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
             .AddJsonFile("appsettings.json", optional: false)
             .Build();
+
+        MoveRoamingDataIfNeeded(configuration);
+
         var serviceCollection = new ServiceCollection();
         serviceCollection.Configure<DatabaseConfig>(options => configuration.GetSection("DatabaseConfig").Bind(options));
         serviceCollection.AddSingleton<DatabaseConfigurator>();
@@ -47,6 +50,15 @@ public partial class App : AvaloniaApp
                 provider.GetRequiredService<DatabaseConfigurator>().GetApplicationFolder(),
                 ColorThemeStore.ThemesFolderName)));
         serviceCollection.AddSingleton<IThemeService, ThemeService>();
+        serviceCollection.AddSingleton<IVaultSession, VaultSession>();
+        serviceCollection.AddSingleton<AppSettingsStore>(provider =>
+            new AppSettingsStore(provider.GetRequiredService<DatabaseConfigurator>().GetApplicationFolder()));
+        serviceCollection.AddSingleton<IAppSettingsService, AppSettingsService>();
+        serviceCollection.AddSingleton<IVaultBackupService>(provider =>
+            new VaultBackupService(provider.GetRequiredService<IPWDbContextFactory>().DatabasePath));
+        serviceCollection.AddTransient<IVaultRekeyService, VaultRekeyService>();
+        serviceCollection.AddSingleton<IFilePickerService>(_ => new FilePickerService(() =>
+            ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop ? desktop.MainWindow : null));
         serviceCollection.AddScoped(typeof(IRepository<>), typeof(Repository<>));
         serviceCollection.AddScoped<IUserRepository, UserRepository>();
         serviceCollection.AddScoped<IUserApplication, PWManager.Application.UserApplication>();
@@ -64,19 +76,37 @@ public partial class App : AvaloniaApp
         {
             var context = scope.ServiceProvider.GetRequiredService<PWDbContext>();
             context.Database.EnsureCreated();
+            VaultSchemaInitializer.EnsureUpToDate(context);
         }
 
         Services.GetRequiredService<IThemeService>()
             .Apply(Services.GetRequiredService<ColorThemeStore>().LoadActiveScheme());
 
+        var shellViewModel = Services.GetRequiredService<ShellViewModel>();
+        var vaultStatus = Services.GetRequiredService<IUnlockService>().GetStatusAsync().GetAwaiter().GetResult();
+        shellViewModel.Unlock.Configure(vaultStatus);
+
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             desktop.MainWindow = new ShellWindow
             {
-                DataContext = Services.GetRequiredService<ShellViewModel>()
+                DataContext = shellViewModel
             };
         }
 
         base.OnFrameworkInitializationCompleted();
+    }
+
+    private static void MoveRoamingDataIfNeeded(IConfiguration configuration)
+    {
+        if (!OperatingSystem.IsWindows())
+        {
+            return;
+        }
+
+        DataFolderMigration.MoveIfNeeded(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            configuration["DatabaseConfig:AppFolder"] ?? "PWManager");
     }
 }
