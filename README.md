@@ -25,7 +25,7 @@ The redesign does not migrate the database or change the encryption format.
 
 Enter your master password on **Unlock your vault**. For an empty vault, the application retains its existing behavior: the entered password is used to encrypt the entries you subsequently save.
 
-Unlocking happens in a single window: after the password is validated, the vault entries load behind one continuous progress indicator, the window expands once and the vault fades in. No vault content is created or displayed before authentication, and the password field is cleared as soon as the attempt completes.
+Unlocking happens in a single window: after the password is validated, the vault entries load behind one continuous progress indicator, the window grows to the vault size with a short eased transition that keeps it centered on the screen, and the vault fades in. No vault content is created or displayed before authentication, and the password field is cleared as soon as the attempt completes.
 
 Search in the header, then select an entry to see its login, password, creation date, and last update. The copy icon in a list row copies its password directly. In the details pane, **Copy** is available beside both login and password.
 

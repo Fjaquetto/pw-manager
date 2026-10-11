@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
 using Avalonia.Input;
@@ -241,6 +242,48 @@ public class ThemeSettingsTests
 
             Assert.False(viewModel.IsThemeSettingsOpen);
             Assert.False(Find<Border>(window, "ThemeLayer").IsEffectivelyVisible);
+        }
+        finally
+        {
+            window.Close();
+            RestoreDefaults();
+        }
+    }
+
+    [AvaloniaFact]
+    public void VaultPanel_AppearanceModal_KeepsTheDeleteButtonClearOfTheScrollBar()
+    {
+        var viewModel = MemoryVault.Sample(3).CreateViewModel();
+        viewModel.LoadEntriesAsync().GetAwaiter().GetResult();
+        var window = new Window
+        {
+            Content = new VaultPanel
+            {
+                DataContext = viewModel
+            },
+            Width = 1180,
+            Height = 780
+        };
+        window.Show();
+        Dispatcher.UIThread.RunJobs();
+
+        try
+        {
+            viewModel.OpenThemeSettingsCommand.Execute(null);
+            Dispatcher.UIThread.RunJobs();
+
+            var themeView = window.GetVisualDescendants().OfType<ThemeSettingsView>().Single();
+            var delete = themeView.GetVisualDescendants().OfType<Button>().Single(button => Equals(button.Content, "Delete"));
+            var scroll = delete.GetVisualAncestors().OfType<ScrollViewer>().First();
+            var scrollBar = scroll.GetVisualDescendants().OfType<ScrollBar>()
+                .Single(bar => bar.Name == "PART_VerticalScrollBar" && bar.IsEffectivelyVisible);
+            var deleteTopLeft = delete.TranslatePoint(default, scroll);
+            var scrollBarTopLeft = scrollBar.TranslatePoint(default, scroll);
+
+            Assert.NotNull(deleteTopLeft);
+            Assert.NotNull(scrollBarTopLeft);
+            Assert.True(deleteTopLeft!.Value.X + delete.Bounds.Width <= scrollBarTopLeft!.Value.X,
+                $"The Delete button ends at {deleteTopLeft.Value.X + delete.Bounds.Width} and overlaps the scroll bar starting at {scrollBarTopLeft.Value.X}.");
         }
         finally
         {
