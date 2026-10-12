@@ -4,26 +4,28 @@
              x:Class="PWManager.Views.UnlockPanel" x:DataType="vm:UnlockViewModel">
   <ScrollViewer HorizontalScrollBarVisibility="Disabled">
     <Grid Margin="36" RowDefinitions="Auto,*">
-      <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,0,0,40">
+      <StackPanel Orientation="Horizontal" Spacing="10">
         <material:MaterialIcon Kind="ShieldKey" Width="24" Height="24" Foreground="{StaticResource FocusBrush}"/>
         <TextBlock Text="PWManager" FontWeight="SemiBold" VerticalAlignment="Center"/>
       </StackPanel>
-      <StackPanel Grid.Row="1" Spacing="12">
-        <Border Width="56" Height="56" CornerRadius="16" Background="{StaticResource AccentSurfaceBrush}" HorizontalAlignment="Left" Margin="0,0,0,12">
+      <StackPanel Grid.Row="1" Spacing="12" MaxWidth="360" HorizontalAlignment="Center" VerticalAlignment="Center">
+        <Border Width="56" Height="56" CornerRadius="16" Background="{StaticResource AccentSurfaceBrush}" HorizontalAlignment="Center" Margin="0,0,0,12">
           <material:MaterialIcon Kind="LockOutline" Width="28" Height="28" Foreground="{StaticResource FocusBrush}"/>
         </Border>
-        <TextBlock Text="Unlock your vault" Classes="heading" FontSize="28"/>
-        <TextBlock Text="Your passwords, right where you left them." Classes="secondary" TextWrapping="Wrap" Margin="0,0,0,20"/>
+        <TextBlock Text="Unlock your vault" Classes="heading" FontSize="28" TextAlignment="Center"/>
+        <TextBlock Text="Your passwords, right where you left them." Classes="secondary" TextWrapping="Wrap" TextAlignment="Center" Margin="0,0,0,20"/>
         <TextBlock x:Name="MasterPasswordLabel" Text="Master password" FontWeight="Medium"/>
-        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8" IsEnabled="{Binding IsIdle}">
+        <Grid IsEnabled="{Binding IsIdle}">
           <TextBox x:Name="PasswordBox" Text="{Binding Password}" PasswordChar="{Binding PasswordMask}"
+                   Padding="12,10,48,10"
                    PlaceholderText="Enter master password" AutomationProperties.LabeledBy="{Binding #MasterPasswordLabel}"
                    AutomationProperties.AutomationId="MasterPassword">
             <TextBox.KeyBindings>
               <KeyBinding Gesture="Return" Command="{Binding UnlockCommand}"/>
             </TextBox.KeyBindings>
           </TextBox>
-          <Button Grid.Column="1" Classes="ghost icon" Command="{Binding TogglePasswordVisibilityCommand}"
+          <Button x:Name="PasswordVisibility" Classes="ghost icon" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,4,0"
+                  Command="{Binding TogglePasswordVisibilityCommand}"
                   AutomationProperties.Name="{Binding VisibilityLabel}" ToolTip.Tip="{Binding VisibilityLabel}">
             <Grid><material:MaterialIcon Kind="EyeOutline" Width="20" Height="20" IsVisible="{Binding !IsPasswordVisible}"/><material:MaterialIcon Kind="EyeOffOutline" Width="20" Height="20" IsVisible="{Binding IsPasswordVisible}"/></Grid>
           </Button>
@@ -33,7 +35,7 @@
           <ProgressBar IsIndeterminate="True" Height="4" AutomationProperties.Name="Unlocking"/>
           <TextBlock Text="Unlocking your vault…" Classes="caption" HorizontalAlignment="Center" AutomationProperties.LiveSetting="Polite"/>
         </StackPanel>
-        <Button Classes="primary" Command="{Binding UnlockCommand}" Content="{Binding ButtonLabel}"
+        <Button x:Name="UnlockButton" Classes="primary" Command="{Binding UnlockCommand}" Content="{Binding ButtonLabel}"
                 HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="0,8,0,0" MinHeight="46"/>
         <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center" Margin="0,20,0,0">
           <material:MaterialIcon Kind="LockOutline" Width="14" Height="14" Foreground="{StaticResource SecondaryTextBrush}"/>

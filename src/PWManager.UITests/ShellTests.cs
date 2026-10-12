@@ -1,8 +1,10 @@
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
 using Avalonia.Input;
 using Avalonia.Input.Raw;
+using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using PWManager.Enums;
@@ -73,6 +75,37 @@ public class ShellTests
             Assert.False(Find<ContentControl>(window, "VaultHost").IsEffectivelyVisible);
             Assert.Null(shell.Vault);
             Assert.Equal(0, Created);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
+    public void Shell_UnlockPanel_CentersTheFormAndFitsThePasswordToggle()
+    {
+        Created = 0;
+        var window = Open(new UnlockStub());
+
+        try
+        {
+            var panel = window.GetVisualDescendants().OfType<UnlockPanel>().Single();
+            var password = Find<TextBox>(window, "PasswordBox");
+            var unlock = Find<Button>(window, "UnlockButton");
+            var visibility = Find<Button>(window, "PasswordVisibility");
+            var passwordOrigin = password.TranslatePoint(default, panel)!.Value;
+            var visibilityOrigin = visibility.TranslatePoint(default, password)!.Value;
+            var label = unlock.GetVisualDescendants().OfType<TextBlock>().First();
+            var labelOrigin = label.TranslatePoint(default, unlock)!.Value;
+
+            Assert.Equal(panel.Bounds.Width / 2, passwordOrigin.X + password.Bounds.Width / 2, 1);
+            Assert.Equal(unlock.Bounds.Width, password.Bounds.Width, 1);
+            Assert.InRange(visibilityOrigin.X, 0, password.Bounds.Width - visibility.Bounds.Width);
+            Assert.Equal(password.Bounds.Height / 2, visibilityOrigin.Y + visibility.Bounds.Height / 2, 1);
+            Assert.Equal(unlock.Bounds.Height / 2, labelOrigin.Y + label.Bounds.Height / 2, 1.5);
+            Assert.NotNull(window.Icon);
+            Capture(window, "unlock");
         }
         finally
         {
@@ -187,5 +220,30 @@ public class ShellTests
         {
             window.Close();
         }
+    }
+
+    private static RenderTargetBitmap Render(Window window, double scale = 1)
+    {
+        Dispatcher.UIThread.RunJobs();
+        var pixelSize = new PixelSize((int)(window.Bounds.Width * scale), (int)(window.Bounds.Height * scale));
+        var resolution = new Vector(96 * scale, 96 * scale);
+        var bitmap = new RenderTargetBitmap(pixelSize, resolution);
+        bitmap.Render(window);
+
+        return bitmap;
+    }
+
+    private static void Capture(Window window, string name)
+    {
+        var directory = Environment.GetEnvironmentVariable("PWMANAGER_SCREENSHOTS");
+
+        if (string.IsNullOrWhiteSpace(directory))
+        {
+            return;
+        }
+
+        Directory.CreateDirectory(directory);
+        using var bitmap = Render(window);
+        bitmap.Save(Path.Combine(directory, name + ".png"));
     }
 }

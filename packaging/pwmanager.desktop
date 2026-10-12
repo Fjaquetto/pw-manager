@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=PWManager
+Comment=Local password vault
+Exec=PWManager
+Icon=pwmanager
+Terminal=false
+Categories=Utility;Security;
+StartupWMClass=PWManager
+StartupNotify=true

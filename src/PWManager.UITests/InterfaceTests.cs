@@ -76,6 +76,39 @@ public class InterfaceTests
     }
 
     [AvaloniaFact]
+    public void PrimaryActionLabels_StayVerticallyCentered()
+    {
+        var window = Open();
+
+        try
+        {
+            var viewModel = Vault(window);
+            viewModel.SelectedEntry = viewModel.Entries[0];
+            Dispatcher.UIThread.RunJobs();
+
+            var buttons = new[]
+            {
+                window.GetVisualDescendants().OfType<Button>()
+                    .Single(button => (button.Content as string)?.StartsWith('+') == true),
+                window.GetVisualDescendants().OfType<Button>()
+                    .Single(button => Equals(button.Content, "Edit entry"))
+            };
+
+            foreach (var button in buttons)
+            {
+                var label = button.GetVisualDescendants().OfType<TextBlock>().First();
+                var origin = label.TranslatePoint(default, button)!.Value;
+
+                Assert.Equal(button.Bounds.Height / 2, origin.Y + label.Bounds.Height / 2, 1.5);
+            }
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
     public void Selection_FilterRefresh_PreservesSelectedEntryAndMask()
     {
         var window = Open();
