@@ -22,10 +22,11 @@
         </StackPanel>
         <StackPanel Spacing="8">
           <TextBlock x:Name="EditorPasswordLabel" Text="Password" FontWeight="Medium"/>
-          <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+          <Grid>
             <TextBox x:Name="EditorPassword" Text="{Binding Editor.Password}" PasswordChar="{Binding Editor.PasswordMask}"
-                     Classes="secret" PlaceholderText="Enter a password" AutomationProperties.LabeledBy="{Binding #EditorPasswordLabel}"/>
-            <Button Grid.Column="1" Classes="ghost icon" Command="{Binding Editor.TogglePasswordVisibilityCommand}"
+                     Classes="secret" PlaceholderText="Enter a password" Padding="12,10,48,10" AutomationProperties.LabeledBy="{Binding #EditorPasswordLabel}"/>
+            <Button Classes="ghost icon" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,4,0"
+                    Command="{Binding Editor.TogglePasswordVisibilityCommand}"
                     AutomationProperties.Name="{Binding Editor.VisibilityLabel}" ToolTip.Tip="{Binding Editor.VisibilityLabel}">
               <Grid><material:MaterialIcon Kind="EyeOutline" Width="18" Height="18" IsVisible="{Binding !Editor.IsPasswordVisible}"/><material:MaterialIcon Kind="EyeOffOutline" Width="18" Height="18" IsVisible="{Binding Editor.IsPasswordVisible}"/></Grid>
             </Button>
