@@ -103,6 +103,17 @@ dotnet publish src/PWManager/PWManager.csproj -c Release -r linux-x64 --self-con
 
 Run `publish/PWManager.exe` on Windows or `./publish/PWManager` on Linux, and keep the generated `appsettings.json` alongside the executable.
 
+### Application icon on Linux
+
+The application sets its window icon at runtime, and the Windows package embeds the executable icon. To show the icon in Linux launchers and docks, install the bundled icon and desktop entry:
+
+```bash
+install -Dm644 packaging/pwmanager.png ~/.local/share/icons/hicolor/256x256/apps/pwmanager.png
+install -Dm644 packaging/pwmanager.desktop ~/.local/share/applications/pwmanager.desktop
+```
+
+Adjust `Exec` in `packaging/pwmanager.desktop` when the published binary is not on your `PATH`. `Assets/pwmanager.svg` is the source art for `Assets/pwmanager.ico`, which is referenced by the window and by the build.
+
 ## Tests
 
 ```bash

@@ -2,6 +2,7 @@
         xmlns:vm="using:PWManager.ViewModels" xmlns:views="using:PWManager.Views"
         x:Class="PWManager.Views.ShellWindow" x:DataType="vm:ShellViewModel"
         Title="PWManager" Width="480" Height="560" MinWidth="420" MinHeight="460"
+        Icon="/Assets/pwmanager.ico"
         WindowStartupLocation="CenterScreen" WindowDecorations="Full">
   <Window.Styles>
     <Style Selector="ContentControl#VaultHost">
