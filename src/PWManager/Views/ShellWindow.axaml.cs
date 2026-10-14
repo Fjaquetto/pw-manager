@@ -23,6 +23,8 @@ public partial class ShellWindow : Window
     private const double VaultWidth = 1180;
     private const double VaultHeight = 780;
     private const double VerticalScreenMargin = 40;
+    private const double LockWidth = 480;
+    private const double LockHeight = 560;
 
     private static readonly TimeSpan ResizeDuration = TimeSpan.FromMilliseconds(240);
     private static readonly TimeSpan ResizeFrameInterval = TimeSpan.FromMilliseconds(16);
@@ -38,6 +40,10 @@ public partial class ShellWindow : Window
         InitializeComponent();
         DataContextChanged += OnDataContextChanged;
         AddHandler(KeyDownEvent, HandleKeyDown, RoutingStrategies.Tunnel);
+        AddHandler(PointerMovedEvent, OnPointerActivity, RoutingStrategies.Tunnel, handledEventsToo: true);
+        AddHandler(PointerPressedEvent, OnPointerActivity, RoutingStrategies.Tunnel, handledEventsToo: true);
+        PropertyChanged += OnWindowPropertyChanged;
+        Deactivated += (_, _) => _vault?.HideSensitiveData();
     }
 
     protected override void OnOpened(EventArgs e)
@@ -45,6 +51,16 @@ public partial class ShellWindow : Window
         base.OnOpened(e);
         ClampToScreen();
         FocusControl(_vault is null ? "PasswordBox" : "SearchBox");
+    }
+
+    private void OnPointerActivity(object? sender, PointerEventArgs e) => _viewModel?.NotifyActivity();
+
+    private void OnWindowPropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
+    {
+        if (e.Property == WindowStateProperty && WindowState == WindowState.Minimized)
+        {
+            _viewModel?.HandleWindowMinimized();
+        }
     }
 
     private void OnDataContextChanged(object? sender, EventArgs e)
@@ -69,10 +85,18 @@ public partial class ShellWindow : Window
         {
             AttachVault(_viewModel?.Vault);
         }
-        else if (args.PropertyName == nameof(ShellViewModel.IsUnlocked) && _viewModel?.IsUnlocked == true)
+        else if (args.PropertyName == nameof(ShellViewModel.IsUnlocked))
         {
-            _ = ResizeForVaultAsync();
-            FocusControl("SearchBox");
+            if (_viewModel?.IsUnlocked == true)
+            {
+                _ = ResizeForVaultAsync();
+                FocusControl("SearchBox");
+            }
+            else
+            {
+                ResizeForLock();
+                FocusControl("PasswordBox");
+            }
         }
     }
 
@@ -136,7 +160,7 @@ public partial class ShellWindow : Window
 
         try
         {
-            while (!_isClosing)
+            while (!_isClosing && _viewModel?.IsUnlocked == true)
             {
                 var elapsed = Stopwatch.GetElapsedTime(startedAt);
                 var progress = elapsed >= ResizeDuration ? 1 : elapsed / ResizeDuration;
@@ -173,8 +197,17 @@ public partial class ShellWindow : Window
         return 1 - inverse * inverse * inverse;
     }
 
+    private void ResizeForLock()
+    {
+        Width = LockWidth;
+        Height = LockHeight;
+        ClampToScreen();
+    }
+
     private void HandleKeyDown(object? sender, KeyEventArgs e)
     {
+        _viewModel?.NotifyActivity();
+
         if (e.Key == Key.F && e.KeyModifiers == KeyModifiers.Control && _vault?.CanInteract == true)
         {
             FocusControl("SearchBox");

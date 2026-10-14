@@ -1,25 +1,46 @@
 using System;
 using System.ComponentModel;
+using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
+using PWManager.Domain.DataContracts.InfraService;
+using PWManager.Services.Interfaces;
 
 namespace PWManager.ViewModels;
 
 /// <summary>
 /// Coordinates the single application window: stays on the unlock screen until
 /// authentication succeeds, then creates and loads the vault before revealing
-/// it. Nothing of the vault exists before a successful unlock.
+/// it. Nothing of the vault exists before a successful unlock, and locking
+/// disposes the vault and zeroes the session key.
 /// </summary>
 public partial class ShellViewModel : ViewModelBase
 {
     private readonly Func<MainViewModel> _vaultFactory;
+    private readonly IVaultSession _session;
+    private readonly IAppSettingsService _settings;
+    private readonly TimeProvider _timeProvider;
+    private static readonly TimeSpan ActivityThrottle = TimeSpan.FromSeconds(10);
     private MainViewModel? _vault;
     private Task? _openingTask;
+    private CancellationTokenSource? _autoLock;
+    private DateTimeOffset _lastActivity;
+    private bool _lockPending;
+    private bool _retrying;
+    private string? _lockNotice;
 
-    public ShellViewModel(UnlockViewModel unlock, Func<MainViewModel> vaultFactory)
+    public ShellViewModel(
+        UnlockViewModel unlock,
+        Func<MainViewModel> vaultFactory,
+        IVaultSession session,
+        IAppSettingsService settings,
+        TimeProvider timeProvider)
     {
         Unlock = unlock;
         _vaultFactory = vaultFactory;
+        _session = session;
+        _settings = settings;
+        _timeProvider = timeProvider;
         Unlock.Unlocked += OnUnlocked;
         Unlock.PropertyChanged += OnUnlockPropertyChanged;
     }
@@ -53,9 +74,96 @@ public partial class ShellViewModel : ViewModelBase
     public bool ShowProgress => Unlock.IsBusy || IsOpening;
 
     /// <summary>
-    /// The in-flight vault opening, exposed so tests and the window can await it.
+    /// The in-flight vault opening, exposed so tests can await it.
     /// </summary>
     public Task? OpeningTask => _openingTask;
+
+    /// <summary>
+    /// Called on user input. Postpones (or cancels) the automatic lock.
+    /// </summary>
+    public void NotifyActivity()
+    {
+        if (!IsUnlocked)
+        {
+            return;
+        }
+
+        var now = _timeProvider.GetUtcNow();
+
+        if (!_lockPending && now - _lastActivity < ActivityThrottle)
+        {
+            return;
+        }
+
+        _lastActivity = now;
+        _lockPending = false;
+        RestartAutoLock();
+    }
+
+    public void HandleWindowMinimized()
+    {
+        if (IsUnlocked && _settings.Current.LockWhenMinimized)
+        {
+            RequestLock();
+        }
+    }
+
+    /// <summary>
+    /// Locks now, or as soon as the vault is not busy with a save.
+    /// </summary>
+    public void RequestLock()
+    {
+        if (!IsUnlocked)
+        {
+            return;
+        }
+
+        if (_vault?.IsBusy == true)
+        {
+            _lockPending = true;
+
+            if (!_retrying)
+            {
+                _retrying = true;
+                _ = RetryPendingLockAsync();
+            }
+
+            return;
+        }
+
+        Lock();
+    }
+
+    /// <summary>
+    /// Disposes the vault, zeroes the session key and returns to the unlock
+    /// screen. The clipboard cleanup happens through the vault disposal.
+    /// </summary>
+    public void Lock()
+    {
+        if (!IsUnlocked && _vault is null)
+        {
+            return;
+        }
+
+        CancelAutoLock();
+        _lockPending = false;
+        _retrying = false;
+
+        var vault = _vault;
+        Vault = null;
+
+        if (vault is not null)
+        {
+            vault.LockRequested -= OnVaultLockRequested;
+            vault.Dispose();
+        }
+
+        IsUnlocked = false;
+        Unlock.Reset();
+        Unlock.Notice = _lockNotice ?? string.Empty;
+        _lockNotice = null;
+        _session.Lock();
+    }
 
     private void OnUnlocked() => _openingTask = OpenVaultAsync();
 
@@ -76,6 +184,7 @@ public partial class ShellViewModel : ViewModelBase
         try
         {
             vault = _vaultFactory();
+            vault.LockRequested += OnVaultLockRequested;
             await vault.LoadEntriesAsync();
         }
         finally
@@ -85,6 +194,79 @@ public partial class ShellViewModel : ViewModelBase
 
         Vault = vault;
         IsUnlocked = true;
+        _lockPending = false;
+        _lockNotice = null;
+        Unlock.Notice = string.Empty;
+        _lastActivity = _timeProvider.GetUtcNow();
+        RestartAutoLock();
+    }
+
+    private void OnVaultLockRequested(string? notice)
+    {
+        _lockNotice = notice;
+        RequestLock();
+    }
+
+    private void RestartAutoLock()
+    {
+        CancelAutoLock();
+
+        var minutes = _settings.Current.AutoLockMinutes;
+
+        if (!IsUnlocked || minutes <= 0)
+        {
+            return;
+        }
+
+        _autoLock = new CancellationTokenSource();
+        _ = AutoLockLaterAsync(TimeSpan.FromMinutes(minutes), _autoLock.Token);
+    }
+
+    private void CancelAutoLock()
+    {
+        _autoLock?.Cancel();
+        _autoLock?.Dispose();
+        _autoLock = null;
+    }
+
+    private async Task AutoLockLaterAsync(TimeSpan timeout, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await Task.Delay(timeout, _timeProvider, cancellationToken);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+
+        if (!cancellationToken.IsCancellationRequested)
+        {
+            RequestLock();
+        }
+    }
+
+    private async Task RetryPendingLockAsync()
+    {
+        try
+        {
+            while (_lockPending && IsUnlocked && _vault?.IsBusy == true)
+            {
+                await Task.Delay(TimeSpan.FromSeconds(1), _timeProvider);
+            }
+
+            if (_lockPending && IsUnlocked)
+            {
+                Lock();
+            }
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        finally
+        {
+            _retrying = false;
+        }
     }
 
     private void OnUnlockPropertyChanged(object? sender, PropertyChangedEventArgs args)

@@ -9,8 +9,7 @@ public class ClipboardService : IClipboardService
 {
     public async Task<bool> SetTextAsync(string text)
     {
-        if (global::Avalonia.Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop
-            || desktop.MainWindow?.Clipboard is not { } clipboard)
+        if (ResolveClipboard() is not { } clipboard)
         {
             return false;
         }
@@ -18,5 +17,32 @@ public class ClipboardService : IClipboardService
         await clipboard.SetTextAsync(text);
 
         return true;
+    }
+
+    public async Task<string?> TryGetTextAsync()
+    {
+        if (ResolveClipboard() is not { } clipboard)
+        {
+            return null;
+        }
+
+        return await clipboard.TryGetTextAsync();
+    }
+
+    public async Task ClearAsync()
+    {
+        if (ResolveClipboard() is not { } clipboard)
+        {
+            return;
+        }
+
+        await clipboard.ClearAsync();
+    }
+
+    private static IClipboard? ResolveClipboard()
+    {
+        return global::Avalonia.Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop
+            ? desktop.MainWindow?.Clipboard
+            : null;
     }
 }

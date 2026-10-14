@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
 using Avalonia.Input;
@@ -7,7 +8,9 @@ using Avalonia.Input.Raw;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
+using PWManager.Domain.Model;
 using PWManager.Enums;
+using PWManager.Infra.Services;
 using PWManager.UITests.Fakes;
 using PWManager.ViewModels;
 using PWManager.Views;
@@ -21,13 +24,19 @@ public class ShellTests
 
     private static int Created;
 
-    private static ShellWindow Open(UnlockStub service)
+    private static ShellWindow Open(UnlockStub service, AppSettingsFake? settings = null, Action<ShellViewModel>? configure = null)
     {
-        var shell = new ShellViewModel(new UnlockViewModel(service), () =>
-        {
-            Created++;
-            return MemoryVault.Sample(3).CreateViewModel();
-        });
+        var shell = new ShellViewModel(
+            new UnlockViewModel(service),
+            () =>
+            {
+                Created++;
+                return MemoryVault.Sample(3).CreateViewModel();
+            },
+            new VaultSession(),
+            settings ?? new AppSettingsFake(),
+            TimeProvider.System);
+        configure?.Invoke(shell);
         var window = new ShellWindow { DataContext = shell };
         window.Show();
         Dispatcher.UIThread.RunJobs();
@@ -215,6 +224,154 @@ public class ShellTests
             Assert.Equal(expected.Y, window.Position.Y);
             Assert.Equal(expected.X + expected.Width / 2, window.Position.X + window.Width / 2, 1);
             Assert.Equal(expected.Y + expected.Height / 2, window.Position.Y + window.Height / 2, 1);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
+    public void Shell_CtrlL_LocksBackToTheCompactUnlockScreen()
+    {
+        Created = 0;
+        var window = Open(new UnlockStub { Result = UnlockResult.Success });
+
+        try
+        {
+            var shell = (ShellViewModel)window.DataContext!;
+
+            window.KeyTextInput("master");
+            window.KeyPress(Key.Enter, RawInputModifiers.None, PhysicalKey.Enter, null);
+            window.KeyRelease(Key.Enter, RawInputModifiers.None, PhysicalKey.Enter, null);
+            PumpUntil(() => shell.IsUnlocked);
+            Dispatcher.UIThread.RunJobs();
+
+            window.KeyPress(Key.L, RawInputModifiers.Control, PhysicalKey.L, null);
+            window.KeyRelease(Key.L, RawInputModifiers.Control, PhysicalKey.L, null);
+            PumpUntil(() => !shell.IsUnlocked);
+            Dispatcher.UIThread.RunJobs();
+
+            Assert.Null(shell.Vault);
+            Assert.True(Find<ContentControl>(window, "UnlockHost").IsEffectivelyVisible);
+            Assert.False(Find<ContentControl>(window, "VaultHost").IsEffectivelyVisible);
+            Assert.True(window.Width <= 700);
+            Assert.True(Find<TextBox>(window, "PasswordBox").IsFocused);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
+    public void Shell_CreateMode_ShowsConfirmationAndCreatesTheVault()
+    {
+        Created = 0;
+        var window = Open(
+            new UnlockStub { Result = UnlockResult.Success },
+            configure: shell => shell.Unlock.Configure(VaultStatus.New));
+
+        try
+        {
+            var shell = (ShellViewModel)window.DataContext!;
+            var confirmation = Find<TextBox>(window, "ConfirmPasswordBox");
+
+            Assert.True(confirmation.IsEffectivelyVisible);
+            Assert.Equal("Create your vault", shell.Unlock.Heading);
+
+            shell.Unlock.Password = "long-enough-password";
+            shell.Unlock.ConfirmPassword = "long-enough-password";
+            shell.Unlock.UnlockCommand.Execute(null);
+            PumpUntil(() => shell.IsUnlocked);
+
+            Assert.Equal(1, Created);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
+    public void Shell_SecurityModal_OpensAndClosesWithEscape()
+    {
+        Created = 0;
+        var window = Open(new UnlockStub { Result = UnlockResult.Success });
+
+        try
+        {
+            var shell = (ShellViewModel)window.DataContext!;
+
+            window.KeyTextInput("master");
+            window.KeyPress(Key.Enter, RawInputModifiers.None, PhysicalKey.Enter, null);
+            window.KeyRelease(Key.Enter, RawInputModifiers.None, PhysicalKey.Enter, null);
+            PumpUntil(() => shell.IsUnlocked);
+            Dispatcher.UIThread.RunJobs();
+
+            shell.Vault!.OpenSecuritySettingsCommand.Execute(null);
+            Dispatcher.UIThread.RunJobs();
+
+            Assert.True(shell.Vault.IsSecuritySettingsOpen);
+            Assert.True(Find<Border>(window, "SecurityLayer").IsEffectivelyVisible);
+            Assert.True(Find<NumericUpDown>(window, "SecurityAutoLock").IsEffectivelyVisible);
+
+            window.KeyPress(Key.Escape, RawInputModifiers.None, PhysicalKey.Escape, null);
+            window.KeyRelease(Key.Escape, RawInputModifiers.None, PhysicalKey.Escape, null);
+            Dispatcher.UIThread.RunJobs();
+
+            Assert.False(shell.Vault.IsSecuritySettingsOpen);
+            Assert.False(Find<Border>(window, "SecurityLayer").IsEffectivelyVisible);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
+    public void VaultPanel_SecurityModal_KeepsTheRightAlignedFieldsClearOfTheScrollBar()
+    {
+        var viewModel = MemoryVault.Sample(3).CreateViewModel();
+        viewModel.LoadEntriesAsync().GetAwaiter().GetResult();
+        var window = new Window
+        {
+            Content = new VaultPanel
+            {
+                DataContext = viewModel
+            },
+            Width = 1180,
+            Height = 780
+        };
+        window.Show();
+        Dispatcher.UIThread.RunJobs();
+
+        try
+        {
+            viewModel.OpenSecuritySettingsCommand.Execute(null);
+            Dispatcher.UIThread.RunJobs();
+
+            var securityView = window.GetVisualDescendants().OfType<SecuritySettingsView>().Single();
+            var fields = securityView.GetVisualDescendants().OfType<NumericUpDown>()
+                .Where(field => field.IsEffectivelyVisible)
+                .ToList();
+            Assert.NotEmpty(fields);
+
+            var scroll = fields[0].GetVisualAncestors().OfType<ScrollViewer>().First();
+            var scrollBar = scroll.GetVisualDescendants().OfType<ScrollBar>()
+                .Single(bar => bar.Name == "PART_VerticalScrollBar" && bar.IsEffectivelyVisible);
+            var scrollBarTopLeft = scrollBar.TranslatePoint(default, scroll);
+
+            Assert.NotNull(scrollBarTopLeft);
+
+            foreach (var field in fields)
+            {
+                var fieldTopLeft = field.TranslatePoint(default, scroll);
+
+                Assert.NotNull(fieldTopLeft);
+                Assert.True(fieldTopLeft!.Value.X + field.Bounds.Width <= scrollBarTopLeft!.Value.X,
+                    $"The field ending at {fieldTopLeft.Value.X + field.Bounds.Width} overlaps the scroll bar starting at {scrollBarTopLeft.Value.X}.");
+            }
         }
         finally
         {
