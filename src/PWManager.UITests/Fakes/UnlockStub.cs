@@ -1,3 +1,4 @@
+using PWManager.Domain.Model;
 using PWManager.Enums;
 using PWManager.Services.Interfaces;
 
@@ -9,7 +10,11 @@ internal sealed class UnlockStub : IUnlockService
 
     public UnlockResult Result { get; set; } = UnlockResult.InvalidPassword;
 
+    public VaultStatus Status { get; set; } = VaultStatus.Existing;
+
     public TaskCompletionSource<UnlockResult>? Pending { get; set; }
+
+    public Task<VaultStatus> GetStatusAsync() => Task.FromResult(Status);
 
     public Task<UnlockResult> UnlockAsync(string password)
     {

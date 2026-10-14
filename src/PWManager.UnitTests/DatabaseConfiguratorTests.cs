@@ -5,20 +5,49 @@ namespace PWManager.UnitTests;
 
 public class DatabaseConfiguratorTests
 {
-    [Fact]
-    public void ResolveDataFolder_UsesRoamingAppDataOnWindows()
-    {
-        Assert.Equal(
-            Environment.SpecialFolder.ApplicationData,
-            DatabaseConfigurator.ResolveDataFolder(isWindows: true));
-    }
-
-    [Fact]
-    public void ResolveDataFolder_UsesLocalAppDataOnOtherPlatforms()
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void ResolveDataFolder_AlwaysUsesLocalAppData(bool isWindows)
     {
         Assert.Equal(
             Environment.SpecialFolder.LocalApplicationData,
-            DatabaseConfigurator.ResolveDataFolder(isWindows: false));
+            DatabaseConfigurator.ResolveDataFolder(isWindows));
+    }
+
+    [Fact]
+    public void DataFolderMigration_MovesTheVaultAndThemesFromRoamingToLocal()
+    {
+        var roaming = Path.Combine(Path.GetTempPath(), "pwmanager-roaming-" + Guid.NewGuid().ToString("N"));
+        var local = Path.Combine(Path.GetTempPath(), "pwmanager-local-" + Guid.NewGuid().ToString("N"));
+        var source = Path.Combine(roaming, "PWManager");
+        Directory.CreateDirectory(Path.Combine(source, "themes"));
+        File.WriteAllText(Path.Combine(source, "pwmanager.db"), "db");
+        File.WriteAllText(Path.Combine(source, "pwmanager.db-wal"), "wal");
+        File.WriteAllText(Path.Combine(source, "themes", "ocean.json"), "{}");
+
+        try
+        {
+            DataFolderMigration.MoveIfNeeded(roaming, local, "PWManager");
+
+            var target = Path.Combine(local, "PWManager");
+
+            Assert.True(File.Exists(Path.Combine(target, "pwmanager.db")));
+            Assert.True(File.Exists(Path.Combine(target, "pwmanager.db-wal")));
+            Assert.True(File.Exists(Path.Combine(target, "themes", "ocean.json")));
+            Assert.False(File.Exists(Path.Combine(source, "pwmanager.db")));
+
+            // Running again is a no-op and never overwrites the local vault.
+            File.WriteAllText(Path.Combine(target, "pwmanager.db"), "local-db");
+            DataFolderMigration.MoveIfNeeded(roaming, local, "PWManager");
+
+            Assert.Equal("local-db", File.ReadAllText(Path.Combine(target, "pwmanager.db")));
+        }
+        finally
+        {
+            Directory.Delete(roaming, recursive: true);
+            Directory.Delete(local, recursive: true);
+        }
     }
 
     [Fact]

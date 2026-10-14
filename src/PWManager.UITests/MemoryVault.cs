@@ -4,6 +4,7 @@ using PWManager.Domain.Model;
 using PWManager.Infra.Config;
 using PWManager.Services;
 using PWManager.Services.Interfaces;
+using PWManager.UITests.Fakes;
 using PWManager.ViewModels;
 
 namespace PWManager.UITests;
@@ -52,7 +53,33 @@ internal sealed class MemoryVault : IUserApplication, IUserEncryptorService, ICl
         return Task.FromResult(true);
     }
 
-    public MainViewModel CreateViewModel() => new(new VaultEntryService(this, this, TimeProvider.System), this, TimeProvider.System, new ThemeService(), new ColorThemeStore(ThemeDirectory));
+    public Task<string?> TryGetTextAsync() => Task.FromResult<string?>(CopiedText);
+
+    public Task ClearAsync()
+    {
+        CopiedText = null;
+
+        return Task.CompletedTask;
+    }
+
+    public AppSettingsFake Settings { get; } = new();
+
+    public RekeyStub Rekey { get; } = new();
+
+    public BackupStub Backup { get; } = new();
+
+    public FilePickerStub FilePicker { get; } = new();
+
+    public MainViewModel CreateViewModel() => new(
+        new VaultEntryService(this, this, TimeProvider.System),
+        this,
+        TimeProvider.System,
+        new ThemeService(),
+        new ColorThemeStore(ThemeDirectory),
+        Settings,
+        Rekey,
+        Backup,
+        FilePicker);
 
     private static string ThemeDirectory => Path.Combine(Path.GetTempPath(), "pwmanager-ui-themes-unused");
 

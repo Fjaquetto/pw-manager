@@ -15,6 +15,8 @@ namespace PWManager.Infra.Context.SQLite
         {
             _dbPath = dbPath;
         }
+
+        public string DatabasePath => _dbPath;
         public PWDbContextFactory()
         {
             var services = new ServiceCollection();

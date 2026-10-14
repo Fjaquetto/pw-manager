@@ -3,21 +3,25 @@ using PWManager.Domain.Model;
 
 namespace PWManager.Infra.Services
 {
-    public class UserEncryptorService : IUserEncryptorService
+    public class UserEncryptorService(IVaultSession session) : IUserEncryptorService
     {
         public User EncryptUser(User user)
         {
-            user.Site = EncryptorService.Encrypt(user.Site);
-            user.Login = EncryptorService.Encrypt(user.Login);
-            user.Password = EncryptorService.Encrypt(user.Password);
+            var key = session.GetKey();
+
+            user.Site = VaultCrypto.Encrypt(key, user.Site);
+            user.Login = VaultCrypto.Encrypt(key, user.Login);
+            user.Password = VaultCrypto.Encrypt(key, user.Password);
             return user;
         }
 
         public User DecryptUser(User user)
         {
-            user.Site = EncryptorService.Decrypt(user.Site);
-            user.Login = EncryptorService.Decrypt(user.Login);
-            user.Password = EncryptorService.Decrypt(user.Password);
+            var key = session.GetKey();
+
+            user.Site = VaultCrypto.Decrypt(key, user.Site);
+            user.Login = VaultCrypto.Decrypt(key, user.Login);
+            user.Password = VaultCrypto.Decrypt(key, user.Password);
             return user;
         }
     }

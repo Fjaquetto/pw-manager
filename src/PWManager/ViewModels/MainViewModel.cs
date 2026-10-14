@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using PWManager.Domain.DataContracts.InfraService;
 using PWManager.Domain.Model;
 using PWManager.Enums;
 using PWManager.Infra.Config;
@@ -16,11 +18,16 @@ public partial class MainViewModel : ViewModelBase, IDisposable
 {
     private readonly IVaultEntryService _vaultEntries;
     private readonly IClipboardService _clipboard;
+    private readonly IAppSettingsService _settings;
+    private readonly TimeProvider _timeProvider;
     private List<PasswordEntryViewModel> _allEntries = new();
     private PasswordEntryViewModel? _selectedEntry;
     private Action? _pendingNavigation;
     private bool _generatorForEditor;
     private bool _isRefreshingList;
+    private string? _sensitiveClipboard;
+    private CancellationTokenSource? _clipboardClear;
+    private CancellationTokenSource? _hidePasswords;
 
     [ObservableProperty]
     private string _searchGlobal = string.Empty;
@@ -56,6 +63,9 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     private bool _isThemeSettingsOpen;
 
     [ObservableProperty]
+    private bool _isSecuritySettingsOpen;
+
+    [ObservableProperty]
     private bool _isDeletePending;
 
     [ObservableProperty]
@@ -80,6 +90,8 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     public PasswordGeneratorViewModel Generator { get; } = new();
 
     public ThemeSettingsViewModel ThemeSettings { get; }
+
+    public SecuritySettingsViewModel SecuritySettings { get; }
 
     public NotificationViewModel Notification
     { get; }
@@ -144,7 +156,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
 
     public string CountLabel => HasFilters ? $"{Entries.Count} of {EntryCount} entries" : $"{EntryCount} entries";
 
-    public bool HasModal => IsGeneratorOpen || IsDeletePending || IsDiscardPending || IsThemeSettingsOpen;
+    public bool HasModal => IsGeneratorOpen || IsDeletePending || IsDiscardPending || IsThemeSettingsOpen || IsSecuritySettingsOpen;
 
     public bool CanInteract => !IsBusy && !HasModal;
 
@@ -174,14 +186,33 @@ public partial class MainViewModel : ViewModelBase, IDisposable
 
     public event Action? CloseRequested;
 
-    public MainViewModel(IVaultEntryService vaultEntries, IClipboardService clipboard, TimeProvider timeProvider, IThemeService themeService, ColorThemeStore themeStore)
+    /// <summary>
+    /// Raised when the user asks to lock the vault (button or Ctrl+L).
+    /// </summary>
+    public event Action<string?>? LockRequested;
+
+    public MainViewModel(
+        IVaultEntryService vaultEntries,
+        IClipboardService clipboard,
+        TimeProvider timeProvider,
+        IThemeService themeService,
+        ColorThemeStore themeStore,
+        IAppSettingsService settings,
+        IVaultRekeyService rekeyService,
+        IVaultBackupService backupService,
+        IFilePickerService filePicker)
     {
         _vaultEntries = vaultEntries;
         _clipboard = clipboard;
+        _settings = settings;
+        _timeProvider = timeProvider;
         Notification = new NotificationViewModel(timeProvider);
         ThemeSettings = new ThemeSettingsViewModel(themeService, themeStore);
         ThemeSettings.CloseRequested += CloseThemeSettings;
         ThemeSettings.Saved += () => Notification.Show("Appearance saved.");
+        SecuritySettings = new SecuritySettingsViewModel(settings, rekeyService, backupService, filePicker);
+        SecuritySettings.CloseRequested += CloseSecuritySettings;
+        SecuritySettings.VaultRestored += OnVaultRestored;
     }
 
     private void RefreshState()
@@ -225,6 +256,8 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     partial void OnIsGeneratorOpenChanged(bool value) => RefreshState();
 
     partial void OnIsThemeSettingsOpenChanged(bool value) => RefreshState();
+
+    partial void OnIsSecuritySettingsOpenChanged(bool value) => RefreshState();
 
     partial void OnIsDeletePendingChanged(bool value) => RefreshState();
 
@@ -402,7 +435,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
 
     private void OpenEditor(PasswordEntryViewModel? entry = null)
     {
-        MaskPasswords();
+        HideSensitiveData();
         EntryMissing = false;
         Editor.Open(entry);
         DetailActive = true;
@@ -418,7 +451,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         Editor.Open();
         EntryMissing = false;
         IsEditorOpen = false;
-        MaskPasswords();
+        HideSensitiveData();
     }
 
     [RelayCommand]
@@ -471,6 +504,11 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         if (IsThemeSettingsOpen)
         {
             ThemeSettings.CancelCommand.Execute(null);
+        }
+
+        if (IsSecuritySettingsOpen)
+        {
+            SecuritySettings.CancelCommand.Execute(null);
         }
 
         if (IsDeletePending)
@@ -565,7 +603,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
             return;
         }
 
-        MaskPasswords();
+        HideSensitiveData();
         IsDeletePending = true;
         FocusRequested?.Invoke("CancelDelete");
     }
@@ -634,7 +672,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     {
         if (!IsBusy && entry is not null)
         {
-            await CopyTextAsync(entry.Password, "Password");
+            await CopyTextAsync(entry.Password, "Password", sensitive: true);
         }
     }
 
@@ -648,14 +686,31 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     }
 
     [RelayCommand]
-    private Task CopyGeneratedAsync() => CopyTextAsync(Generator.GeneratedPassword, "Password");
+    private Task CopyGeneratedAsync() => CopyTextAsync(Generator.GeneratedPassword, "Password", sensitive: true);
 
-    public async Task CopyTextAsync(string text, string label = "Content")
+    public async Task CopyTextAsync(string text, string label = "Content", bool sensitive = false)
     {
         try
         {
             var copied = await _clipboard.SetTextAsync(text);
-            Notification.Show(copied ? $"{label} copied." : "Clipboard is unavailable. Please try again.", isError: !copied);
+
+            if (!copied)
+            {
+                Notification.Show("Clipboard is unavailable. Please try again.", isError: true);
+                return;
+            }
+
+            if (sensitive)
+            {
+                _sensitiveClipboard = text;
+                ScheduleClipboardClear();
+                var seconds = _settings.Current.ClipboardClearSeconds;
+                Notification.Show(seconds > 0 ? $"{label} copied. Clipboard clears in {seconds}s." : $"{label} copied.");
+            }
+            else
+            {
+                Notification.Show($"{label} copied.");
+            }
         }
         catch (Exception)
         {
@@ -663,13 +718,137 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         }
     }
 
+    /// <summary>
+    /// Clears the clipboard if it still holds the copied secret, so content the
+    /// user copied elsewhere in the meantime is not destroyed.
+    /// </summary>
+    public async Task ClearSensitiveClipboardAsync(bool notify = true)
+    {
+        CancelClipboardClear();
+
+        var pending = _sensitiveClipboard;
+        _sensitiveClipboard = null;
+
+        if (pending is null)
+        {
+            return;
+        }
+
+        try
+        {
+            var current = await _clipboard.TryGetTextAsync();
+
+            if (current == pending)
+            {
+                await _clipboard.ClearAsync();
+
+                if (notify)
+                {
+                    Notification.Show("Clipboard cleared.");
+                }
+            }
+        }
+        catch (Exception)
+        {
+        }
+    }
+
+    private void ScheduleClipboardClear()
+    {
+        CancelClipboardClear();
+
+        var seconds = _settings.Current.ClipboardClearSeconds;
+
+        if (seconds <= 0)
+        {
+            return;
+        }
+
+        _clipboardClear = new CancellationTokenSource();
+        _ = ClearClipboardLaterAsync(TimeSpan.FromSeconds(seconds), _clipboardClear.Token);
+    }
+
+    private async Task ClearClipboardLaterAsync(TimeSpan delay, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await Task.Delay(delay, _timeProvider, cancellationToken);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+
+        if (!cancellationToken.IsCancellationRequested)
+        {
+            await ClearSensitiveClipboardAsync();
+        }
+    }
+
+    private void CancelClipboardClear()
+    {
+        _clipboardClear?.Cancel();
+        _clipboardClear?.Dispose();
+        _clipboardClear = null;
+    }
+
     [RelayCommand]
     private void ToggleDetailPassword()
     {
-        if (SelectedEntry is not null)
+        if (SelectedEntry is null)
         {
-            SelectedEntry.IsPasswordVisible = !SelectedEntry.IsPasswordVisible;
+            return;
         }
+
+        SelectedEntry.IsPasswordVisible = !SelectedEntry.IsPasswordVisible;
+
+        if (SelectedEntry.IsPasswordVisible)
+        {
+            SchedulePasswordHide();
+        }
+        else
+        {
+            CancelPasswordHide();
+        }
+    }
+
+    private void SchedulePasswordHide()
+    {
+        CancelPasswordHide();
+
+        var seconds = _settings.Current.HidePasswordsAfterSeconds;
+
+        if (seconds <= 0)
+        {
+            return;
+        }
+
+        _hidePasswords = new CancellationTokenSource();
+        _ = HidePasswordsLaterAsync(TimeSpan.FromSeconds(seconds), _hidePasswords.Token);
+    }
+
+    private async Task HidePasswordsLaterAsync(TimeSpan delay, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await Task.Delay(delay, _timeProvider, cancellationToken);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+
+        if (!cancellationToken.IsCancellationRequested)
+        {
+            HideSensitiveData();
+        }
+    }
+
+    private void CancelPasswordHide()
+    {
+        _hidePasswords?.Cancel();
+        _hidePasswords?.Dispose();
+        _hidePasswords = null;
     }
 
     [RelayCommand]
@@ -680,7 +859,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
             return;
         }
 
-        MaskPasswords();
+        HideSensitiveData();
         _generatorForEditor = false;
         IsGeneratorOpen = true;
         RefreshState();
@@ -716,7 +895,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
             return;
         }
 
-        MaskPasswords();
+        HideSensitiveData();
         Notification.DismissCommand.Execute(null);
         ThemeSettings.Open();
         IsThemeSettingsOpen = true;
@@ -730,6 +909,38 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         RefreshState();
         FocusRequested?.Invoke(IsEditorOpen ? "EditorSite" : "OpenThemeSettings");
     }
+
+    [RelayCommand]
+    private void OpenSecuritySettings()
+    {
+        if (!CanInteract)
+        {
+            return;
+        }
+
+        HideSensitiveData();
+        Notification.DismissCommand.Execute(null);
+        SecuritySettings.Open();
+        IsSecuritySettingsOpen = true;
+        RefreshState();
+        FocusRequested?.Invoke("SecurityAutoLock");
+    }
+
+    private void CloseSecuritySettings()
+    {
+        IsSecuritySettingsOpen = false;
+        RefreshState();
+        FocusRequested?.Invoke(IsEditorOpen ? "EditorSite" : "OpenSecuritySettings");
+    }
+
+    private void OnVaultRestored()
+    {
+        CloseSecuritySettings();
+        LockRequested?.Invoke("Backup restored. Unlock with the master password of that backup.");
+    }
+
+    [RelayCommand]
+    private void RequestLock() => LockRequested?.Invoke(null);
 
     [RelayCommand]
     private void UseGeneratedPassword()
@@ -771,7 +982,11 @@ public partial class MainViewModel : ViewModelBase, IDisposable
             return;
         }
 
-        if (IsThemeSettingsOpen)
+        if (IsSecuritySettingsOpen)
+        {
+            SecuritySettings.CancelCommand.Execute(null);
+        }
+        else if (IsThemeSettingsOpen)
         {
             ThemeSettings.CancelCommand.Execute(null);
         }
@@ -801,8 +1016,14 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         }
     }
 
-    private void MaskPasswords()
+    /// <summary>
+    /// Masks every revealed password. Used when the window loses focus, after
+    /// the auto-hide timeout and when the vault is locked.
+    /// </summary>
+    public void HideSensitiveData()
     {
+        CancelPasswordHide();
+
         foreach (var entry in _allEntries)
         {
             entry.IsPasswordVisible = false;
@@ -815,7 +1036,9 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     public void Dispose()
     {
         Notification.Dispose();
-        MaskPasswords();
+        HideSensitiveData();
+        CancelClipboardClear();
+        _ = ClearSensitiveClipboardAsync(notify: false);
         Editor.Open();
         Generator.GeneratedPassword = string.Empty;
         _allEntries.Clear();

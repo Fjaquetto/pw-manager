@@ -12,8 +12,8 @@
         <Border Width="56" Height="56" CornerRadius="16" Background="{StaticResource AccentSurfaceBrush}" HorizontalAlignment="Center" Margin="0,0,0,12">
           <material:MaterialIcon Kind="LockOutline" Width="28" Height="28" Foreground="{StaticResource FocusBrush}"/>
         </Border>
-        <TextBlock Text="Unlock your vault" Classes="heading" FontSize="28" TextAlignment="Center"/>
-        <TextBlock Text="Your passwords, right where you left them." Classes="secondary" TextWrapping="Wrap" TextAlignment="Center" Margin="0,0,0,20"/>
+        <TextBlock Text="{Binding Heading}" Classes="heading" FontSize="28" TextAlignment="Center"/>
+        <TextBlock Text="{Binding Description}" Classes="secondary" TextWrapping="Wrap" TextAlignment="Center" Margin="0,0,0,20"/>
         <TextBlock x:Name="MasterPasswordLabel" Text="Master password" FontWeight="Medium"/>
         <Grid IsEnabled="{Binding IsIdle}">
           <TextBox x:Name="PasswordBox" Text="{Binding Password}" PasswordChar="{Binding PasswordMask}"
@@ -30,6 +30,18 @@
             <Grid><material:MaterialIcon Kind="EyeOutline" Width="20" Height="20" IsVisible="{Binding !IsPasswordVisible}"/><material:MaterialIcon Kind="EyeOffOutline" Width="20" Height="20" IsVisible="{Binding IsPasswordVisible}"/></Grid>
           </Button>
         </Grid>
+        <StackPanel Spacing="8" IsVisible="{Binding IsCreating}">
+          <TextBlock x:Name="ConfirmPasswordLabel" Text="Confirm master password" FontWeight="Medium"/>
+          <TextBox x:Name="ConfirmPasswordBox" Text="{Binding ConfirmPassword}" PasswordChar="{Binding PasswordMask}"
+                   PlaceholderText="Repeat master password" AutomationProperties.LabeledBy="{Binding #ConfirmPasswordLabel}"
+                   AutomationProperties.AutomationId="ConfirmMasterPassword">
+            <TextBox.KeyBindings>
+              <KeyBinding Gesture="Return" Command="{Binding UnlockCommand}"/>
+            </TextBox.KeyBindings>
+          </TextBox>
+        </StackPanel>
+        <TextBlock Text="{Binding Notice}" Classes="caption" IsVisible="{Binding HasNotice}" TextWrapping="Wrap"
+                   AutomationProperties.LiveSetting="Polite"/>
         <TextBlock Text="{Binding ErrorMessage}" Classes="error" IsVisible="{Binding HasError}" AutomationProperties.LiveSetting="Polite"/>
         <StackPanel Spacing="8" IsVisible="{Binding ShowProgress}" Margin="0,4,0,0">
           <ProgressBar IsIndeterminate="True" Height="4" AutomationProperties.Name="Unlocking"/>

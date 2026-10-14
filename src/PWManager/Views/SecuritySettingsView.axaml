@@ -1,0 +1,90 @@
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:PWManager.ViewModels"
+             xmlns:material="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             x:Class="PWManager.Views.SecuritySettingsView" x:DataType="vm:SecuritySettingsViewModel">
+  <Grid RowDefinitions="Auto,*,Auto" RowSpacing="20">
+    <Grid ColumnDefinitions="*,Auto">
+      <StackPanel Spacing="8">
+        <TextBlock Text="Security" Classes="heading"/>
+        <TextBlock Text="Session, clipboard and vault protections." Classes="secondary" TextWrapping="Wrap"/>
+      </StackPanel>
+      <Button Grid.Column="1" Classes="ghost icon" Command="{Binding CancelCommand}" AutomationProperties.Name="Close security settings">
+        <material:MaterialIcon Kind="Close" Width="20" Height="20"/>
+      </Button>
+    </Grid>
+
+    <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled" Padding="0,0,16,0">
+      <StackPanel Spacing="20">
+        <StackPanel Spacing="12">
+          <TextBlock Text="SESSION" Classes="section"/>
+          <Grid ColumnDefinitions="*,140" ColumnSpacing="8">
+            <TextBlock x:Name="AutoLockLabel" Text="Auto-lock after (minutes, 0 = off)" VerticalAlignment="Center" FontWeight="Medium"/>
+            <NumericUpDown x:Name="SecurityAutoLock" Grid.Column="1" Minimum="0" Maximum="1440" Increment="5" FormatString="0"
+                           Value="{Binding AutoLockMinutes}" AutomationProperties.LabeledBy="{Binding #AutoLockLabel}"/>
+          </Grid>
+          <CheckBox Content="Lock the vault when the window is minimized" IsChecked="{Binding LockWhenMinimized}"/>
+          <TextBlock Text="Passwords revealed in the details pane are masked again when the window loses focus." Classes="caption" TextWrapping="Wrap"/>
+        </StackPanel>
+
+        <StackPanel Spacing="12">
+          <TextBlock Text="CLIPBOARD" Classes="section"/>
+          <Grid ColumnDefinitions="*,140" ColumnSpacing="8">
+            <TextBlock x:Name="ClipboardLabel" Text="Clear copied passwords after (seconds, 0 = off)" VerticalAlignment="Center" FontWeight="Medium"/>
+            <NumericUpDown Grid.Column="1" Minimum="0" Maximum="3600" Increment="5" FormatString="0"
+                           Value="{Binding ClipboardClearSeconds}" AutomationProperties.LabeledBy="{Binding #ClipboardLabel}"/>
+          </Grid>
+          <TextBlock Text="The clipboard is cleared only if it still contains the copied password." Classes="caption" TextWrapping="Wrap"/>
+        </StackPanel>
+
+        <StackPanel Spacing="12">
+          <TextBlock Text="PASSWORDS" Classes="section"/>
+          <Grid ColumnDefinitions="*,140" ColumnSpacing="8">
+            <TextBlock x:Name="HideLabel" Text="Hide revealed passwords after (seconds, 0 = off)" VerticalAlignment="Center" FontWeight="Medium"/>
+            <NumericUpDown Grid.Column="1" Minimum="0" Maximum="3600" Increment="5" FormatString="0"
+                           Value="{Binding HidePasswordsAfterSeconds}" AutomationProperties.LabeledBy="{Binding #HideLabel}"/>
+          </Grid>
+        </StackPanel>
+
+        <StackPanel Spacing="12">
+          <TextBlock Text="MASTER PASSWORD" Classes="section"/>
+          <TextBlock Text="Changing the master password re-encrypts every entry with a new key." Classes="caption" TextWrapping="Wrap"/>
+          <Grid ColumnDefinitions="*,*" ColumnSpacing="12" RowDefinitions="Auto,Auto" RowSpacing="8">
+            <TextBox Text="{Binding CurrentPassword}" PasswordChar="•" PlaceholderText="Current master password"
+                     AutomationProperties.Name="Current master password"/>
+            <TextBox Grid.Column="1" Text="{Binding NewPassword}" PasswordChar="•" PlaceholderText="New master password"
+                     AutomationProperties.Name="New master password"/>
+            <TextBox Grid.Row="1" Text="{Binding ConfirmPassword}" PasswordChar="•" PlaceholderText="Confirm new master password"
+                     AutomationProperties.Name="Confirm new master password"/>
+            <Button Grid.Row="1" Grid.Column="1" Content="Change master password" Command="{Binding ChangeMasterPasswordCommand}" HorizontalAlignment="Left"/>
+          </Grid>
+          <TextBlock Text="{Binding PasswordMessage}" Classes="caption" IsVisible="{Binding HasPasswordMessage}" TextWrapping="Wrap"
+                     AutomationProperties.LiveSetting="Polite"/>
+        </StackPanel>
+
+        <StackPanel Spacing="12">
+          <TextBlock Text="BACKUP" Classes="section"/>
+          <TextBlock Text="Backups are encrypted copies of the vault. Restoring one requires its master password." Classes="caption" TextWrapping="Wrap"/>
+          <StackPanel Orientation="Horizontal" Spacing="12">
+            <Button Content="Back up vault…" Command="{Binding BackupVaultCommand}"/>
+            <Button Content="Restore from backup…" Command="{Binding ChooseRestoreCommand}"/>
+          </StackPanel>
+          <StackPanel Spacing="8" IsVisible="{Binding HasPendingRestore}">
+            <TextBlock Text="{Binding PendingRestorePath}" Classes="caption" TextWrapping="Wrap"/>
+            <TextBlock Text="Restoring replaces the current vault (a safety copy is kept) and locks the app; unlock with the backup's master password."
+                       Classes="caption" TextWrapping="Wrap"/>
+            <StackPanel Orientation="Horizontal" Spacing="12">
+              <Button Content="Replace vault" Classes="danger" Command="{Binding ConfirmRestoreCommand}"/>
+              <Button Content="Cancel restore" Classes="ghost" Command="{Binding CancelRestoreCommand}"/>
+            </StackPanel>
+          </StackPanel>
+          <TextBlock Text="{Binding BackupMessage}" Classes="caption" IsVisible="{Binding HasBackupMessage}" TextWrapping="Wrap"
+                     AutomationProperties.LiveSetting="Polite"/>
+        </StackPanel>
+      </StackPanel>
+    </ScrollViewer>
+
+    <Grid Grid.Row="2" ColumnDefinitions="*,Auto">
+      <Button Grid.Column="1" Content="Close" Classes="primary" Command="{Binding CancelCommand}"/>
+    </Grid>
+  </Grid>
+</UserControl>
