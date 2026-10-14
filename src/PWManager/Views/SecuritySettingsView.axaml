@@ -13,7 +13,7 @@
       </Button>
     </Grid>
 
-    <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled">
+    <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled" Padding="0,0,16,0">
       <StackPanel Spacing="20">
         <StackPanel Spacing="12">
           <TextBlock Text="SESSION" Classes="section"/>

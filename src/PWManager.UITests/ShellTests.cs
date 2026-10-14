@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
 using Avalonia.Input;
@@ -321,6 +322,56 @@ public class ShellTests
 
             Assert.False(shell.Vault.IsSecuritySettingsOpen);
             Assert.False(Find<Border>(window, "SecurityLayer").IsEffectivelyVisible);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
+    public void VaultPanel_SecurityModal_KeepsTheRightAlignedFieldsClearOfTheScrollBar()
+    {
+        var viewModel = MemoryVault.Sample(3).CreateViewModel();
+        viewModel.LoadEntriesAsync().GetAwaiter().GetResult();
+        var window = new Window
+        {
+            Content = new VaultPanel
+            {
+                DataContext = viewModel
+            },
+            Width = 1180,
+            Height = 780
+        };
+        window.Show();
+        Dispatcher.UIThread.RunJobs();
+
+        try
+        {
+            viewModel.OpenSecuritySettingsCommand.Execute(null);
+            Dispatcher.UIThread.RunJobs();
+
+            var securityView = window.GetVisualDescendants().OfType<SecuritySettingsView>().Single();
+            var fields = securityView.GetVisualDescendants().OfType<NumericUpDown>()
+                .Where(field => field.IsEffectivelyVisible)
+                .ToList();
+            Assert.NotEmpty(fields);
+
+            var scroll = fields[0].GetVisualAncestors().OfType<ScrollViewer>().First();
+            var scrollBar = scroll.GetVisualDescendants().OfType<ScrollBar>()
+                .Single(bar => bar.Name == "PART_VerticalScrollBar" && bar.IsEffectivelyVisible);
+            var scrollBarTopLeft = scrollBar.TranslatePoint(default, scroll);
+
+            Assert.NotNull(scrollBarTopLeft);
+
+            foreach (var field in fields)
+            {
+                var fieldTopLeft = field.TranslatePoint(default, scroll);
+
+                Assert.NotNull(fieldTopLeft);
+                Assert.True(fieldTopLeft!.Value.X + field.Bounds.Width <= scrollBarTopLeft!.Value.X,
+                    $"The field ending at {fieldTopLeft.Value.X + field.Bounds.Width} overlaps the scroll bar starting at {scrollBarTopLeft.Value.X}.");
+            }
         }
         finally
         {
