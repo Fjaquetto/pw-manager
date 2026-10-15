@@ -104,11 +104,6 @@ public partial class App : AvaloniaApp
         return serviceCollection.BuildServiceProvider();
     }
 
-    /// <summary>
-    /// Resolves the vault status on a worker thread and hands it to the unlock
-    /// screen on the UI thread. Failures fall back to "vault exists" so the
-    /// unlock attempt can surface the error instead of application startup.
-    /// </summary>
     private static async Task PrepareVaultAsync(ShellViewModel shell)
     {
         VaultStatus status;

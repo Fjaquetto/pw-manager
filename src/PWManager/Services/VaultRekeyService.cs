@@ -14,11 +14,6 @@ using PWManager.Services.Interfaces;
 
 namespace PWManager.Services;
 
-/// <summary>
-/// Re-encrypts every entry with a key derived from the new master password.
-/// The old password is verified against the verifier first, the re-encryption
-/// runs in a transaction and a transient backup protects the operation.
-/// </summary>
 public sealed class VaultRekeyService(
     IServiceScopeFactory scopeFactory,
     IVaultSession session,

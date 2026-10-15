@@ -9,10 +9,6 @@ using PWManager.Services.Interfaces;
 
 namespace PWManager.ViewModels;
 
-/// <summary>
-/// Session, clipboard, password hygiene, master password and backup options.
-/// Preferences apply immediately and are persisted outside the vault database.
-/// </summary>
 public partial class SecuritySettingsViewModel : ViewModelBase
 {
     private readonly IAppSettingsService _settings;
@@ -35,10 +31,8 @@ public partial class SecuritySettingsViewModel : ViewModelBase
 
     public event Action? CloseRequested;
 
-    /// <summary>
-    /// Raised after a backup was restored; the shell locks the vault so it is
-    /// unlocked again with the backup's master password.
-    /// </summary>
+    // The shell locks the vault after a restore, so it can be unlocked again
+    // with the backup's master password.
     public event Action? VaultRestored;
 
     [ObservableProperty]

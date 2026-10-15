@@ -9,12 +9,7 @@ using PWManager.Services.Interfaces;
 
 namespace PWManager.ViewModels;
 
-/// <summary>
-/// Drives the appearance dialog: edit the semantic color tokens with live
-/// preview, derive related shades automatically, audit contrast, and save or
-/// load profiles. Profiles are stored as JSON files, never in the vault
-/// database.
-/// </summary>
+// Profiles are JSON files outside the vault database.
 public partial class ThemeSettingsViewModel : ViewModelBase
 {
     private readonly IThemeService _themeService;
@@ -107,9 +102,6 @@ public partial class ThemeSettingsViewModel : ViewModelBase
 
     public bool HasWarnings => ContrastWarnings.Count > 0;
 
-    /// <summary>
-    /// Loads the active profile and prepares the dialog for editing.
-    /// </summary>
     public void Open()
     {
         _original = _store.LoadActiveScheme();
@@ -242,9 +234,6 @@ public partial class ThemeSettingsViewModel : ViewModelBase
         UpdateWarnings();
     }
 
-    /// <summary>
-    /// Restores a single token to its built-in default value.
-    /// </summary>
     [RelayCommand]
     private void ResetToken(string? token)
     {

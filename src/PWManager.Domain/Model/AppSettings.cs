@@ -1,9 +1,6 @@
 namespace PWManager.Domain.Model;
 
-/// <summary>
-/// User preferences that are stored outside the vault database. Zero disables
-/// the feature for the numeric timeouts.
-/// </summary>
+// Stored outside the vault database. Zero disables the numeric timeouts.
 public sealed record AppSettings
 {
     public const int DefaultAutoLockMinutes = 15;

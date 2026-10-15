@@ -1,9 +1,7 @@
 namespace PWManager.Domain.Model;
 
-/// <summary>
-/// Crypto metadata of the vault. Stored inside the database so it travels
-/// with backups; never contains secrets (salt and verifier only).
-/// </summary>
+// Salt and verifier only: never contains secrets. Stored inside the database so
+// it travels with backups.
 public class VaultMetadata
 {
     public const int CurrentFormatVersion = 2;

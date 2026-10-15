@@ -233,7 +233,7 @@ public class PersistenceTests : IDisposable
     {
         var context = new PWDbContext(_path);
         context.Database.EnsureCreated();
-        VaultSchemaInitializer.EnsureUpToDate(context);
+        VaultSchemaInitializer.CreateVaultMetadataTableIfMissing(context);
 
         return context;
     }

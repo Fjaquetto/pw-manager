@@ -3,10 +3,7 @@ using PWManager.Domain.Model;
 
 namespace PWManager.Infra.Config;
 
-/// <summary>
-/// Persists the user preferences as JSON next to the vault. Preferences are
-/// not secrets and are deliberately kept out of the database.
-/// </summary>
+// Preferences are not secrets and are deliberately kept out of the vault database.
 public sealed class AppSettingsStore
 {
     public const string FileName = "settings.json";

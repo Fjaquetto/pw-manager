@@ -14,11 +14,6 @@ using PWManager.Services.Interfaces;
 
 namespace PWManager.Services;
 
-/// <summary>
-/// Opens (or creates) the vault. Vaults written before the v2 format are
-/// detected and migrated to AES-GCM with a single PBKDF2-SHA256 derivation
-/// when the correct password is provided.
-/// </summary>
 public sealed class UnlockService(
     IServiceScopeFactory scopeFactory,
     IVaultSession session,
@@ -29,7 +24,7 @@ public sealed class UnlockService(
     {
         using var scope = scopeFactory.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<PWDbContext>();
-        VaultSchemaInitializer.EnsureUpToDate(context);
+        VaultSchemaInitializer.CreateVaultMetadataTableIfMissing(context);
 
         if (await context.VaultMetadata.AnyAsync())
         {
@@ -45,7 +40,7 @@ public sealed class UnlockService(
         {
             using var scope = scopeFactory.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<PWDbContext>();
-            VaultSchemaInitializer.EnsureUpToDate(context);
+            VaultSchemaInitializer.CreateVaultMetadataTableIfMissing(context);
 
             var metadata = await context.VaultMetadata.FirstOrDefaultAsync();
 

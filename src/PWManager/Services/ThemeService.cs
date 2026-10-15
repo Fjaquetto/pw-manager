@@ -10,13 +10,8 @@ using AvaloniaApp = Avalonia.Application;
 
 namespace PWManager.Services;
 
-/// <summary>
-/// Applies a <see cref="ColorScheme"/> to the shared brushes loaded from
-/// Styles/Colors.axaml. Because every view references those same brush
-/// instances, updating the brush colors propagates to the live UI without
-/// replacing resources. The Fluent accent (selection, checked states) is
-/// updated through its palette, which supports runtime changes.
-/// </summary>
+// Every view shares the brush instances from Styles/Colors.axaml, so mutating
+// their color updates the live UI without replacing resources.
 public sealed class ThemeService : IThemeService
 {
     private static readonly IReadOnlyList<(string ResourceKey, Func<ColorScheme, string> Token)> BrushMap = new (string, Func<ColorScheme, string>)[]

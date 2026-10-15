@@ -30,7 +30,7 @@ public class VaultRekeyServiceTests : IDisposable
         using (var context = new PWDbContext(_databasePath))
         {
             context.Database.EnsureCreated();
-            VaultSchemaInitializer.EnsureUpToDate(context);
+            VaultSchemaInitializer.CreateVaultMetadataTableIfMissing(context);
 
             var salt = VaultCrypto.CreateSalt();
             _oldSalt = Convert.ToBase64String(salt);
@@ -114,7 +114,7 @@ public class VaultRekeyServiceTests : IDisposable
         using (var context = new PWDbContext(path))
         {
             context.Database.EnsureCreated();
-            VaultSchemaInitializer.EnsureUpToDate(context);
+            VaultSchemaInitializer.CreateVaultMetadataTableIfMissing(context);
         }
 
         var provider = new ServiceCollection()

@@ -31,21 +31,13 @@ public partial class UnlockViewModel(IUnlockService unlockService) : ViewModelBa
     [NotifyCanExecuteChangedFor(nameof(UnlockCommand))]
     private bool _isBusy;
 
-    /// <summary>
-    /// True while the shell is opening the vault after a successful unlock.
-    /// Keeps the unlock form disabled and its progress indicator visible until
-    /// the vault is ready to be revealed.
-    /// </summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsIdle), nameof(ShowProgress), nameof(CanUnlock))]
     [NotifyCanExecuteChangedFor(nameof(UnlockCommand))]
     private bool _isOpeningVault;
 
-    /// <summary>
-    /// True until the shell resolves the vault status. The form stays visible
-    /// and editable, but submitting is blocked so a brand-new vault can never
-    /// be created through the single-password (unlock) flow.
-    /// </summary>
+    // Submitting is blocked until the shell resolves the status: a new vault must
+    // never be created through the unlock flow, which has no confirmation field.
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanUnlock))]
     [NotifyCanExecuteChangedFor(nameof(UnlockCommand))]
@@ -60,10 +52,6 @@ public partial class UnlockViewModel(IUnlockService unlockService) : ViewModelBa
     [NotifyPropertyChangedFor(nameof(HasNotice))]
     private string _notice = string.Empty;
 
-    /// <summary>
-    /// Raised after a successful unlock, once the password and visibility have
-    /// been reset.
-    /// </summary>
     public event Action? Unlocked;
 
     public bool IsCreating => Status == VaultStatus.New;
@@ -78,10 +66,6 @@ public partial class UnlockViewModel(IUnlockService unlockService) : ViewModelBa
 
     public bool IsIdle => !IsBusy && !IsOpeningVault;
 
-    /// <summary>
-    /// Whether the form is ready to be submitted. False while the shell is
-    /// still resolving the vault status.
-    /// </summary>
     public bool CanUnlock => IsIdle && !IsPreparing;
 
     public bool ShowProgress => IsBusy || IsOpeningVault;
@@ -96,20 +80,12 @@ public partial class UnlockViewModel(IUnlockService unlockService) : ViewModelBa
         ? (IsCreating ? "Creating…" : "Unlocking…")
         : (IsCreating ? "Create vault" : "Unlock vault");
 
-    /// <summary>
-    /// Applies the resolved status and completes startup preparation, which
-    /// unblocks submitting.
-    /// </summary>
     public void Configure(VaultStatus status)
     {
         Status = status;
         IsPreparing = false;
     }
 
-    /// <summary>
-    /// Clears the form (passwords, visibility and messages). Used when the
-    /// vault is locked again.
-    /// </summary>
     public void Reset()
     {
         Password = string.Empty;

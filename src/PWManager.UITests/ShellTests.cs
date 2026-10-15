@@ -223,7 +223,7 @@ public class ShellTests
             window.KeyPress(Key.Enter, RawInputModifiers.None, PhysicalKey.Enter, null);
             window.KeyRelease(Key.Enter, RawInputModifiers.None, PhysicalKey.Enter, null);
             PumpUntil(() => shell.IsUnlocked);
-            PumpUntil(() => Math.Abs(window.Width - expected.Width) < 0.5 && Math.Abs(window.Height - expected.Height) < 0.5);
+            PumpUntil(() => Math.Abs(window.Width - expected.Width) < 0.0005 && Math.Abs(window.Height - expected.Height) < 0.0005);
             Dispatcher.UIThread.RunJobs();
 
             Assert.Equal(1, Created);
@@ -267,7 +267,7 @@ public class ShellTests
             window.KeyRelease(Key.Enter, RawInputModifiers.None, PhysicalKey.Enter, null);
 
             PumpUntil(() => shell.IsUnlocked);
-            PumpUntil(() => Math.Abs(window.Width - expected.Width) < 0.5 && Math.Abs(window.Height - expected.Height) < 0.5);
+            PumpUntil(() => Math.Abs(window.Width - expected.Width) < 0.0005 && Math.Abs(window.Height - expected.Height) < 0.0005);
             Dispatcher.UIThread.RunJobs();
 
             Assert.NotEqual(startPosition, window.Position);
