@@ -9,6 +9,38 @@ namespace PWManager.UnitTests;
 public class UnlockViewModelTests
 {
     [Fact]
+    public void IsPreparing_DefaultsToTrue_AndBlocksTheCommand()
+    {
+        var viewModel = new UnlockViewModel(Mock.Of<IUnlockService>());
+
+        Assert.True(viewModel.IsPreparing);
+        Assert.False(viewModel.UnlockCommand.CanExecute(null));
+    }
+
+    [Fact]
+    public void Configure_CompletesPreparationAndEnablesTheCommand()
+    {
+        var viewModel = new UnlockViewModel(Mock.Of<IUnlockService>());
+
+        viewModel.Configure(VaultStatus.Existing);
+
+        Assert.False(viewModel.IsPreparing);
+        Assert.True(viewModel.UnlockCommand.CanExecute(null));
+    }
+
+    [Fact]
+    public async Task Unlock_WhilePreparing_DoesNotCallTheService()
+    {
+        var service = new Mock<IUnlockService>();
+        var viewModel = new UnlockViewModel(service.Object) { Password = "master" };
+
+        await viewModel.UnlockCommand.ExecuteAsync(null);
+
+        Assert.False(viewModel.HasError);
+        service.Verify(s => s.UnlockAsync(It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
     public void Configure_SwitchesBetweenUnlockAndCreateModes()
     {
         var viewModel = CreateViewModel();
@@ -96,6 +128,11 @@ public class UnlockViewModelTests
         Assert.False(viewModel.HasNotice);
     }
 
-    private static UnlockViewModel CreateViewModel(IUnlockService? service = null) =>
-        new(service ?? Mock.Of<IUnlockService>());
+    private static UnlockViewModel CreateViewModel(IUnlockService? service = null)
+    {
+        var viewModel = new UnlockViewModel(service ?? Mock.Of<IUnlockService>());
+        viewModel.Configure(VaultStatus.Existing);
+
+        return viewModel;
+    }
 }

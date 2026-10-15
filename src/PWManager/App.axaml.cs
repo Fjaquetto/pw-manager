@@ -1,13 +1,17 @@
 using System;
+using System.Diagnostics;
 using System.IO;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Avalonia.Threading;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PWManager.Application.DataContracts;
 using PWManager.Domain.DataContracts.InfraService;
 using PWManager.Domain.DataContracts.Repository;
+using PWManager.Domain.Model;
 using PWManager.Infra.Config;
 using PWManager.Infra.Context.SQLite;
 using PWManager.Infra.Context.SQLite.DataContracts;
@@ -39,12 +43,37 @@ public partial class App : AvaloniaApp
 
         MoveRoamingDataIfNeeded(configuration);
 
+        Services = BuildServices(configuration);
+
+        Services.GetRequiredService<IThemeService>()
+            .Apply(Services.GetRequiredService<ColorThemeStore>().LoadActiveScheme());
+
+        var shellViewModel = Services.GetRequiredService<ShellViewModel>();
+
+        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            desktop.MainWindow = new ShellWindow
+            {
+                DataContext = shellViewModel
+            };
+        }
+
+        base.OnFrameworkInitializationCompleted();
+
+        // Vault preparation is deliberately started after the window has been
+        // assigned: it must never delay the first frame.
+        _ = PrepareVaultAsync(shellViewModel);
+    }
+
+    private IServiceProvider BuildServices(IConfiguration configuration)
+    {
         var serviceCollection = new ServiceCollection();
         serviceCollection.Configure<DatabaseConfig>(options => configuration.GetSection("DatabaseConfig").Bind(options));
         serviceCollection.AddSingleton<DatabaseConfigurator>();
         serviceCollection.AddSingleton<IPWDbContextFactory>(provider =>
             new PWDbContextFactory(provider.GetRequiredService<DatabaseConfigurator>().GetDatabaseFilePath()));
         serviceCollection.AddScoped(sp => sp.GetRequiredService<IPWDbContextFactory>().CreateDbContext());
+        serviceCollection.AddSingleton<IVaultBootstrapper, VaultBootstrapper>();
         serviceCollection.AddSingleton<ColorThemeStore>(provider => new ColorThemeStore(
             Path.Combine(
                 provider.GetRequiredService<DatabaseConfigurator>().GetApplicationFolder(),
@@ -71,30 +100,30 @@ public partial class App : AvaloniaApp
         serviceCollection.AddTransient<MainViewModel>();
         serviceCollection.AddTransient<ShellViewModel>();
         serviceCollection.AddSingleton<Func<MainViewModel>>(provider => provider.GetRequiredService<MainViewModel>);
-        Services = serviceCollection.BuildServiceProvider();
-        using (var scope = Services.GetRequiredService<IServiceScopeFactory>().CreateScope())
+
+        return serviceCollection.BuildServiceProvider();
+    }
+
+    /// <summary>
+    /// Resolves the vault status on a worker thread and hands it to the unlock
+    /// screen on the UI thread. Failures fall back to "vault exists" so the
+    /// unlock attempt can surface the error instead of application startup.
+    /// </summary>
+    private static async Task PrepareVaultAsync(ShellViewModel shell)
+    {
+        VaultStatus status;
+
+        try
         {
-            var context = scope.ServiceProvider.GetRequiredService<PWDbContext>();
-            context.Database.EnsureCreated();
-            VaultSchemaInitializer.EnsureUpToDate(context);
+            status = await Services.GetRequiredService<IVaultBootstrapper>().InitializeAsync();
+        }
+        catch (Exception exception)
+        {
+            Trace.TraceError($"Vault bootstrap failed: {exception}");
+            status = VaultStatus.Existing;
         }
 
-        Services.GetRequiredService<IThemeService>()
-            .Apply(Services.GetRequiredService<ColorThemeStore>().LoadActiveScheme());
-
-        var shellViewModel = Services.GetRequiredService<ShellViewModel>();
-        var vaultStatus = Services.GetRequiredService<IUnlockService>().GetStatusAsync().GetAwaiter().GetResult();
-        shellViewModel.Unlock.Configure(vaultStatus);
-
-        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-        {
-            desktop.MainWindow = new ShellWindow
-            {
-                DataContext = shellViewModel
-            };
-        }
-
-        base.OnFrameworkInitializationCompleted();
+        await Dispatcher.UIThread.InvokeAsync(() => shell.Unlock.Configure(status));
     }
 
     private static void MoveRoamingDataIfNeeded(IConfiguration configuration)

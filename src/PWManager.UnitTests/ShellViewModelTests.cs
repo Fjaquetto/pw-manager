@@ -270,6 +270,7 @@ public class ShellViewModelTests
         {
             Password = "master"
         };
+        unlock.Configure(VaultStatus.Existing);
 
         return new ShellViewModel(
             unlock,
