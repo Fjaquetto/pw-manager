@@ -1,8 +1,6 @@
-using System.Threading.Tasks;
-using PWManager.Domain.Model;
-using PWManager.Enums;
+using PWManager.Application.Enums;
 
-namespace PWManager.Services.Interfaces;
+namespace PWManager.Application.DataContracts;
 
 public interface IVaultRekeyService
 {

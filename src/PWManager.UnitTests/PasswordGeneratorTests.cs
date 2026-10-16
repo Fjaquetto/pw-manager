@@ -1,5 +1,5 @@
 using System.Linq;
-using PWManager.Services;
+using PWManager.Application;
 using Xunit;
 
 namespace PWManager.UnitTests;

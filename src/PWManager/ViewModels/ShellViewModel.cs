@@ -3,8 +3,8 @@ using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
+using PWManager.Application.DataContracts;
 using PWManager.Domain.DataContracts.InfraService;
-using PWManager.Services.Interfaces;
 
 namespace PWManager.ViewModels;
 

@@ -1,22 +1,18 @@
-using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
+using PWManager.Application.DataContracts;
+using PWManager.Domain.DataContracts.InfraService;
 using PWManager.Domain.Model;
-using PWManager.Infra.Context.SQLite;
-using PWManager.Services.Interfaces;
 
-namespace PWManager.Services;
+namespace PWManager.Application;
 
 public sealed class VaultBootstrapper(
-    IServiceScopeFactory scopeFactory,
+    IVaultSchemaInitializer schemaInitializer,
     IUnlockService unlockService) : IVaultBootstrapper
 {
     // Microsoft.Data.Sqlite executes "async" commands synchronously, so this has
     // to own a worker thread or the shell would block while the status resolves.
     public Task<VaultStatus> InitializeAsync() => Task.Run(async () =>
     {
-        using var scope = scopeFactory.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<PWDbContext>();
-        context.Database.EnsureCreated();
+        await schemaInitializer.EnsureAsync();
 
         return await unlockService.GetStatusAsync();
     });

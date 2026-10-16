@@ -8,6 +8,7 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using PWManager.Application;
 using PWManager.Application.DataContracts;
 using PWManager.Domain.DataContracts.InfraService;
 using PWManager.Domain.DataContracts.Repository;
@@ -80,7 +81,7 @@ public partial class App : AvaloniaApp
                 ColorThemeStore.ThemesFolderName)));
         serviceCollection.AddSingleton<IThemeService, ThemeService>();
         serviceCollection.AddSingleton<IVaultSession, VaultSession>();
-        serviceCollection.AddSingleton<AppSettingsStore>(provider =>
+        serviceCollection.AddSingleton<IAppSettingsStore>(provider =>
             new AppSettingsStore(provider.GetRequiredService<DatabaseConfigurator>().GetApplicationFolder()));
         serviceCollection.AddSingleton<IAppSettingsService, AppSettingsService>();
         serviceCollection.AddSingleton<IVaultBackupService>(provider =>
@@ -90,7 +91,10 @@ public partial class App : AvaloniaApp
             ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop ? desktop.MainWindow : null));
         serviceCollection.AddScoped(typeof(IRepository<>), typeof(Repository<>));
         serviceCollection.AddScoped<IUserRepository, UserRepository>();
-        serviceCollection.AddScoped<IUserApplication, PWManager.Application.UserApplication>();
+        serviceCollection.AddScoped<IVaultMetadataRepository, VaultMetadataRepository>();
+        serviceCollection.AddSingleton<IVaultKeyService, VaultKeyService>();
+        serviceCollection.AddSingleton<IVaultSchemaInitializer, SqliteVaultSchemaInitializer>();
+        serviceCollection.AddSingleton<IVaultDataMigrator, VaultDataMigrator>();
         serviceCollection.AddScoped<IUserEncryptorService, UserEncryptorService>();
         serviceCollection.AddTransient<IClipboardService, ClipboardService>();
         serviceCollection.AddTransient<IUnlockService, UnlockService>();

@@ -1,7 +1,6 @@
-using System.Threading.Tasks;
 using PWManager.Domain.Model;
 
-namespace PWManager.Services.Interfaces;
+namespace PWManager.Application.DataContracts;
 
 public interface IVaultBootstrapper
 {

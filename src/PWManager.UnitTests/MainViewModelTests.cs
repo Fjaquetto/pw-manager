@@ -107,7 +107,7 @@ public class MainViewModelTests
         Assert.NotEmpty(vault.ViewModel.Editor.SiteError);
         Assert.NotEmpty(vault.ViewModel.Editor.LoginError);
         Assert.NotEmpty(vault.ViewModel.Editor.PasswordError);
-        vault.Application.Verify(a => a.AddUserAsync(It.IsAny<User>()), Times.Never);
+        vault.UserRepository.Verify(repository => repository.AddAsync(It.IsAny<User>()), Times.Never);
         vault.ViewModel.Editor.Site = "Fixed";
 
         Assert.Empty(vault.ViewModel.Editor.SiteError);
@@ -165,7 +165,7 @@ public class MainViewModelTests
     {
         var vault = new TestVault();
         vault.Fill();
-        vault.Application.Setup(a => a.AddUserAsync(It.IsAny<User>())).ThrowsAsync(new IOException());
+        vault.UserRepository.Setup(repository => repository.AddAsync(It.IsAny<User>())).ThrowsAsync(new IOException());
 
         await vault.ViewModel.SaveEntryCommand.ExecuteAsync(null);
 
@@ -193,7 +193,7 @@ public class MainViewModelTests
         Assert.True(viewModel.Notification.IsError);
         Assert.True(viewModel.IsEditorOpen);
         Assert.Equal("updated", viewModel.Editor.Login);
-        vault.Application.Verify(a => a.UpdateUserAsync(It.IsAny<User>()), Times.Never);
+        vault.UserRepository.Verify(repository => repository.UpdateAsync(It.IsAny<User>()), Times.Never);
 
         Assert.True(viewModel.EntryMissing);
         await viewModel.SaveAsNewCommand.ExecuteAsync(null);
@@ -277,7 +277,7 @@ public class MainViewModelTests
 
         await viewModel.LoadEntriesAsync();
         viewModel.SelectedEntry = viewModel.Entries[0];
-        vault.Application.Setup(a => a.DeleteUserAsync(It.IsAny<User>())).ThrowsAsync(new IOException());
+        vault.UserRepository.Setup(repository => repository.DeleteAsync(It.IsAny<User>())).ThrowsAsync(new IOException());
         viewModel.RequestDeleteCommand.Execute(null);
 
         await viewModel.ConfirmDeleteCommand.ExecuteAsync(null);
@@ -293,7 +293,7 @@ public class MainViewModelTests
         var vault = new TestVault();
         vault.Fill();
         var pending = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-        vault.Application.Setup(a => a.AddUserAsync(It.IsAny<User>())).Returns(pending.Task);
+        vault.UserRepository.Setup(repository => repository.AddAsync(It.IsAny<User>())).Returns(pending.Task);
         var saving = vault.ViewModel.SaveEntryCommand.ExecuteAsync(null);
 
         Assert.True(vault.ViewModel.IsBusy);
@@ -305,7 +305,7 @@ public class MainViewModelTests
         pending.SetResult();
 
         await saving;
-        vault.Application.Verify(a => a.AddUserAsync(It.IsAny<User>()), Times.Once);
+        vault.UserRepository.Verify(repository => repository.AddAsync(It.IsAny<User>()), Times.Once);
 
         Assert.False(vault.ViewModel.IsBusy);
     }
@@ -330,7 +330,7 @@ public class MainViewModelTests
     public async Task LoadFailure_ShowsRetryAndRecovers()
     {
         var vault = new TestVault(new User("Site", "login", "pw"));
-        vault.Application.SetupSequence(a => a.GetAllUsersAsync()).ThrowsAsync(new IOException()).ReturnsAsync(vault.Users);
+        vault.UserRepository.SetupSequence(repository => repository.GetAllAsync()).ThrowsAsync(new IOException()).ReturnsAsync(vault.Users);
 
         await vault.ViewModel.LoadEntriesAsync();
 

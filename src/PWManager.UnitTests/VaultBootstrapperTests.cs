@@ -1,12 +1,12 @@
-using Microsoft.Extensions.DependencyInjection;
 using Moq;
+using PWManager.Application;
+using PWManager.Application.DataContracts;
+using PWManager.Application.Enums;
+using PWManager.Domain.DataContracts.Repository;
 using PWManager.Domain.Model;
-using PWManager.Enums;
 using PWManager.Infra.Context.SQLite;
-using PWManager.Infra.Context.SQLite.DataContracts;
+using PWManager.Infra.Repository;
 using PWManager.Infra.Services;
-using PWManager.Services;
-using PWManager.Services.Interfaces;
 
 namespace PWManager.UnitTests;
 
@@ -15,22 +15,16 @@ public class VaultBootstrapperTests : IDisposable
     private readonly string _directory = Path.Combine(Path.GetTempPath(), "pwmanager-bootstrap-" + Guid.NewGuid().ToString("N"));
     private readonly string _path;
     private readonly PWDbContextFactory _factory;
-    private readonly ServiceProvider _provider;
 
     public VaultBootstrapperTests()
     {
         Directory.CreateDirectory(_directory);
         _path = Path.Combine(_directory, "vault.db");
         _factory = new PWDbContextFactory(_path);
-        _provider = new ServiceCollection()
-            .AddSingleton<IPWDbContextFactory>(_factory)
-            .AddScoped(_ => _factory.CreateDbContext())
-            .BuildServiceProvider();
     }
 
     public void Dispose()
     {
-        _provider.Dispose();
         Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();
 
         if (Directory.Exists(_directory))
@@ -108,12 +102,20 @@ public class VaultBootstrapperTests : IDisposable
     }
 
     private VaultBootstrapper CreateBootstrapper(IUnlockService? unlockService = null) =>
-        new(
-            _provider.GetRequiredService<IServiceScopeFactory>(),
-            unlockService ?? CreateUnlockService());
+        new(new SqliteVaultSchemaInitializer(_factory), unlockService ?? CreateUnlockService());
 
-    private UnlockService CreateUnlockService() =>
-        new(_provider.GetRequiredService<IServiceScopeFactory>(), new VaultSession(), _factory, TimeProvider.System);
+    private UnlockService CreateUnlockService()
+    {
+        var context = _factory.CreateDbContext();
+
+        return new UnlockService(
+            new VaultMetadataRepository(context),
+            new UserRepository(context),
+            new VaultKeyService(),
+            new VaultDataMigrator(_factory),
+            new VaultSession(),
+            TimeProvider.System);
+    }
 
     private void CreateVault(string password)
     {

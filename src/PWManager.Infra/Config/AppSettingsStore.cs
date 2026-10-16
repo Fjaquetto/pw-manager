@@ -1,10 +1,10 @@
 using System.Text.Json;
+using PWManager.Domain.DataContracts.InfraService;
 using PWManager.Domain.Model;
 
 namespace PWManager.Infra.Config;
 
-// Preferences are not secrets and are deliberately kept out of the vault database.
-public sealed class AppSettingsStore
+public sealed class AppSettingsStore(string directory) : IAppSettingsStore
 {
     public const string FileName = "settings.json";
 
@@ -15,14 +15,7 @@ public sealed class AppSettingsStore
         PropertyNameCaseInsensitive = true
     };
 
-    private readonly string _directory;
-
-    public AppSettingsStore(string directory)
-    {
-        _directory = directory;
-    }
-
-    public string FilePath => Path.Combine(_directory, FileName);
+    public string FilePath => Path.Combine(directory, FileName);
 
     public AppSettings Load()
     {
@@ -45,7 +38,7 @@ public sealed class AppSettingsStore
 
     public void Save(AppSettings settings)
     {
-        Directory.CreateDirectory(_directory);
+        Directory.CreateDirectory(directory);
         var normalized = settings.Normalized();
         var temporary = FilePath + ".tmp";
         File.WriteAllText(temporary, JsonSerializer.Serialize(normalized, JsonOptions));

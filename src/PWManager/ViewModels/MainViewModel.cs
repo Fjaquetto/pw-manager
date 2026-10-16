@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using PWManager.Application.DataContracts;
 using PWManager.Domain.DataContracts.InfraService;
 using PWManager.Domain.Model;
 using PWManager.Enums;

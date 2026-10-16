@@ -1,9 +1,7 @@
-using System;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace PWManager.Services;
+namespace PWManager.Application;
 
 public static class PasswordGenerator
 {
