@@ -2,11 +2,8 @@ using System.Security.Cryptography;
 
 namespace PWManager.Infra.Services;
 
-/// <summary>
-/// The original per-field encryption (PBKDF2-SHA1 with 1000 iterations,
-/// AES-CBC). Kept only to detect and migrate vaults created before the v2
-/// format; the master password is passed per call and never retained.
-/// </summary>
+// The original per-field encryption: PBKDF2-SHA1 with 1000 iterations and AES-CBC.
+// Kept only to read pre-v2 vaults; the derived keys are never retained.
 public static class LegacyVaultCrypto
 {
     private const int Iterations = 1000;

@@ -1,12 +1,12 @@
 using Microsoft.Extensions.Time.Testing;
 using Moq;
+using PWManager.Application;
+using PWManager.Application.DataContracts;
+using PWManager.Application.Enums;
 using PWManager.Domain.DataContracts.InfraService;
 using PWManager.Domain.Model;
-using PWManager.Enums;
 using PWManager.Infra.Config;
 using PWManager.Infra.Services;
-using PWManager.Services;
-using PWManager.Services.Interfaces;
 using PWManager.ViewModels;
 
 namespace PWManager.UnitTests;
@@ -32,7 +32,7 @@ public class ShellViewModelTests
     {
         var encrypted = new TaskCompletionSource<IEnumerable<User>>();
         var vault = new TestVault();
-        vault.Application.Setup(a => a.GetAllUsersAsync()).Returns(encrypted.Task);
+        vault.UserRepository.Setup(repository => repository.GetAllAsync()).Returns(encrypted.Task);
         var shell = CreateShell(() => vault.ViewModel, UnlockResult.Success);
 
         await shell.Unlock.UnlockCommand.ExecuteAsync(null);
@@ -91,7 +91,7 @@ public class ShellViewModelTests
         unlockService.Setup(s => s.UnlockAsync(It.IsAny<string>())).Returns(pendingUnlock.Task);
         var encrypted = new TaskCompletionSource<IEnumerable<User>>();
         var vault = new TestVault();
-        vault.Application.Setup(a => a.GetAllUsersAsync()).Returns(encrypted.Task);
+        vault.UserRepository.Setup(repository => repository.GetAllAsync()).Returns(encrypted.Task);
         var shell = CreateShell(() => vault.ViewModel, unlockService: unlockService.Object);
 
         shell.Unlock.Password = "master";
@@ -270,6 +270,7 @@ public class ShellViewModelTests
         {
             Password = "master"
         };
+        unlock.Configure(VaultStatus.Existing);
 
         return new ShellViewModel(
             unlock,

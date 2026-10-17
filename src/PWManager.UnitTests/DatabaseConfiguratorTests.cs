@@ -3,16 +3,88 @@ using PWManager.Infra.Config;
 
 namespace PWManager.UnitTests;
 
+[CollectionDefinition(PlatformDataFolderCollection.Name, DisableParallelization = true)]
+public sealed class PlatformDataFolderCollection
+{
+    public const string Name = "platform-data-folder";
+}
+
+[Collection(PlatformDataFolderCollection.Name)]
 public class DatabaseConfiguratorTests
 {
-    [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    public void ResolveDataFolder_AlwaysUsesLocalAppData(bool isWindows)
+    [Fact]
+    public void GetApplicationFolder_CreatesAMissingXdgDataDirectory()
     {
-        Assert.Equal(
-            Environment.SpecialFolder.LocalApplicationData,
-            DatabaseConfigurator.ResolveDataFolder(isWindows));
+        if (!OperatingSystem.IsLinux())
+        {
+            return;
+        }
+
+        // XDG_DATA_HOME is only honored on Linux; it is the source of the
+        // local application data folder this test has to control.
+        var dataHome = CreateTemporaryRoot();
+        var previousDataHome = Environment.GetEnvironmentVariable("XDG_DATA_HOME");
+        Environment.SetEnvironmentVariable("XDG_DATA_HOME", dataHome);
+
+        try
+        {
+            var folder = CreateConfigurator(new DatabaseConfig()).GetApplicationFolder();
+
+            Assert.True(Path.IsPathRooted(folder));
+            Assert.True(Directory.Exists(folder));
+            Assert.Equal(dataHome, Directory.GetParent(folder)!.FullName);
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable("XDG_DATA_HOME", previousDataHome);
+            DeleteDirectory(dataHome);
+        }
+    }
+
+    [Fact]
+    public void GetDatabaseFilePath_IsAbsoluteAndUsesTheConfiguredFileName()
+    {
+        var path = CreateConfigurator(new DatabaseConfig()).GetDatabaseFilePath();
+
+        Assert.True(Path.IsPathRooted(path));
+        Assert.Equal("pwmanager.db", Path.GetFileName(path));
+        Assert.True(Directory.Exists(Path.GetDirectoryName(path)));
+    }
+
+    [Fact]
+    public void GetApplicationFolder_CreatesTheDefaultFolderUnderTheGivenRoot()
+    {
+        var root = CreateTemporaryRoot();
+
+        try
+        {
+            var folder = CreateConfigurator(new DatabaseConfig()).GetApplicationFolder(root);
+
+            Assert.Equal(Path.Combine(root, "PWManager"), folder);
+            Assert.True(Directory.Exists(folder));
+        }
+        finally
+        {
+            DeleteDirectory(root);
+        }
+    }
+
+    [Fact]
+    public void GetApplicationFolder_CreatesTheConfiguredFolderUnderTheGivenRoot()
+    {
+        var root = CreateTemporaryRoot();
+
+        try
+        {
+            var folder = CreateConfigurator(new DatabaseConfig { AppFolder = "CustomApp" }).GetApplicationFolder(root);
+
+            Assert.Equal(Path.Combine(root, "CustomApp"), folder);
+            Assert.True(Directory.Exists(folder));
+        }
+        finally
+        {
+            DeleteDirectory(root);
+        }
     }
 
     [Fact]
@@ -45,57 +117,9 @@ public class DatabaseConfiguratorTests
         }
         finally
         {
-            Directory.Delete(roaming, recursive: true);
-            Directory.Delete(local, recursive: true);
+            DeleteDirectory(roaming);
+            DeleteDirectory(local);
         }
-    }
-
-    [Fact]
-    public void GetDatabaseFilePath_UsesDefaultFolderAndFileNames()
-    {
-        var root = CreateTemporaryRoot();
-        try
-        {
-            Assert.False(Directory.Exists(root));
-            var configurator = CreateConfigurator(new DatabaseConfig());
-
-            var path = configurator.GetDatabaseFilePath(root);
-
-            Assert.Equal(Path.Combine(root, "PWManager", "pwmanager.db"), path);
-            Assert.True(Directory.Exists(Path.Combine(root, "PWManager")));
-        }
-        finally
-        {
-            Directory.Delete(root, recursive: true);
-        }
-    }
-
-    [Fact]
-    public void GetDatabaseFilePath_CombinesConfiguredFolderAndFile()
-    {
-        var root = CreateTemporaryRoot();
-        try
-        {
-            var configurator = CreateConfigurator(new DatabaseConfig { AppFolder = "CustomApp", DbFile = "custom.db" });
-
-            var path = configurator.GetDatabaseFilePath(root);
-
-            Assert.Equal(Path.Combine(root, "CustomApp", "custom.db"), path);
-            Assert.True(Directory.Exists(Path.Combine(root, "CustomApp")));
-        }
-        finally
-        {
-            Directory.Delete(root, recursive: true);
-        }
-    }
-
-    [Fact]
-    public void PlatformDataFolder_IsAvailableOnCurrentOperatingSystem()
-    {
-        var dataFolder = Environment.GetFolderPath(
-            DatabaseConfigurator.ResolveDataFolder(OperatingSystem.IsWindows()));
-
-        Assert.False(string.IsNullOrWhiteSpace(dataFolder));
     }
 
     private static DatabaseConfigurator CreateConfigurator(DatabaseConfig config)
@@ -106,5 +130,13 @@ public class DatabaseConfiguratorTests
     private static string CreateTemporaryRoot()
     {
         return Path.Combine(Path.GetTempPath(), "pwmanager-configurator-" + Guid.NewGuid().ToString("N"));
+    }
+
+    private static void DeleteDirectory(string path)
+    {
+        if (Directory.Exists(path))
+        {
+            Directory.Delete(path, recursive: true);
+        }
     }
 }

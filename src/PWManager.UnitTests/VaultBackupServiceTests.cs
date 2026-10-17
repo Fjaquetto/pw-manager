@@ -93,7 +93,7 @@ public class VaultBackupServiceTests : IDisposable
     {
         using var context = new PWDbContext(_databasePath);
         context.Database.EnsureCreated();
-        VaultSchemaInitializer.EnsureUpToDate(context);
+        VaultSchemaInitializer.CreateVaultMetadataTableIfMissing(context);
         context.User.Add(new UserEncryptorService(_session).EncryptUser(new User(site, "login", "secret")));
         context.SaveChanges();
     }

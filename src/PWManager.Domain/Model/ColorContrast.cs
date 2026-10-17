@@ -1,18 +1,10 @@
 namespace PWManager.Domain.Model;
 
-/// <summary>
-/// A readability warning produced when two tokens do not reach the WCAG
-/// contrast target for their role. Warnings are advisory: they never block
-/// saving a profile.
-/// </summary>
 public sealed record ContrastWarning(string Description, double Ratio, double Required)
 {
     public string Message => $"{Description}: {Ratio:F1}:1 — recommended at least {Required:F1}:1";
 }
 
-/// <summary>
-/// Audits the semantic token pairs that carry text or indicators.
-/// </summary>
 public static class ColorContrast
 {
     public const double NormalText = 4.5;
@@ -42,9 +34,6 @@ public static class ColorContrast
 
     public static double Ratio(RgbColor first, RgbColor second) => ColorMath.ContrastRatio(first, second);
 
-    /// <summary>
-    /// Returns the warnings for the token pairs that do not reach their target.
-    /// </summary>
     public static IReadOnlyList<ContrastWarning> Audit(ColorScheme scheme)
     {
         var warnings = new List<ContrastWarning>();

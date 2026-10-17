@@ -3,11 +3,8 @@ using System.Text;
 
 namespace PWManager.Infra.Services;
 
-/// <summary>
-/// Vault cryptography v2: PBKDF2-SHA256 derives the key once per session and
-/// AES-GCM authenticates every field, so tampered ciphertext is rejected and
-/// no per-field key derivation is needed.
-/// </summary>
+// v2 vault cryptography: PBKDF2-SHA256 derives the key once per session and
+// AES-GCM authenticates every field, so tampered ciphertext is rejected.
 public static class VaultCrypto
 {
     public const string Prefix = "v2:";

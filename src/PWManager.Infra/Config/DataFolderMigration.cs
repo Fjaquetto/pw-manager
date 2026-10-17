@@ -1,10 +1,7 @@
 namespace PWManager.Infra.Config;
 
-/// <summary>
-/// Moves the application data from the Roaming AppData folder (used on Windows
-/// by earlier versions) to the Local AppData folder, so the vault is not
-/// replicated by roaming profiles and its WAL files stay together.
-/// </summary>
+// Moves the data out of Roaming AppData, which would replicate the vault
+// through roaming profiles and split its WAL side files.
 public static class DataFolderMigration
 {
     public static void MoveIfNeeded(string roamingRoot, string localRoot, string appFolderName)

@@ -1,14 +1,7 @@
 namespace PWManager.Domain.Model;
 
-/// <summary>
-/// Framework-free color math used to derive related shades and to audit
-/// contrast between the appearance profile tokens.
-/// </summary>
 public static class ColorMath
 {
-    /// <summary>
-    /// WCAG 2.x contrast ratio between two colors (1:1 to 21:1).
-    /// </summary>
     public static double ContrastRatio(RgbColor first, RgbColor second)
     {
         var firstLuminance = first.RelativeLuminance();
@@ -19,17 +12,11 @@ public static class ColorMath
         return (lighter + 0.05) / (darker + 0.05);
     }
 
-    /// <summary>
-    /// Multiplies the RGB channels by a factor, keeping the alpha channel.
-    /// </summary>
     public static RgbColor Scale(RgbColor color, double factor)
     {
         return new(ScaleChannel(color.R, factor), ScaleChannel(color.G, factor), ScaleChannel(color.B, factor), color.A);
     }
 
-    /// <summary>
-    /// Interpolates each channel from <paramref name="from"/> to <paramref name="to"/>.
-    /// </summary>
     public static RgbColor Mix(RgbColor from, RgbColor to, double amount)
     {
         return new(
@@ -39,9 +26,6 @@ public static class ColorMath
             LerpChannel(from.A, to.A, amount));
     }
 
-    /// <summary>
-    /// Raises the HSL lightness by <paramref name="amount"/> (0..1).
-    /// </summary>
     public static RgbColor Lighten(RgbColor color, double amount)
     {
         var (hue, saturation, lightness) = ToHsl(color);

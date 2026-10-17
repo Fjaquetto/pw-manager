@@ -3,17 +3,13 @@ using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
+using PWManager.Application.DataContracts;
 using PWManager.Domain.DataContracts.InfraService;
-using PWManager.Services.Interfaces;
 
 namespace PWManager.ViewModels;
 
-/// <summary>
-/// Coordinates the single application window: stays on the unlock screen until
-/// authentication succeeds, then creates and loads the vault before revealing
-/// it. Nothing of the vault exists before a successful unlock, and locking
-/// disposes the vault and zeroes the session key.
-/// </summary>
+// Nothing of the vault exists before a successful unlock, and locking disposes
+// it and zeroes the session key.
 public partial class ShellViewModel : ViewModelBase
 {
     private readonly Func<MainViewModel> _vaultFactory;
@@ -47,9 +43,6 @@ public partial class ShellViewModel : ViewModelBase
 
     public UnlockViewModel Unlock { get; }
 
-    /// <summary>
-    /// The vault, available only after a successful unlock. Null while locked.
-    /// </summary>
     public MainViewModel? Vault
     {
         get => _vault;
@@ -62,25 +55,12 @@ public partial class ShellViewModel : ViewModelBase
     [ObservableProperty]
     private bool _isUnlocked;
 
-    /// <summary>
-    /// The unlock screen is visible until the vault has been loaded and shown.
-    /// </summary>
     public bool ShowUnlock => !IsUnlocked;
 
-    /// <summary>
-    /// Covers the whole unlock flow: validating the password and loading the
-    /// vault entries, so the user sees a single continuous progress state.
-    /// </summary>
     public bool ShowProgress => Unlock.IsBusy || IsOpening;
 
-    /// <summary>
-    /// The in-flight vault opening, exposed so tests can await it.
-    /// </summary>
     public Task? OpeningTask => _openingTask;
 
-    /// <summary>
-    /// Called on user input. Postpones (or cancels) the automatic lock.
-    /// </summary>
     public void NotifyActivity()
     {
         if (!IsUnlocked)
@@ -108,9 +88,6 @@ public partial class ShellViewModel : ViewModelBase
         }
     }
 
-    /// <summary>
-    /// Locks now, or as soon as the vault is not busy with a save.
-    /// </summary>
     public void RequestLock()
     {
         if (!IsUnlocked)
@@ -134,10 +111,6 @@ public partial class ShellViewModel : ViewModelBase
         Lock();
     }
 
-    /// <summary>
-    /// Disposes the vault, zeroes the session key and returns to the unlock
-    /// screen. The clipboard cleanup happens through the vault disposal.
-    /// </summary>
     public void Lock()
     {
         if (!IsUnlocked && _vault is null)
@@ -167,10 +140,6 @@ public partial class ShellViewModel : ViewModelBase
 
     private void OnUnlocked() => _openingTask = OpenVaultAsync();
 
-    /// <summary>
-    /// Creates the vault, loads its entries and only then reveals it.
-    /// Idempotent: a second call while opening or after opening does nothing.
-    /// </summary>
     public async Task OpenVaultAsync()
     {
         if (_vault is not null || IsUnlocked || IsOpening)

@@ -7,10 +7,6 @@ using PWManager.Domain.Model;
 
 namespace PWManager.Converters;
 
-/// <summary>
-/// Converts between the hex strings used by the appearance profiles and the
-/// <see cref="Color"/> expected by the color picker controls.
-/// </summary>
 public sealed class HexColorConverter : IValueConverter
 {
     public static HexColorConverter Instance { get; } = new();

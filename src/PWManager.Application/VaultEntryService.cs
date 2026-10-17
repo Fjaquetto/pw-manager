@@ -1,22 +1,18 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using PWManager.Application.DataContracts;
 using PWManager.Domain.DataContracts.InfraService;
+using PWManager.Domain.DataContracts.Repository;
 using PWManager.Domain.Model;
-using PWManager.Services.Interfaces;
 
-namespace PWManager.Services;
+namespace PWManager.Application;
 
 public sealed class VaultEntryService(
-    IUserApplication application,
+    IUserRepository userRepository,
     IUserEncryptorService encryptor,
     TimeProvider timeProvider) : IVaultEntryService
 {
     public async Task<IReadOnlyList<User>> LoadAsync()
     {
-        var encryptedEntries = await application.GetAllUsersAsync();
+        var encryptedEntries = await userRepository.GetAllAsync();
 
         return encryptedEntries
             .Select(entry => encryptor.DecryptUser(CopyEntry(entry)))
@@ -42,11 +38,11 @@ public sealed class VaultEntryService(
 
         if (id.HasValue)
         {
-            await application.UpdateUserAsync(encryptedEntry);
+            await userRepository.UpdateAsync(encryptedEntry);
         }
         else
         {
-            await application.AddUserAsync(encryptedEntry);
+            await userRepository.AddAsync(encryptedEntry);
         }
 
         return entry;
@@ -54,21 +50,21 @@ public sealed class VaultEntryService(
 
     public async Task<bool> DeleteAsync(Guid id)
     {
-        var entry = await application.GetUserByIdAsync(id);
+        var entry = await userRepository.GetUserByIdAsync(id);
 
         if (entry is null)
         {
             return false;
         }
 
-        await application.DeleteUserAsync(entry);
+        await userRepository.DeleteAsync(entry);
 
         return true;
     }
 
     private async Task<User?> LoadEntryForUpdateAsync(Guid id)
     {
-        var encryptedEntry = await application.GetUserByIdAsync(id);
+        var encryptedEntry = await userRepository.GetUserByIdAsync(id);
 
         return encryptedEntry is null ? null : encryptor.DecryptUser(CopyEntry(encryptedEntry));
     }

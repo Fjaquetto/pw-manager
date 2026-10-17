@@ -4,11 +4,8 @@ using PWManager.Domain.Model;
 
 namespace PWManager.Infra.Config;
 
-/// <summary>
-/// Persists appearance profiles as JSON files. Profiles live next to the
-/// database (in a "themes" folder) but are completely independent from it:
-/// nothing about appearance is ever written to the vault database.
-/// </summary>
+// Appearance profiles live as JSON files next to the vault, never inside it.
+// The built-in Default profile is implicit and is never written to disk.
 public sealed class ColorThemeStore
 {
     public const string ThemesFolderName = "themes";
@@ -101,9 +98,6 @@ public sealed class ColorThemeStore
         return true;
     }
 
-    /// <summary>
-    /// The name of the active profile, or null when the built-in Default is active.
-    /// </summary>
     public string? GetActiveProfileName()
     {
         var path = Path.Combine(_directory, ActiveFileName);
@@ -141,11 +135,6 @@ public sealed class ColorThemeStore
             JsonSerializer.Serialize(new ActiveProfileFile { Name = normalized }, JsonOptions));
     }
 
-    /// <summary>
-    /// The scheme of the active profile; resolves the built-in presets, falls
-    /// back to the built-in default when there is no active profile or its
-    /// file is missing or corrupt.
-    /// </summary>
     public ColorScheme LoadActiveScheme()
     {
         var activeName = GetActiveProfileName();

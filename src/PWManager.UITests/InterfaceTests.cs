@@ -7,8 +7,6 @@ using Avalonia.Input.Raw;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
-using PWManager.Services;
-using PWManager.Services.Interfaces;
 using PWManager.ViewModels;
 using PWManager.Views;
 

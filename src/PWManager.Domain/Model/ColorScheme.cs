@@ -1,10 +1,5 @@
 namespace PWManager.Domain.Model;
 
-/// <summary>
-/// The semantic color tokens of the application. Each token maps to a UI role
-/// (background, text, primary action, status, modal overlay) instead of a
-/// single control, so profiles stay coherent and readable.
-/// </summary>
 public sealed record ColorScheme
 {
     public string Canvas { get; init; } = ColorSchemeDefaults.Canvas;
@@ -69,9 +64,6 @@ public sealed record ColorScheme
         };
     }
 
-    /// <summary>
-    /// The token values in a stable order, keyed by the property name.
-    /// </summary>
     public IEnumerable<KeyValuePair<string, string>> Tokens()
     {
         yield return new(nameof(Canvas), Canvas);
@@ -93,9 +85,6 @@ public sealed record ColorScheme
         yield return new(nameof(Overlay), Overlay);
     }
 
-    /// <summary>
-    /// Names of the tokens that cannot be parsed as a color.
-    /// </summary>
     public IReadOnlyList<string> FindInvalidTokens()
     {
         var invalid = new List<string>();

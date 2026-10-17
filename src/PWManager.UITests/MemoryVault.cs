@@ -1,5 +1,7 @@
-using PWManager.Application.DataContracts;
+using System.Linq.Expressions;
+using PWManager.Application;
 using PWManager.Domain.DataContracts.InfraService;
+using PWManager.Domain.DataContracts.Repository;
 using PWManager.Domain.Model;
 using PWManager.Infra.Config;
 using PWManager.Services;
@@ -9,25 +11,28 @@ using PWManager.ViewModels;
 
 namespace PWManager.UITests;
 
-internal sealed class MemoryVault : IUserApplication, IUserEncryptorService, IClipboardService
+internal sealed class MemoryVault : IUserRepository, IUserEncryptorService, IClipboardService
 {
     public List<User> Users { get; } = new();
 
-    public string? CopiedText
-    { get; private set; }
+    public string? CopiedText { get; private set; }
 
-    public Task<IEnumerable<User>> GetAllUsersAsync() => Task.FromResult<IEnumerable<User>>(Users.ToArray());
+    public Task<IEnumerable<User>> GetAllAsync() => Task.FromResult<IEnumerable<User>>(Users.ToArray());
+
+    public Task<User> GetAsync(Expression<Func<User, bool>> predicate) => Task.FromResult(Users.FirstOrDefault(predicate.Compile()))!;
+
+    public Task<bool> AnyAsync() => Task.FromResult(Users.Count > 0);
 
     public Task<User> GetUserByIdAsync(Guid id) => Task.FromResult(Users.FirstOrDefault(u => u.Id == id)!);
 
-    public Task AddUserAsync(User user)
+    public Task AddAsync(User user)
     {
         Users.Add(user);
 
         return Task.CompletedTask;
     }
 
-    public Task UpdateUserAsync(User user)
+    public Task UpdateAsync(User user)
     {
         Users.RemoveAll(u => u.Id == user.Id);
         Users.Add(user);
@@ -35,7 +40,7 @@ internal sealed class MemoryVault : IUserApplication, IUserEncryptorService, ICl
         return Task.CompletedTask;
     }
 
-    public Task DeleteUserAsync(User user)
+    public Task DeleteAsync(User user)
     {
         Users.RemoveAll(u => u.Id == user.Id);
 

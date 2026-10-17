@@ -1,10 +1,7 @@
 namespace PWManager.Domain.Model;
 
-/// <summary>
-/// The built-in palette of the application. These values must reproduce the
-/// original theme exactly, so existing users see no change until they choose
-/// a different color.
-/// </summary>
+// Must reproduce the original theme exactly, so existing users see no change
+// until they pick a different color.
 public static class ColorSchemeDefaults
 {
     public const string Canvas = "#090A0B";

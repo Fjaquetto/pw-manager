@@ -1,6 +1,6 @@
+using PWManager.Application.DataContracts;
+using PWManager.Application.Enums;
 using PWManager.Domain.Model;
-using PWManager.Enums;
-using PWManager.Services.Interfaces;
 
 namespace PWManager.UITests.Fakes;
 

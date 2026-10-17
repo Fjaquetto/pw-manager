@@ -11,13 +11,6 @@ using PWManager.ViewModels;
 
 namespace PWManager.Views;
 
-/// <summary>
-/// The single application window. Keeps the unlock screen while locked, then
-/// grows to the vault size with a short eased transition that keeps the window
-/// centered on the screen, and reveals the vault with a short fade. Window-level
-/// concerns (screen clamping, focus, keyboard shortcuts and close confirmation)
-/// live here; the panels only render their state.
-/// </summary>
 public partial class ShellWindow : Window
 {
     private const double VaultWidth = 1180;
@@ -126,11 +119,8 @@ public partial class ShellWindow : Window
         }
     }
 
-    /// <summary>
-    /// Grows the window to the vault size with an eased transition. The window
-    /// keeps its center fixed on the screen while it grows, so the vault always
-    /// ends up centered instead of anchored to its previous top-left corner.
-    /// </summary>
+    // Keeps the window center fixed while it grows, so the vault ends up centered
+    // instead of anchored to the previous top-left corner.
     private async Task ResizeForVaultAsync()
     {
         if (_isResizing || _isClosing)
@@ -250,11 +240,6 @@ public partial class ShellWindow : Window
         base.OnClosed(e);
     }
 
-    /// <summary>
-    /// The geometry of one window transition: the size and the physical screen
-    /// center at the start and at the end, plus the screen scaling needed to
-    /// convert logical sizes to physical pixels.
-    /// </summary>
     private readonly record struct ResizePlan(
         double StartWidth,
         double StartHeight,

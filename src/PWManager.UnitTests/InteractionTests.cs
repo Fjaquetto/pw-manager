@@ -1,9 +1,8 @@
 using Microsoft.Extensions.Time.Testing;
 using Moq;
+using PWManager.Application.DataContracts;
+using PWManager.Application.Enums;
 using PWManager.Domain.Model;
-using PWManager.Enums;
-using PWManager.Services;
-using PWManager.Services.Interfaces;
 using PWManager.ViewModels;
 
 namespace PWManager.UnitTests;
@@ -188,6 +187,7 @@ public class InteractionTests
             Password = "master",
             IsPasswordVisible = true
         };
+        viewModel.Configure(VaultStatus.Existing);
         var unlocked = 0;
         viewModel.Unlocked += () => unlocked++;
 
@@ -205,6 +205,7 @@ public class InteractionTests
     {
         var service = new Mock<IUnlockService>();
         var viewModel = new UnlockViewModel(service.Object);
+        viewModel.Configure(VaultStatus.Existing);
 
         await viewModel.UnlockCommand.ExecuteAsync(null);
 
@@ -222,6 +223,7 @@ public class InteractionTests
         {
             Password = "master"
         };
+        viewModel.Configure(VaultStatus.Existing);
         var task = viewModel.UnlockCommand.ExecuteAsync(null);
 
         Assert.True(viewModel.IsBusy);

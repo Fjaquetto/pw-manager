@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using PWManager.Application.DataContracts;
 using PWManager.Domain.DataContracts.InfraService;
 using PWManager.Domain.Model;
 using PWManager.Enums;
@@ -186,9 +187,6 @@ public partial class MainViewModel : ViewModelBase, IDisposable
 
     public event Action? CloseRequested;
 
-    /// <summary>
-    /// Raised when the user asks to lock the vault (button or Ctrl+L).
-    /// </summary>
     public event Action<string?>? LockRequested;
 
     public MainViewModel(
@@ -718,10 +716,8 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         }
     }
 
-    /// <summary>
-    /// Clears the clipboard if it still holds the copied secret, so content the
-    /// user copied elsewhere in the meantime is not destroyed.
-    /// </summary>
+    // Only clears the clipboard while it still holds our secret; content the user
+    // copied elsewhere in the meantime must survive.
     public async Task ClearSensitiveClipboardAsync(bool notify = true)
     {
         CancelClipboardClear();
@@ -1016,10 +1012,6 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         }
     }
 
-    /// <summary>
-    /// Masks every revealed password. Used when the window loses focus, after
-    /// the auto-hide timeout and when the vault is locked.
-    /// </summary>
     public void HideSensitiveData()
     {
         CancelPasswordHide();
