@@ -1,10 +1,7 @@
 using PWManager.Domain.Model;
 
-namespace PWManager.Services.Interfaces;
+namespace PWManager.Application.DataContracts;
 
-/// <summary>
-/// The user preferences, cached and persisted outside the vault database.
-/// </summary>
 public interface IAppSettingsService
 {
     AppSettings Current { get; }

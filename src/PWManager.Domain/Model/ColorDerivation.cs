@@ -1,10 +1,5 @@
 namespace PWManager.Domain.Model;
 
-/// <summary>
-/// Derives coherent shades from the base colors so a profile cannot end up
-/// with a hover, selection or focus tone that clashes with the primary action.
-/// Users can override every derived token in the advanced mode.
-/// </summary>
 public static class ColorDerivation
 {
     public const byte OverlayAlpha = 0xB3;
@@ -17,9 +12,6 @@ public static class ColorDerivation
 
     public static RgbColor Overlay(RgbColor canvas) => canvas.WithAlpha(OverlayAlpha);
 
-    /// <summary>
-    /// Returns the scheme with every derived token recalculated from its base.
-    /// </summary>
     public static ColorScheme Derive(ColorScheme scheme)
     {
         if (!RgbColor.TryParse(scheme.Accent, out var accent) || !RgbColor.TryParse(scheme.Canvas, out var canvas))
@@ -36,9 +28,6 @@ public static class ColorDerivation
         };
     }
 
-    /// <summary>
-    /// True when the derived tokens already match what derivation would produce.
-    /// </summary>
     public static bool MatchesDerived(ColorScheme scheme)
     {
         if (!RgbColor.TryParse(scheme.Accent, out _) || !RgbColor.TryParse(scheme.Canvas, out _))
@@ -54,9 +43,5 @@ public static class ColorDerivation
             && string.Equals(scheme.Overlay, derived.Overlay, StringComparison.OrdinalIgnoreCase);
     }
 
-    /// <summary>
-    /// True when the scheme has coherent derived tokens: either the built-in
-    /// defaults (which are the reference palette) or freshly derived shades.
-    /// </summary>
     public static bool IsCoherent(ColorScheme scheme) => scheme.MatchesDefaults() || MatchesDerived(scheme);
 }

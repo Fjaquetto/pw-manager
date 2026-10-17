@@ -3,11 +3,8 @@ using PWManager.Domain.DataContracts.InfraService;
 
 namespace PWManager.Infra.Services;
 
-/// <summary>
-/// Backs up and restores the vault as a single encrypted database file.
-/// VACUUM INTO produces a consistent snapshot without the WAL side files, and
-/// no plaintext ever leaves the vault.
-/// </summary>
+// VACUUM INTO produces a consistent snapshot without the WAL side files, and
+// no plaintext ever leaves the vault.
 public sealed class VaultBackupService(string databasePath) : IVaultBackupService
 {
     public string DatabasePath => databasePath;
@@ -69,11 +66,6 @@ public sealed class VaultBackupService(string databasePath) : IVaultBackupServic
         }
     }
 
-    /// <summary>
-    /// Replaces the current vault with the backup, keeping a safety copy of
-    /// the current database first. The caller must lock the session afterwards
-    /// so the vault is unlocked again with the backup's master password.
-    /// </summary>
     public async Task<string> RestoreAsync(string sourcePath)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(sourcePath);

@@ -6,24 +6,20 @@ namespace PWManager.Infra.Config;
 
 public class DatabaseConfigurator(IOptions<DatabaseConfig> databaseConfigOptions)
 {
-    public static Environment.SpecialFolder ResolveDataFolder(bool isWindows)
-    {
-        return Environment.SpecialFolder.LocalApplicationData;
-    }
-
     public string GetDatabaseFilePath()
     {
         return Path.Combine(GetApplicationFolder(), databaseConfigOptions.Value.DbFile);
     }
 
-    public string GetDatabaseFilePath(string dataFolder)
-    {
-        return Path.Combine(GetApplicationFolder(dataFolder), databaseConfigOptions.Value.DbFile);
-    }
-
     public string GetApplicationFolder()
     {
-        var dataFolder = Environment.GetFolderPath(ResolveDataFolder(OperatingSystem.IsWindows()));
+        // Without SpecialFolderOption.Create an absent data directory resolves
+        // to an empty string, which would silently turn the application folder
+        // into a path relative to the working directory.
+        var dataFolder = Environment.GetFolderPath(
+            Environment.SpecialFolder.LocalApplicationData,
+            Environment.SpecialFolderOption.Create);
+
         return GetApplicationFolder(dataFolder);
     }
 

@@ -1,16 +1,14 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using PWManager.Application;
+using PWManager.Application.DataContracts;
+using PWManager.Application.Enums;
 using PWManager.Domain.DataContracts.InfraService;
 using PWManager.Domain.Model;
-using PWManager.Enums;
 using PWManager.Infra.Config;
 using PWManager.Infra.Context.SQLite;
-using PWManager.Infra.Context.SQLite.DataContracts;
 using PWManager.Infra.Repository;
 using PWManager.Infra.Services;
-using PWManager.Services;
 using PWManager.Services.Interfaces;
 using PWManager.ViewModels;
 
@@ -47,8 +45,8 @@ public class PersistenceTests : IDisposable
 
         using (var context = CreateContext())
         {
-            var application = new UserApplication(new UserRepository(context));
-            var vaultService = new VaultEntryService(application, new UserEncryptorService(session), TimeProvider.System);
+            var repository = new UserRepository(context);
+            var vaultService = new VaultEntryService(repository, new UserEncryptorService(session), TimeProvider.System);
             using var viewModel = CreateViewModel(vaultService);
 
             await viewModel.LoadEntriesAsync();
@@ -62,7 +60,7 @@ public class PersistenceTests : IDisposable
             Assert.False(viewModel.Notification.IsError);
             id = viewModel.SelectedEntry!.Id;
             created = viewModel.SelectedEntry.CreationDate;
-            var encrypted = await application.GetUserByIdAsync(id);
+            var encrypted = await repository.GetUserByIdAsync(id);
 
             Assert.True(VaultCrypto.IsV2(encrypted.Site));
             Assert.NotEqual("Test account", encrypted.Site);
@@ -78,8 +76,8 @@ public class PersistenceTests : IDisposable
 
         using (var context = CreateContext())
         {
-            var application = new UserApplication(new UserRepository(context));
-            var vaultService = new VaultEntryService(application, new UserEncryptorService(session), TimeProvider.System);
+            var repository = new UserRepository(context);
+            var vaultService = new VaultEntryService(repository, new UserEncryptorService(session), TimeProvider.System);
             using var viewModel = CreateViewModel(vaultService);
 
             await viewModel.LoadEntriesAsync();
@@ -94,7 +92,7 @@ public class PersistenceTests : IDisposable
 
             await viewModel.ConfirmDeleteCommand.ExecuteAsync(null);
 
-            Assert.Empty(await application.GetAllUsersAsync());
+            Assert.Empty(await repository.GetAllAsync());
         }
     }
 
@@ -233,7 +231,7 @@ public class PersistenceTests : IDisposable
     {
         var context = new PWDbContext(_path);
         context.Database.EnsureCreated();
-        VaultSchemaInitializer.EnsureUpToDate(context);
+        VaultSchemaInitializer.CreateVaultMetadataTableIfMissing(context);
 
         return context;
     }
@@ -260,12 +258,15 @@ public class PersistenceTests : IDisposable
     private UnlockService CreateUnlockService(IVaultSession session)
     {
         var factory = new PWDbContextFactory(_path);
-        var provider = new ServiceCollection()
-            .AddSingleton<IPWDbContextFactory>(factory)
-            .AddScoped(_ => factory.CreateDbContext())
-            .BuildServiceProvider();
+        var context = factory.CreateDbContext();
 
-        return new UnlockService(provider.GetRequiredService<IServiceScopeFactory>(), session, factory, TimeProvider.System);
+        return new UnlockService(
+            new VaultMetadataRepository(context),
+            new UserRepository(context),
+            new VaultKeyService(),
+            new VaultDataMigrator(factory),
+            session,
+            TimeProvider.System);
     }
 
     private static User CreateLegacyEntry(string password)

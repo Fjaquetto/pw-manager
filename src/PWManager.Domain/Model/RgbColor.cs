@@ -2,19 +2,12 @@ using System.Globalization;
 
 namespace PWManager.Domain.Model;
 
-/// <summary>
-/// A color value that does not depend on any UI framework. Used by the
-/// appearance profiles so color logic can be unit tested without Avalonia.
-/// </summary>
 public readonly record struct RgbColor(byte R, byte G, byte B, byte A = 255)
 {
     public static RgbColor White { get; } = new(255, 255, 255);
 
     public static RgbColor Black { get; } = new(0, 0, 0);
 
-    /// <summary>
-    /// Parses #RGB, #RRGGBB or #AARRGGBB (the leading # is optional).
-    /// </summary>
     public static bool TryParse(string? hex, out RgbColor color)
     {
         color = default;
@@ -56,18 +49,12 @@ public readonly record struct RgbColor(byte R, byte G, byte B, byte A = 255)
     public static RgbColor Parse(string hex) =>
         TryParse(hex, out var color) ? color : throw new FormatException($"'{hex}' is not a valid color.");
 
-    /// <summary>
-    /// Formats as #RRGGBB, keeping the alpha channel only when it is not opaque.
-    /// </summary>
     public string ToHex() => A == 255
         ? $"#{R:X2}{G:X2}{B:X2}"
         : $"#{A:X2}{R:X2}{G:X2}{B:X2}";
 
     public RgbColor WithAlpha(byte alpha) => this with { A = alpha };
 
-    /// <summary>
-    /// WCAG 2.x relative luminance (0 for black, 1 for white).
-    /// </summary>
     public double RelativeLuminance()
     {
         var r = Linearize(R);

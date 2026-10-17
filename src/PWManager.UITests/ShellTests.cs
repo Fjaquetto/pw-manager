@@ -8,8 +8,8 @@ using Avalonia.Input.Raw;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
+using PWManager.Application.Enums;
 using PWManager.Domain.Model;
-using PWManager.Enums;
 using PWManager.Infra.Services;
 using PWManager.UITests.Fakes;
 using PWManager.ViewModels;
@@ -24,7 +24,11 @@ public class ShellTests
 
     private static int Created;
 
-    private static ShellWindow Open(UnlockStub service, AppSettingsFake? settings = null, Action<ShellViewModel>? configure = null)
+    private static ShellWindow Open(
+        UnlockStub service,
+        AppSettingsFake? settings = null,
+        Action<ShellViewModel>? configure = null,
+        bool configured = true)
     {
         var shell = new ShellViewModel(
             new UnlockViewModel(service),
@@ -36,6 +40,12 @@ public class ShellTests
             new VaultSession(),
             settings ?? new AppSettingsFake(),
             TimeProvider.System);
+
+        if (configured)
+        {
+            shell.Unlock.Configure(VaultStatus.Existing);
+        }
+
         configure?.Invoke(shell);
         var window = new ShellWindow { DataContext = shell };
         window.Show();
@@ -84,6 +94,47 @@ public class ShellTests
             Assert.False(Find<ContentControl>(window, "VaultHost").IsEffectivelyVisible);
             Assert.Null(shell.Vault);
             Assert.Equal(0, Created);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
+    public void Shell_WhilePreparing_BlocksSubmitUntilTheStatusIsConfigured()
+    {
+        Created = 0;
+        var service = new UnlockStub();
+        var window = Open(service, configured: false);
+
+        try
+        {
+            var shell = (ShellViewModel)window.DataContext!;
+            var unlock = Find<Button>(window, "UnlockButton");
+
+            Assert.True(shell.Unlock.IsPreparing);
+            Assert.False(unlock.IsEffectivelyEnabled);
+
+            window.KeyTextInput("master");
+            window.KeyPress(Key.Enter, RawInputModifiers.None, PhysicalKey.Enter, null);
+            window.KeyRelease(Key.Enter, RawInputModifiers.None, PhysicalKey.Enter, null);
+            Dispatcher.UIThread.RunJobs();
+
+            Assert.Equal(0, service.Calls);
+
+            shell.Unlock.Configure(VaultStatus.Existing);
+            Dispatcher.UIThread.RunJobs();
+
+            Assert.False(shell.Unlock.IsPreparing);
+            Assert.True(unlock.IsEffectivelyEnabled);
+
+            window.KeyPress(Key.Enter, RawInputModifiers.None, PhysicalKey.Enter, null);
+            window.KeyRelease(Key.Enter, RawInputModifiers.None, PhysicalKey.Enter, null);
+            Dispatcher.UIThread.RunJobs();
+            PumpUntil(() => service.Calls == 1);
+
+            Assert.Equal(1, service.Calls);
         }
         finally
         {
@@ -172,7 +223,7 @@ public class ShellTests
             window.KeyPress(Key.Enter, RawInputModifiers.None, PhysicalKey.Enter, null);
             window.KeyRelease(Key.Enter, RawInputModifiers.None, PhysicalKey.Enter, null);
             PumpUntil(() => shell.IsUnlocked);
-            PumpUntil(() => Math.Abs(window.Width - expected.Width) < 0.5 && Math.Abs(window.Height - expected.Height) < 0.5);
+            PumpUntil(() => Math.Abs(window.Width - expected.Width) < 0.0005 && Math.Abs(window.Height - expected.Height) < 0.0005);
             Dispatcher.UIThread.RunJobs();
 
             Assert.Equal(1, Created);
@@ -216,7 +267,7 @@ public class ShellTests
             window.KeyRelease(Key.Enter, RawInputModifiers.None, PhysicalKey.Enter, null);
 
             PumpUntil(() => shell.IsUnlocked);
-            PumpUntil(() => Math.Abs(window.Width - expected.Width) < 0.5 && Math.Abs(window.Height - expected.Height) < 0.5);
+            PumpUntil(() => Math.Abs(window.Width - expected.Width) < 0.0005 && Math.Abs(window.Height - expected.Height) < 0.0005);
             Dispatcher.UIThread.RunJobs();
 
             Assert.NotEqual(startPosition, window.Position);

@@ -1,10 +1,10 @@
+using PWManager.Application.DataContracts;
+using PWManager.Domain.DataContracts.InfraService;
 using PWManager.Domain.Model;
-using PWManager.Infra.Config;
-using PWManager.Services.Interfaces;
 
-namespace PWManager.Services;
+namespace PWManager.Application;
 
-public sealed class AppSettingsService(AppSettingsStore store) : IAppSettingsService
+public sealed class AppSettingsService(IAppSettingsStore store) : IAppSettingsService
 {
     public AppSettings Current { get; private set; } = store.Load();
 

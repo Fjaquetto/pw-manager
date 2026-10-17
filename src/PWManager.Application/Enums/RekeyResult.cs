@@ -1,4 +1,4 @@
-namespace PWManager.Enums;
+namespace PWManager.Application.Enums;
 
 public enum RekeyResult
 {

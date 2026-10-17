@@ -2,9 +2,9 @@ using System;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using PWManager.Application.DataContracts;
+using PWManager.Application.Enums;
 using PWManager.Domain.Model;
-using PWManager.Enums;
-using PWManager.Services.Interfaces;
 
 namespace PWManager.ViewModels;
 
@@ -27,19 +27,21 @@ public partial class UnlockViewModel(IUnlockService unlockService) : ViewModelBa
     private string _errorMessage = string.Empty;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ButtonLabel), nameof(IsIdle), nameof(ShowProgress))]
+    [NotifyPropertyChangedFor(nameof(ButtonLabel), nameof(IsIdle), nameof(ShowProgress), nameof(CanUnlock))]
     [NotifyCanExecuteChangedFor(nameof(UnlockCommand))]
     private bool _isBusy;
 
-    /// <summary>
-    /// True while the shell is opening the vault after a successful unlock.
-    /// Keeps the unlock form disabled and its progress indicator visible until
-    /// the vault is ready to be revealed.
-    /// </summary>
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsIdle), nameof(ShowProgress))]
+    [NotifyPropertyChangedFor(nameof(IsIdle), nameof(ShowProgress), nameof(CanUnlock))]
     [NotifyCanExecuteChangedFor(nameof(UnlockCommand))]
     private bool _isOpeningVault;
+
+    // Submitting is blocked until the shell resolves the status: a new vault must
+    // never be created through the unlock flow, which has no confirmation field.
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanUnlock))]
+    [NotifyCanExecuteChangedFor(nameof(UnlockCommand))]
+    private bool _isPreparing = true;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsCreating), nameof(Heading), nameof(Description), nameof(ButtonLabel))]
@@ -50,10 +52,6 @@ public partial class UnlockViewModel(IUnlockService unlockService) : ViewModelBa
     [NotifyPropertyChangedFor(nameof(HasNotice))]
     private string _notice = string.Empty;
 
-    /// <summary>
-    /// Raised after a successful unlock, once the password and visibility have
-    /// been reset.
-    /// </summary>
     public event Action? Unlocked;
 
     public bool IsCreating => Status == VaultStatus.New;
@@ -68,6 +66,8 @@ public partial class UnlockViewModel(IUnlockService unlockService) : ViewModelBa
 
     public bool IsIdle => !IsBusy && !IsOpeningVault;
 
+    public bool CanUnlock => IsIdle && !IsPreparing;
+
     public bool ShowProgress => IsBusy || IsOpeningVault;
 
     public string Heading => IsCreating ? "Create your vault" : "Unlock your vault";
@@ -80,12 +80,12 @@ public partial class UnlockViewModel(IUnlockService unlockService) : ViewModelBa
         ? (IsCreating ? "Creating…" : "Unlocking…")
         : (IsCreating ? "Create vault" : "Unlock vault");
 
-    public void Configure(VaultStatus status) => Status = status;
+    public void Configure(VaultStatus status)
+    {
+        Status = status;
+        IsPreparing = false;
+    }
 
-    /// <summary>
-    /// Clears the form (passwords, visibility and messages). Used when the
-    /// vault is locked again.
-    /// </summary>
     public void Reset()
     {
         Password = string.Empty;
@@ -102,10 +102,10 @@ public partial class UnlockViewModel(IUnlockService unlockService) : ViewModelBa
     [RelayCommand]
     private void TogglePasswordVisibility() => IsPasswordVisible = !IsPasswordVisible;
 
-    [RelayCommand(CanExecute = nameof(IsIdle))]
+    [RelayCommand(CanExecute = nameof(CanUnlock))]
     private async Task UnlockAsync()
     {
-        if (IsBusy)
+        if (IsBusy || IsPreparing)
         {
             return;
         }

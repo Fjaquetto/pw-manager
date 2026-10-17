@@ -1,17 +1,7 @@
 namespace PWManager.Domain.Model;
 
-/// <summary>
-/// A built-in appearance preset. Presets ship with the application, always
-/// appear in the profile list, and cannot be overwritten or deleted; saving
-/// an edited preset under a new name creates a regular user profile.
-/// </summary>
 public sealed record ColorSchemePreset(string Name, ColorScheme Colors);
 
-/// <summary>
-/// The hand-tuned palettes offered out of the box. All of them keep the dark
-/// neutral surfaces of the interface and pass the WCAG contrast targets
-/// checked by <see cref="ColorContrast"/>.
-/// </summary>
 public static class ColorSchemePresets
 {
     public static ColorSchemePreset MidnightOcean { get; } = new(

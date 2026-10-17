@@ -1,12 +1,12 @@
 using System.Security.Cryptography;
 using Microsoft.Data.Sqlite;
-using Microsoft.Extensions.DependencyInjection;
+using PWManager.Application;
+using PWManager.Application.Enums;
+using PWManager.Domain.DataContracts.Repository;
 using PWManager.Domain.Model;
-using PWManager.Enums;
 using PWManager.Infra.Context.SQLite;
-using PWManager.Infra.Context.SQLite.DataContracts;
+using PWManager.Infra.Repository;
 using PWManager.Infra.Services;
-using PWManager.Services;
 
 namespace PWManager.UnitTests;
 
@@ -30,7 +30,7 @@ public class VaultRekeyServiceTests : IDisposable
         using (var context = new PWDbContext(_databasePath))
         {
             context.Database.EnsureCreated();
-            VaultSchemaInitializer.EnsureUpToDate(context);
+            VaultSchemaInitializer.CreateVaultMetadataTableIfMissing(context);
 
             var salt = VaultCrypto.CreateSalt();
             _oldSalt = Convert.ToBase64String(salt);
@@ -48,12 +48,11 @@ public class VaultRekeyServiceTests : IDisposable
 
         _session.Unlock(_oldKey);
 
-        var provider = new ServiceCollection()
-            .AddSingleton<IPWDbContextFactory>(factory)
-            .AddScoped(_ => factory.CreateDbContext())
-            .BuildServiceProvider();
-
-        _service = new VaultRekeyService(provider.GetRequiredService<IServiceScopeFactory>(), _session, factory);
+        _service = new VaultRekeyService(
+            new VaultMetadataRepository(factory.CreateDbContext()),
+            new VaultKeyService(),
+            new VaultDataMigrator(factory),
+            _session);
     }
 
     public void Dispose()
@@ -114,14 +113,14 @@ public class VaultRekeyServiceTests : IDisposable
         using (var context = new PWDbContext(path))
         {
             context.Database.EnsureCreated();
-            VaultSchemaInitializer.EnsureUpToDate(context);
+            VaultSchemaInitializer.CreateVaultMetadataTableIfMissing(context);
         }
 
-        var provider = new ServiceCollection()
-            .AddSingleton<IPWDbContextFactory>(factory)
-            .AddScoped(_ => factory.CreateDbContext())
-            .BuildServiceProvider();
-        var service = new VaultRekeyService(provider.GetRequiredService<IServiceScopeFactory>(), new VaultSession(), factory);
+        var service = new VaultRekeyService(
+            new VaultMetadataRepository(factory.CreateDbContext()),
+            new VaultKeyService(),
+            new VaultDataMigrator(factory),
+            new VaultSession());
 
         Assert.Equal(RekeyResult.Unavailable, await service.ChangeMasterPasswordAsync("a", "b"));
     }
