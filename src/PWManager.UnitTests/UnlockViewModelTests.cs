@@ -11,7 +11,7 @@ public class UnlockViewModelTests
     [Fact]
     public void IsPreparing_DefaultsToTrue_AndBlocksTheCommand()
     {
-        var viewModel = new UnlockViewModel(Mock.Of<IUnlockService>());
+        var viewModel = new UnlockViewModel(Mock.Of<IUnlockService>(), TestAppInfo.Create());
 
         Assert.True(viewModel.IsPreparing);
         Assert.False(viewModel.UnlockCommand.CanExecute(null));
@@ -20,7 +20,7 @@ public class UnlockViewModelTests
     [Fact]
     public void Configure_CompletesPreparationAndEnablesTheCommand()
     {
-        var viewModel = new UnlockViewModel(Mock.Of<IUnlockService>());
+        var viewModel = new UnlockViewModel(Mock.Of<IUnlockService>(), TestAppInfo.Create());
 
         viewModel.Configure(VaultStatus.Existing);
 
@@ -32,7 +32,7 @@ public class UnlockViewModelTests
     public async Task Unlock_WhilePreparing_DoesNotCallTheService()
     {
         var service = new Mock<IUnlockService>();
-        var viewModel = new UnlockViewModel(service.Object) { Password = "master" };
+        var viewModel = new UnlockViewModel(service.Object, TestAppInfo.Create()) { Password = "master" };
 
         await viewModel.UnlockCommand.ExecuteAsync(null);
 
@@ -130,7 +130,7 @@ public class UnlockViewModelTests
 
     private static UnlockViewModel CreateViewModel(IUnlockService? service = null)
     {
-        var viewModel = new UnlockViewModel(service ?? Mock.Of<IUnlockService>());
+        var viewModel = new UnlockViewModel(service ?? Mock.Of<IUnlockService>(), TestAppInfo.Create());
         viewModel.Configure(VaultStatus.Existing);
 
         return viewModel;

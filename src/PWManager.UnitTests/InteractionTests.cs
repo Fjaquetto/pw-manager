@@ -182,7 +182,7 @@ public class InteractionTests
     {
         var service = new Mock<IUnlockService>();
         service.Setup(s => s.UnlockAsync("master")).ReturnsAsync(result);
-        var viewModel = new UnlockViewModel(service.Object)
+        var viewModel = new UnlockViewModel(service.Object, TestAppInfo.Create())
         {
             Password = "master",
             IsPasswordVisible = true
@@ -204,7 +204,7 @@ public class InteractionTests
     public async Task Unlock_EmptyInputDoesNotCallService()
     {
         var service = new Mock<IUnlockService>();
-        var viewModel = new UnlockViewModel(service.Object);
+        var viewModel = new UnlockViewModel(service.Object, TestAppInfo.Create());
         viewModel.Configure(VaultStatus.Existing);
 
         await viewModel.UnlockCommand.ExecuteAsync(null);
@@ -219,7 +219,7 @@ public class InteractionTests
         var source = new TaskCompletionSource<UnlockResult>();
         var service = new Mock<IUnlockService>();
         service.Setup(s => s.UnlockAsync(It.IsAny<string>())).Returns(source.Task);
-        var viewModel = new UnlockViewModel(service.Object)
+        var viewModel = new UnlockViewModel(service.Object, TestAppInfo.Create())
         {
             Password = "master"
         };
