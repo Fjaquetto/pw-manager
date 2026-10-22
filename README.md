@@ -22,6 +22,7 @@ A personal desktop password manager built with .NET 10 and Avalonia UI. Keep cre
 - Password generator with a length slider and numeric input, uppercase/lowercase, numbers, symbols, and an estimated strength indicator.
 - Loading, empty-vault, no-results, and retry states, with consistent success and error messages.
 - Responsive layout: list and details side by side at widths of 1000 logical pixels or more; a single pane with **Back to entries** below that.
+- Application version derived from Git tags (MinVer) and shown in the window title, on the unlock screen, and in the vault header.
 
 Vaults created by earlier versions are migrated to the v2 crypto format automatically on the first successful unlock (a transient `pwmanager.db.migrating.bak` snapshot protects the operation).
 

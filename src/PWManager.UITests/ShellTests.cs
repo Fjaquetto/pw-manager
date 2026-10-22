@@ -11,6 +11,7 @@ using Avalonia.VisualTree;
 using PWManager.Application.Enums;
 using PWManager.Domain.Model;
 using PWManager.Infra.Services;
+using PWManager.Services;
 using PWManager.UITests.Fakes;
 using PWManager.ViewModels;
 using PWManager.Views;
@@ -31,7 +32,7 @@ public class ShellTests
         bool configured = true)
     {
         var shell = new ShellViewModel(
-            new UnlockViewModel(service),
+            new UnlockViewModel(service, new AppInfo("2.3.1", "3481920")),
             () =>
             {
                 Created++;
@@ -39,6 +40,7 @@ public class ShellTests
             },
             new VaultSession(),
             settings ?? new AppSettingsFake(),
+            new AppInfo("2.3.1", "3481920"),
             TimeProvider.System);
 
         if (configured)
@@ -94,6 +96,22 @@ public class ShellTests
             Assert.False(Find<ContentControl>(window, "VaultHost").IsEffectivelyVisible);
             Assert.Null(shell.Vault);
             Assert.Equal(0, Created);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
+    public void Shell_ShowsTheApplicationVersionInTheTitleAndUnlockFooter()
+    {
+        var window = Open(new UnlockStub());
+
+        try
+        {
+            Assert.Equal("PWManager 2.3.1", window.Title);
+            Assert.Equal("v2.3.1", Find<TextBlock>(window, "VersionLabel").Text);
         }
         finally
         {
@@ -236,6 +254,7 @@ public class ShellTests
             Assert.Equal(expected.Height, window.Height, 3);
             Assert.Equal(expected.X, window.Position.X);
             Assert.Equal(expected.Y, window.Position.Y);
+            Assert.Equal("v2.3.1", Find<TextBlock>(window, "VaultVersion").Text);
             Assert.True(Find<TextBox>(window, "SearchBox").IsFocused);
 
             window.KeyPress(Key.F, RawInputModifiers.Control, PhysicalKey.F, null);

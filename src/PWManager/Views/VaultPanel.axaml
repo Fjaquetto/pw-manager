@@ -19,6 +19,8 @@
             <StackPanel Spacing="3" VerticalAlignment="Center">
               <TextBlock Text="PWManager" FontSize="16" FontWeight="SemiBold"/>
               <TextBlock Text="LOCAL VAULT" Classes="caption" FontSize="10" LetterSpacing="1.4"/>
+              <TextBlock x:Name="VaultVersion" Text="{Binding VersionText}" Classes="caption" FontSize="10" LetterSpacing="1.4"
+                         ToolTip.Tip="{Binding VersionToolTip}"/>
             </StackPanel>
           </StackPanel>
           <TextBox x:Name="SearchBox" Grid.Column="1" Text="{Binding SearchGlobal}"

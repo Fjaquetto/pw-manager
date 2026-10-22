@@ -266,7 +266,7 @@ public class ShellViewModelTests
             unlockService = mock.Object;
         }
 
-        var unlock = new UnlockViewModel(unlockService)
+        var unlock = new UnlockViewModel(unlockService, TestAppInfo.Create())
         {
             Password = "master"
         };
@@ -277,6 +277,7 @@ public class ShellViewModelTests
             factory,
             session ?? new VaultSession(),
             settings ?? CreateSettings(),
+            TestAppInfo.Create(),
             time ?? new FakeTimeProvider());
     }
 
