@@ -11,6 +11,7 @@ using Avalonia.VisualTree;
 using PWManager.Application.Enums;
 using PWManager.Domain.Model;
 using PWManager.Infra.Services;
+using PWManager.Services;
 using PWManager.UITests.Fakes;
 using PWManager.ViewModels;
 using PWManager.Views;
@@ -31,7 +32,7 @@ public class ShellTests
         bool configured = true)
     {
         var shell = new ShellViewModel(
-            new UnlockViewModel(service, new AppInfoFake()),
+            new UnlockViewModel(service, new AppInfo("2.3.1", "3481920")),
             () =>
             {
                 Created++;
@@ -39,7 +40,7 @@ public class ShellTests
             },
             new VaultSession(),
             settings ?? new AppSettingsFake(),
-            new AppInfoFake(),
+            new AppInfo("2.3.1", "3481920"),
             TimeProvider.System);
 
         if (configured)

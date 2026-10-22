@@ -2,7 +2,7 @@ using PWManager.Services;
 
 namespace PWManager.UnitTests;
 
-public class AppInfoServiceTests
+public class AppInfoTests
 {
     [Theory]
     [InlineData("2.3.1", "2.3.1", null)]
@@ -13,7 +13,7 @@ public class AppInfoServiceTests
     [InlineData("", "1.2.3", null)]
     public void Parse_ExtractsVersionAndShortCommit(string? informationalVersion, string expectedVersion, string? expectedCommit)
     {
-        var info = new AppInfoService(informationalVersion, new Version(1, 2, 3));
+        var info = AppInfo.Parse(informationalVersion, new Version(1, 2, 3));
 
         Assert.Equal(expectedVersion, info.Version);
         Assert.Equal(expectedCommit, info.Commit);
@@ -22,7 +22,7 @@ public class AppInfoServiceTests
     [Fact]
     public void Parse_PadsAPartialAssemblyVersion()
     {
-        var info = new AppInfoService(null, new Version(1, 2));
+        var info = AppInfo.Parse(null, new Version(1, 2));
 
         Assert.Equal("1.2.0", info.Version);
     }
@@ -30,7 +30,7 @@ public class AppInfoServiceTests
     [Fact]
     public void CurrentBuild_HasAVersion()
     {
-        var info = new AppInfoService();
+        var info = AppInfo.FromAssembly(typeof(AppInfo).Assembly);
 
         Assert.False(string.IsNullOrWhiteSpace(info.Version));
     }

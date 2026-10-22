@@ -5,11 +5,12 @@ using CommunityToolkit.Mvvm.Input;
 using PWManager.Application.DataContracts;
 using PWManager.Application.Enums;
 using PWManager.Domain.Model;
+using PWManager.Services;
 using PWManager.Services.Interfaces;
 
 namespace PWManager.ViewModels;
 
-public partial class UnlockViewModel(IUnlockService unlockService, IAppInfoService appInfo) : ViewModelBase
+public partial class UnlockViewModel(IUnlockService unlockService, AppInfo appInfo) : ViewModelBase
 {
     public const int MinimumPasswordLength = 8;
 

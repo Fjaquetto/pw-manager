@@ -80,7 +80,7 @@ public partial class App : AvaloniaApp
                 provider.GetRequiredService<DatabaseConfigurator>().GetApplicationFolder(),
                 ColorThemeStore.ThemesFolderName)));
         serviceCollection.AddSingleton<IThemeService, ThemeService>();
-        serviceCollection.AddSingleton<IAppInfoService, AppInfoService>();
+        serviceCollection.AddSingleton(AppInfo.FromAssembly(typeof(AppInfo).Assembly));
         serviceCollection.AddSingleton<IVaultSession, VaultSession>();
         serviceCollection.AddSingleton<IAppSettingsStore>(provider =>
             new AppSettingsStore(provider.GetRequiredService<DatabaseConfigurator>().GetApplicationFolder()));

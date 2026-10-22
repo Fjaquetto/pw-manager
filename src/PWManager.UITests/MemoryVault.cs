@@ -85,7 +85,7 @@ internal sealed class MemoryVault : IUserRepository, IUserEncryptorService, ICli
         Rekey,
         Backup,
         FilePicker,
-        new AppInfoFake());
+        new AppInfo("2.3.1", "3481920"));
 
     private static string ThemeDirectory => Path.Combine(Path.GetTempPath(), "pwmanager-ui-themes-unused");
 

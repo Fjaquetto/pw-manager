@@ -11,6 +11,7 @@ using PWManager.Domain.DataContracts.InfraService;
 using PWManager.Domain.Model;
 using PWManager.Enums;
 using PWManager.Infra.Config;
+using PWManager.Services;
 using PWManager.Services.Interfaces;
 
 namespace PWManager.ViewModels;
@@ -20,7 +21,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     private readonly IVaultEntryService _vaultEntries;
     private readonly IClipboardService _clipboard;
     private readonly IAppSettingsService _settings;
-    private readonly IAppInfoService _appInfo;
+    private readonly AppInfo _appInfo;
     private readonly TimeProvider _timeProvider;
     private List<PasswordEntryViewModel> _allEntries = new();
     private PasswordEntryViewModel? _selectedEntry;
@@ -206,7 +207,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         IVaultRekeyService rekeyService,
         IVaultBackupService backupService,
         IFilePickerService filePicker,
-        IAppInfoService appInfo)
+        AppInfo appInfo)
     {
         _vaultEntries = vaultEntries;
         _clipboard = clipboard;

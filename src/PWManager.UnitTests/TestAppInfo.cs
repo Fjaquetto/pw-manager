@@ -1,14 +1,8 @@
-using Moq;
-using PWManager.Services.Interfaces;
+using PWManager.Services;
 
 namespace PWManager.UnitTests;
 
 internal static class TestAppInfo
 {
-    public const string Version = "2.3.1";
-
-    public const string Commit = "3481920";
-
-    public static IAppInfoService Create() =>
-        Mock.Of<IAppInfoService>(info => info.Version == Version && info.Commit == Commit);
+    public static AppInfo Create() => new("2.3.1", "3481920");
 }
