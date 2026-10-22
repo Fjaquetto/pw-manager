@@ -5,12 +5,20 @@ using CommunityToolkit.Mvvm.Input;
 using PWManager.Application.DataContracts;
 using PWManager.Application.Enums;
 using PWManager.Domain.Model;
+using PWManager.Services;
+using PWManager.Services.Interfaces;
 
 namespace PWManager.ViewModels;
 
-public partial class UnlockViewModel(IUnlockService unlockService) : ViewModelBase
+public partial class UnlockViewModel(IUnlockService unlockService, AppInfo appInfo) : ViewModelBase
 {
     public const int MinimumPasswordLength = 8;
+
+    public string VersionText => $"v{appInfo.Version}";
+
+    public string VersionToolTip => appInfo.Commit is null
+        ? $"Version {appInfo.Version}"
+        : $"Version {appInfo.Version} · build {appInfo.Commit}";
 
     [ObservableProperty]
     private string _password = string.Empty;

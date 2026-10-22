@@ -58,7 +58,8 @@ internal sealed class TestVault
             Settings,
             Rekey.Object,
             Backup.Object,
-            FilePicker.Object);
+            FilePicker.Object,
+            TestAppInfo.Create());
     }
 
     private static string UnusedThemeDirectory => Path.Combine(Path.GetTempPath(), "pwmanager-tests-no-themes");

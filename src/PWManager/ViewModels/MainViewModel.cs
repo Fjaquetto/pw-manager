@@ -11,6 +11,7 @@ using PWManager.Domain.DataContracts.InfraService;
 using PWManager.Domain.Model;
 using PWManager.Enums;
 using PWManager.Infra.Config;
+using PWManager.Services;
 using PWManager.Services.Interfaces;
 
 namespace PWManager.ViewModels;
@@ -20,6 +21,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     private readonly IVaultEntryService _vaultEntries;
     private readonly IClipboardService _clipboard;
     private readonly IAppSettingsService _settings;
+    private readonly AppInfo _appInfo;
     private readonly TimeProvider _timeProvider;
     private List<PasswordEntryViewModel> _allEntries = new();
     private PasswordEntryViewModel? _selectedEntry;
@@ -157,6 +159,12 @@ public partial class MainViewModel : ViewModelBase, IDisposable
 
     public string CountLabel => HasFilters ? $"{Entries.Count} of {EntryCount} entries" : $"{EntryCount} entries";
 
+    public string VersionText => $"v{_appInfo.Version}";
+
+    public string VersionToolTip => _appInfo.Commit is null
+        ? $"Version {_appInfo.Version}"
+        : $"Version {_appInfo.Version} · build {_appInfo.Commit}";
+
     public bool HasModal => IsGeneratorOpen || IsDeletePending || IsDiscardPending || IsThemeSettingsOpen || IsSecuritySettingsOpen;
 
     public bool CanInteract => !IsBusy && !HasModal;
@@ -198,11 +206,13 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         IAppSettingsService settings,
         IVaultRekeyService rekeyService,
         IVaultBackupService backupService,
-        IFilePickerService filePicker)
+        IFilePickerService filePicker,
+        AppInfo appInfo)
     {
         _vaultEntries = vaultEntries;
         _clipboard = clipboard;
         _settings = settings;
+        _appInfo = appInfo;
         _timeProvider = timeProvider;
         Notification = new NotificationViewModel(timeProvider);
         ThemeSettings = new ThemeSettingsViewModel(themeService, themeStore);

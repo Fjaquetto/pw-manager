@@ -253,7 +253,8 @@ public class PersistenceTests : IDisposable
         new AppSettingsService(new AppSettingsStore(Path.Combine(_directory, "settings"))),
         Mock.Of<IVaultRekeyService>(),
         Mock.Of<IVaultBackupService>(),
-        Mock.Of<IFilePickerService>());
+        Mock.Of<IFilePickerService>(),
+        TestAppInfo.Create());
 
     private UnlockService CreateUnlockService(IVaultSession session)
     {

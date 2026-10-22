@@ -39,24 +39,16 @@ public static class PasswordGenerator
         var characters = new StringBuilder();
 
         if (uppercase)
-        {
             characters.Append(UppercaseCharacters);
-        }
 
         if (lowercase)
-        {
             characters.Append(LowercaseCharacters);
-        }
 
         if (numbers)
-        {
             characters.Append(NumericCharacters);
-        }
 
         if (symbols)
-        {
             characters.Append(SymbolCharacters);
-        }
 
         return characters.Length == 0 ? LowercaseCharacters : characters.ToString();
     }

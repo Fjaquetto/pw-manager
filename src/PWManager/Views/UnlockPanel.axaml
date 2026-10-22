@@ -49,9 +49,13 @@
         </StackPanel>
         <Button x:Name="UnlockButton" Classes="primary" Command="{Binding UnlockCommand}" Content="{Binding ButtonLabel}"
                 HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="0,8,0,0" MinHeight="46"/>
-        <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center" Margin="0,20,0,0">
-          <material:MaterialIcon Kind="LockOutline" Width="14" Height="14" Foreground="{StaticResource SecondaryTextBrush}"/>
-          <TextBlock Text="Stored locally. Encrypted on your device." Classes="caption"/>
+        <StackPanel Spacing="4" HorizontalAlignment="Center" Margin="0,20,0,0">
+          <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
+            <material:MaterialIcon Kind="LockOutline" Width="14" Height="14" Foreground="{StaticResource SecondaryTextBrush}"/>
+            <TextBlock Text="Stored locally. Encrypted on your device." Classes="caption"/>
+          </StackPanel>
+          <TextBlock x:Name="VersionLabel" Text="{Binding VersionText}" Classes="caption" HorizontalAlignment="Center"
+                     ToolTip.Tip="{Binding VersionToolTip}"/>
         </StackPanel>
       </StackPanel>
     </Grid>

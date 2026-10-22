@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using PWManager.Application.DataContracts;
 using PWManager.Domain.DataContracts.InfraService;
+using PWManager.Services;
+using PWManager.Services.Interfaces;
 
 namespace PWManager.ViewModels;
 
@@ -15,6 +17,7 @@ public partial class ShellViewModel : ViewModelBase
     private readonly Func<MainViewModel> _vaultFactory;
     private readonly IVaultSession _session;
     private readonly IAppSettingsService _settings;
+    private readonly AppInfo _appInfo;
     private readonly TimeProvider _timeProvider;
     private static readonly TimeSpan ActivityThrottle = TimeSpan.FromSeconds(10);
     private MainViewModel? _vault;
@@ -30,18 +33,22 @@ public partial class ShellViewModel : ViewModelBase
         Func<MainViewModel> vaultFactory,
         IVaultSession session,
         IAppSettingsService settings,
+        AppInfo appInfo,
         TimeProvider timeProvider)
     {
         Unlock = unlock;
         _vaultFactory = vaultFactory;
         _session = session;
         _settings = settings;
+        _appInfo = appInfo;
         _timeProvider = timeProvider;
         Unlock.Unlocked += OnUnlocked;
         Unlock.PropertyChanged += OnUnlockPropertyChanged;
     }
 
     public UnlockViewModel Unlock { get; }
+
+    public string WindowTitle => $"PWManager {_appInfo.Version}";
 
     public MainViewModel? Vault
     {

@@ -120,6 +120,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -144,7 +146,7 @@ jobs:
             --self-contained true `
             -p:PublishSingleFile=true `
             -p:IncludeNativeLibrariesForSelfExtract=true `
-            -p:Version=${{ needs.prepare.outputs.new_version }} `
+            -p:MinVerVersionOverride=${{ needs.prepare.outputs.new_version }} `
             -o ./publish
 
       - name: Create release archive
