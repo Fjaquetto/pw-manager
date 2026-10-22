@@ -15,17 +15,11 @@ namespace PWManager.Domain.Model
             LastUpdated = DateTime.Now;
         }
 
-        public Guid Id
-        { get; set; }
-        public string Site
-        { get; set; }
-        public string Login
-        { get; set; }
-        public string Password
-        { get; set; }
-        public DateTime CreationDate
-        { get; set; }
-        public DateTime LastUpdated
-        { get; set; }
+        public Guid Id { get; set; }
+        public string Site { get; set; }
+        public string Login { get; set; }
+        public string Password { get; set; }
+        public DateTime CreationDate { get; set; }
+        public DateTime LastUpdated { get; set; }
     }
 }
